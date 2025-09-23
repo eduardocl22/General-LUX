@@ -10,25 +10,39 @@ import {
   ScrollView,
 } from "react-native";
 
-// Lista de subvariantes de cocinas
-const subvariantes = [
-  { nombre: "GLUX – T50 BS «LYS»", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX – T50 SS «VENISE»", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX -3SA ‘MINEIRA’", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 S «GAROTA»", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 SB-ES ‘MARACANA’", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 SSB-ES ‘CARNAVAL’", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 STV SAMBA", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1P-‘PEQUI’", img: require("../assets/images/cocinas.jpg") },
+// Lista de subproductos para los chips
+const subproductos = [
+  "4 Hornallas",
+  "5 Hornallas",
+  "6 Hornallas",
+  "Encimeras",
+  "Hornos de empotrar",
+  "Hornos Eléctricos",
+  "Extractores de grasa",
+  "Complementos",
+];
+
+// Lista completa de productos
+const productos = [
+  { nombre: "GLUX – T50 BS «LYS»", variante: "4 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX – T50 SS «VENISE", variante: "4 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX -3SA ‘MINEIRA’", variante: "5 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX 1 S «GAROTA»", variante: "5 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX 1 SB-ES ‘MARACANA", variante: "6 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX 1 SSB-ES ‘CARNAVAL’", variante: "Encimeras", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX 1 STV SAMBA", variante: "Hornos de empotrar", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX 1 SSB-ES ‘CARNAVAL’", variante: "Hornos Eléctricos", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX -3SA ‘MINEIRA’", variante: "Extractores de grasa", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "GLUX – T50 BS «LYS»", variante: "Complementos", img: require("../assets/images/cocinas.jpg") },
 ];
 
 export default function CocinasScreen() {
   const [selectedVariant, setSelectedVariant] = useState(null);
 
-  // Filtrar productos según subvariante seleccionada
+  // Filtrar productos según subproducto seleccionado
   const filteredProducts = selectedVariant
-    ? subvariantes.filter((item) => item.nombre === selectedVariant)
-    : subvariantes;
+    ? productos.filter((item) => item.variante === selectedVariant)
+    : productos;
 
   const renderProduct = ({ item }) => (
     <View style={styles.productCard}>
@@ -42,7 +56,7 @@ export default function CocinasScreen() {
       <StatusBar backgroundColor="#f2f2f2" barStyle="dark-content" />
       <Text style={styles.title}>Cocinas</Text>
 
-      {/* Chips de subvariantes */}
+      {/* Chips de subproductos */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -65,22 +79,22 @@ export default function CocinasScreen() {
           </Text>
         </TouchableOpacity>
 
-        {subvariantes.map((item, index) => (
+        {subproductos.map((item, index) => (
           <TouchableOpacity
             key={index}
             style={[
               styles.chip,
-              selectedVariant === item.nombre && styles.chipSelected,
+              selectedVariant === item && styles.chipSelected,
             ]}
-            onPress={() => setSelectedVariant(item.nombre)}
+            onPress={() => setSelectedVariant(item)}
           >
             <Text
               style={[
                 styles.chipText,
-                selectedVariant === item.nombre && styles.chipTextSelected,
+                selectedVariant === item && styles.chipTextSelected,
               ]}
             >
-              {item.nombre}
+              {item}
             </Text>
           </TouchableOpacity>
         ))}
@@ -104,10 +118,10 @@ const styles = StyleSheet.create({
 
   chipContainer: { marginBottom: 16 },
   chip: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     backgroundColor: "#fff",
-    borderRadius: 20,
+    borderRadius: 16,
     marginRight: 8,
     borderWidth: 1,
     borderColor: "#ccc",
@@ -116,7 +130,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#007AFF",
     borderColor: "#007AFF",
   },
-  chipText: { fontSize: 14, color: "#333" },
+  chipText: { fontSize: 12, color: "#333" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
 
   productCard: {
