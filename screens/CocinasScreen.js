@@ -24,16 +24,16 @@ const subproductos = [
 
 // Lista completa de productos
 const productos = [
-  { nombre: "GLUX – T50 BS «LYS»", variante: "4 Hornallas", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX – T50 SS «VENISE", variante: "4 Hornallas", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX -3SA ‘MINEIRA’", variante: "5 Hornallas", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 S «GAROTA»", variante: "5 Hornallas", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 SB-ES ‘MARACANA", variante: "6 Hornallas", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 SSB-ES ‘CARNAVAL’", variante: "Encimeras", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 STV SAMBA", variante: "Hornos de empotrar", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX 1 SSB-ES ‘CARNAVAL’", variante: "Hornos Eléctricos", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX -3SA ‘MINEIRA’", variante: "Extractores de grasa", img: require("../assets/images/cocinas.jpg") },
-  { nombre: "GLUX – T50 BS «LYS»", variante: "Complementos", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Cocina 4 Hornallas Modelo A", variante: "4 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Cocina 4 Hornallas Modelo B", variante: "4 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Cocina 5 Hornallas Modelo A", variante: "5 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Cocina 5 Hornallas Modelo B", variante: "5 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Cocina 6 Hornallas Modelo A", variante: "6 Hornallas", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Encimera Modelo A", variante: "Encimeras", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Horno de empotrar Modelo A", variante: "Hornos de empotrar", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Horno eléctrico Modelo A", variante: "Hornos Eléctricos", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Extractor de grasa Modelo A", variante: "Extractores de grasa", img: require("../assets/images/cocinas.jpg") },
+  { nombre: "Complemento Modelo A", variante: "Complementos", img: require("../assets/images/cocinas.jpg") },
 ];
 
 export default function CocinasScreen() {
@@ -47,7 +47,9 @@ export default function CocinasScreen() {
   const renderProduct = ({ item }) => (
     <View style={styles.productCard}>
       <Image source={item.img} style={styles.productImage} />
-      <Text style={styles.productText}>{item.nombre}</Text>
+      <Text style={styles.productText} numberOfLines={2} ellipsizeMode="tail">
+        {item.nombre}
+      </Text>
     </View>
   );
 
@@ -74,6 +76,8 @@ export default function CocinasScreen() {
               styles.chipText,
               selectedVariant === null && styles.chipTextSelected,
             ]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
             Todas
           </Text>
@@ -93,6 +97,8 @@ export default function CocinasScreen() {
                 styles.chipText,
                 selectedVariant === item && styles.chipTextSelected,
               ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
               {item}
             </Text>
@@ -118,19 +124,24 @@ const styles = StyleSheet.create({
 
   chipContainer: { marginBottom: 16 },
   chip: {
-    paddingVertical: 4,
     paddingHorizontal: 10,
     backgroundColor: "#fff",
     borderRadius: 16,
     marginRight: 8,
     borderWidth: 1,
     borderColor: "#ccc",
+    height: 32,          // altura fija
+    justifyContent: "center",  // centrar verticalmente el texto
+    alignItems: "center",      // centrar horizontalmente el texto
   },
   chipSelected: {
     backgroundColor: "#007AFF",
     borderColor: "#007AFF",
+    height: 32,          // misma altura que chip normal
+    justifyContent: "center",
+    alignItems: "center",
   },
-  chipText: { fontSize: 12, color: "#333" },
+  chipText: { fontSize: 14, color: "#333" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
 
   productCard: {
@@ -141,6 +152,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     elevation: 2,
+    maxHeight: 140, // Limita la altura para uniformidad
   },
   productImage: { width: 80, height: 80, marginBottom: 8 },
   productText: { fontSize: 14, fontWeight: "bold", textAlign: "center" },
