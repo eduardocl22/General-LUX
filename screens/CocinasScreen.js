@@ -6,11 +6,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  StatusBar,
   ScrollView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
-// Lista de subproductos para los chips
 const subproductos = [
   "4 Hornallas",
   "5 Hornallas",
@@ -22,7 +22,6 @@ const subproductos = [
   "Complementos",
 ];
 
-// Lista completa de productos
 const productos = [
   { nombre: "Cocina 4 Hornallas Modelo A", variante: "4 Hornallas", img: require("../assets/images/cocinas.jpg") },
   { nombre: "Cocina 4 Hornallas Modelo B", variante: "4 Hornallas", img: require("../assets/images/cocinas.jpg") },
@@ -39,7 +38,6 @@ const productos = [
 export default function CocinasScreen() {
   const [selectedVariant, setSelectedVariant] = useState(null);
 
-  // Filtrar productos según subproducto seleccionado
   const filteredProducts = selectedVariant
     ? productos.filter((item) => item.variante === selectedVariant)
     : productos;
@@ -54,30 +52,30 @@ export default function CocinasScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <StatusBar backgroundColor="#f2f2f2" barStyle="dark-content" />
+    <SafeAreaView style={styles.container}>
+      {/* Barra de estado */}
+      <StatusBar style="light" backgroundColor="#045700" />
+
+      {/* HEADER igual al de HomeScreen */}
+      <View style={styles.header}>
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
+        <Text style={styles.headerText}>GENERAL LUX</Text>
+      </View>
+
       <Text style={styles.title}>Cocinas</Text>
 
-      {/* Chips de subproductos */}
+      {/* Filtros */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.chipContainer}
       >
         <TouchableOpacity
-          style={[
-            styles.chip,
-            selectedVariant === null && styles.chipSelected,
-          ]}
+          style={[styles.chip, selectedVariant === null && styles.chipSelected]}
           onPress={() => setSelectedVariant(null)}
         >
           <Text
-            style={[
-              styles.chipText,
-              selectedVariant === null && styles.chipTextSelected,
-            ]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
+            style={[styles.chipText, selectedVariant === null && styles.chipTextSelected]}
           >
             Todas
           </Text>
@@ -86,17 +84,11 @@ export default function CocinasScreen() {
         {subproductos.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={[
-              styles.chip,
-              selectedVariant === item && styles.chipSelected,
-            ]}
+            style={[styles.chip, selectedVariant === item && styles.chipSelected]}
             onPress={() => setSelectedVariant(item)}
           >
             <Text
-              style={[
-                styles.chipText,
-                selectedVariant === item && styles.chipTextSelected,
-              ]}
+              style={[styles.chipText, selectedVariant === item && styles.chipTextSelected]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
@@ -106,7 +98,7 @@ export default function CocinasScreen() {
         ))}
       </ScrollView>
 
-      {/* Cuadrícula de productos */}
+      {/* Lista de productos */}
       <FlatList
         data={filteredProducts}
         renderItem={renderProduct}
@@ -114,32 +106,50 @@ export default function CocinasScreen() {
         numColumns={3}
         contentContainerStyle={{ paddingVertical: 16 }}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f2f2f2", padding: 16 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 12 },
+  container: { flex: 1, backgroundColor: "#f2f2f2" },
 
-  chipContainer: { marginBottom: 16 },
+  /* HEADER */
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#045700",
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+    marginRight: 10,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  title: { fontSize: 22, fontWeight: "bold", margin: 16, color: "#333" },
+
+  chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
   chip: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     backgroundColor: "#fff",
     borderRadius: 16,
     marginRight: 8,
     borderWidth: 1,
     borderColor: "#ccc",
-    height: 32,          // altura fija
-    justifyContent: "center",  // centrar verticalmente el texto
-    alignItems: "center",      // centrar horizontalmente el texto
-  },
-  chipSelected: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
-    height: 32,          // misma altura que chip normal
+    height: 32,
     justifyContent: "center",
     alignItems: "center",
+  },
+  chipSelected: {
+    backgroundColor: "#045700",
+    borderColor: "#045700",
   },
   chipText: { fontSize: 14, color: "#333" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
@@ -152,7 +162,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 10,
     elevation: 2,
-    maxHeight: 140, // Limita la altura para uniformidad
+    maxHeight: 140,
   },
   productImage: { width: 80, height: 80, marginBottom: 8 },
   productText: { fontSize: 14, fontWeight: "bold", textAlign: "center" },
