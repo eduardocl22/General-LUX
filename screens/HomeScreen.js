@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Swiper from "react-native-swiper";
 import Footer from "../components/Footer";
+import { StatusBar } from "react-native";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = Math.round(width * 0.44);
@@ -40,11 +41,16 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <StatusBar
+        backgroundColor="#045700"
+        barStyle="light-content"
+      />
       {/* HEADER integrado */}
       <View style={styles.header}>
         <Image source={require("../assets/logo.png")} style={styles.logo} />
         <Text style={styles.headerText}>GENERAL LUX</Text>
       </View>
+    
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Carrusel */}
