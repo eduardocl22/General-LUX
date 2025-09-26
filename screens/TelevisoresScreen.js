@@ -1,22 +1,68 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import Header from "../components/Header";
+import { View, Text, StyleSheet, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Footer from "../components/Footer";
 
-export default function TelevisoresScreen() {
+export default function CocinasScreen() {
   return (
-    <View style={styles.container}>
-      <Header title="Televisores" />
-      <View style={styles.content}>
-        <Text style={styles.text}>Aquí se mostrarán los productos de Televisores</Text>
+    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
+        <Text style={styles.headerText}>GENERAL LUX</Text>
       </View>
+
+      {/* Contenido */}
+      <View style={styles.content}>
+        <Text style={styles.title}>Televisores</Text>
+        <Text style={styles.description}>
+          Aquí se mostrarán los productos de la categoría Televisores.
+        </Text>
+      </View>
+
       <Footer />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { flex: 1, justifyContent: "center", alignItems: "center" },
-  text: { fontSize: 18 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#045700",
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+    marginRight: 10,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  content: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#045700",
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 15,
+    color: "#333",
+    textAlign: "center",
+  },
 });

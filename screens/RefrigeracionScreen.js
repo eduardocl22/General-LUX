@@ -16,7 +16,7 @@ export default function CocinasScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>Refrigeración</Text>
         <Text style={styles.description}>
-          Aquí se mostrarán los productos de la categoría Cocinas.
+          Aquí se mostrarán los productos de la categoría Refrigeración.
         </Text>
       </View>
 
