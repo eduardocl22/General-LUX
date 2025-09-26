@@ -9,7 +9,7 @@ import HomeScreen from "./screens/HomeScreen";
 import AboutScreen from "./screens/AboutScreen";
 import ContactScreen from "./screens/ContactScreen";
 import CocinasScreen from "./screens/CocinasScreen";
-import RefrigeradoresScreen from "./screens/RefrigeradoresScreen";
+import RefrigeracionScreen from "./screens/RefrigeracionScreen";
 import LavadorasScreen from "./screens/LavadorasScreen";
 import MicroondasScreen from "./screens/MicroondasScreen";
 import ClimatizaciónScreen from "./screens/ClimatizaciónScreen";
@@ -32,7 +32,7 @@ export default function App() {
 
           {/* Categorías */}
           <Stack.Screen name="Cocinas" component={CocinasScreen} />
-          <Stack.Screen name="Refrigeradores" component={RefrigeradoresScreen} />
+          <Stack.Screen name="Refrigeración" component={RefrigeracionScreen} />
           <Stack.Screen name="Lavadoras" component={LavadorasScreen} />
           <Stack.Screen name="Microondas" component={MicroondasScreen} />
           <Stack.Screen name="Climatización" component={ClimatizaciónScreen} />

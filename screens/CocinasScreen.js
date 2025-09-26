@@ -623,7 +623,7 @@ export default function CocinasScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Barra de estado */}
-      <StatusBar style="light" backgroundColor="#000000ff" />
+      <StatusBar style="light" backgroundColor="#045700" />
 
       {/* HEADER igual al de HomeScreen */}
       <View style={styles.header}>

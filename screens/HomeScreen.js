@@ -22,7 +22,7 @@ export default function HomeScreen({ navigation }) {
 
   const categorias = [
     { nombre: "Cocinas", img: require("../assets/images/cocinas.jpg") },
-    { nombre: "Refrigeradores", img: require("../assets/images/refrigeradores.png") },
+    { nombre: "Refrigeración", img: require("../assets/images/refrigeración.png") },
     { nombre: "Lavadoras", img: require("../assets/images/lavadoras.png") },
     { nombre: "Microondas", img: require("../assets/images/microondas.png") },
     { nombre: "Climatización", img: require("../assets/images/climatización.jpg") },
