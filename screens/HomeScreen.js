@@ -16,7 +16,7 @@ import Footer from "../components/Footer";
 import { StatusBar } from "react-native";
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = Math.round(width * 0.44);
+const CARD_WIDTH = Math.round(width * 0.27);
 
 export default function HomeScreen({ navigation }) {
   const [whatsappVisible, setWhatsappVisible] = useState(false);
