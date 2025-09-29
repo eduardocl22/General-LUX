@@ -294,13 +294,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  /* CTA */
+
   ctaWrap: {
   paddingHorizontal: 20,
   marginTop: 6,
   alignItems: "center",
-  flexDirection: "row",   // 🔹 nuevo
-  justifyContent: "center", // 🔹 nuevo
+  flexDirection: "row",
+  justifyContent: "center",
 },
 
   contactButton: {
@@ -329,7 +329,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  /* WhatsApp flotante */
   whatsappButton: {
     position: "absolute",
     bottom: 20,

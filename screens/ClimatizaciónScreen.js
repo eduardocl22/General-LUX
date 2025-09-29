@@ -1,35 +1,144 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Footer from "../components/Footer";
+import { StatusBar } from "expo-status-bar";
+
+const subproductos = [
+  "Aires Acondicionados Smart",
+  "Aires Convencionales",
+  "DC Inverter Smart",
+  "Soportes Para Aire",
+];
+
+const productos = [
+  {
+    nombre: "AIRES SMART",
+    variante: "Aires Acondicionados Smart",
+    img: require("../assets/images/Climatización/AIRES SMART.png"),
+  },
+  {
+    nombre: "AIRES ON/OFF",
+    variante: "Aires Acondicionados Smart",
+    img: require("../assets/images/Climatización/AIRES ONOFF.jpg"),
+  },
+  {
+    nombre: "AIRES ON/OFF",
+    variante: "Aires Convencionales",
+    img: require("../assets/images/Climatización/AIRES ONOFF1.jpg"),
+  },
+  {
+    nombre: "AIRES INVERTER",
+    variante: "DC Inverter Smart",
+    img: require("../assets/images/Climatización/AIRES INVERTER.jpg"),
+  },
+  {
+    nombre: "GLUX-BA007",
+    variante: "Soportes Para Aire",
+    img: require("../assets/images/Climatización/GLUX-BA007.jpg"),
+  },
+  {
+    nombre: "GLUX-BA008",
+    variante: "Soportes Para Aire",
+    img: require("../assets/images/Climatización/GLUX-BA008.png"),
+  },
+];
 
 export default function CocinasScreen() {
+  const [selectedVariant, setSelectedVariant] = useState(null);
+
+  const filteredProducts = selectedVariant
+    ? productos.filter((item) => item.variante === selectedVariant)
+    : productos;
+
+  const renderProduct = ({ item }) => (
+    <View style={styles.productCard}>
+      <Image source={item.img} style={styles.productImage} />
+      <Text style={styles.productText} numberOfLines={2} ellipsizeMode="tail">
+        {item.nombre}
+      </Text>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      {/* Header */}
+    <SafeAreaView style={styles.container}>
+      {/* Barra de estado */}
+      <StatusBar style="light" backgroundColor="#045700" />
+
+      {/* HEADER igual al de HomeScreen */}
       <View style={styles.header}>
         <Image source={require("../assets/logo.png")} style={styles.logo} />
         <Text style={styles.headerText}>GENERAL LUX</Text>
       </View>
 
-      {/* Contenido */}
-      <View style={styles.content}>
-        <Text style={styles.title}>Climatización</Text>
-        <Text style={styles.description}>
-          Aquí se mostrarán los productos de la categoría Climatización.
-        </Text>
-      </View>
+      <Text style={styles.title}>Cocinas</Text>
 
-      <Footer />
+      {/* Filtros */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.chipContainer}
+      >
+        <TouchableOpacity
+          style={[styles.chip, selectedVariant === null && styles.chipSelected]}
+          onPress={() => setSelectedVariant(null)}
+        >
+          <Text
+            style={[
+              styles.chipText,
+              selectedVariant === null && styles.chipTextSelected,
+            ]}
+          >
+            Todas
+          </Text>
+        </TouchableOpacity>
+
+        {subproductos.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.chip,
+              selectedVariant === item && styles.chipSelected,
+            ]}
+            onPress={() => setSelectedVariant(item)}
+          >
+            <Text
+              style={[
+                styles.chipText,
+                selectedVariant === item && styles.chipTextSelected,
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Lista de productos */}
+      <FlatList
+        data={filteredProducts}
+        renderItem={renderProduct}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={3}
+        contentContainerStyle={{ paddingVertical: 16 }}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#f2f2f2" },
+
+  /* HEADER */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -48,21 +157,38 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#fff",
   },
-  content: {
-    flex: 1,
+
+  title: { fontSize: 22, fontWeight: "bold", margin: 16, color: "#333" },
+
+  chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
+  chip: {
+    paddingHorizontal: 12,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#045700",
-    marginBottom: 8,
+  chipSelected: {
+    backgroundColor: "#045700",
+    borderColor: "#045700",
   },
-  description: {
-    fontSize: 15,
-    color: "#333",
-    textAlign: "center",
+  chipText: { fontSize: 14, color: "#333" },
+  chipTextSelected: { color: "#fff", fontWeight: "bold" },
+
+  productCard: {
+    flex: 1,
+    margin: 5,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    borderRadius: 12,
+    padding: 10,
+    elevation: 2,
+    maxHeight: 250,
   },
+  productImage: { width: 100, height: 150, marginBottom: 10 },
+  productText: { fontSize: 14, fontWeight: "bold", textAlign: "center" },
 });
