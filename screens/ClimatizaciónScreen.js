@@ -51,7 +51,7 @@ const productos = [
   },
 ];
 
-export default function CocinasScreen() {
+export default function ClimatizaciónScreen() {
   const [selectedVariant, setSelectedVariant] = useState(null);
 
   const filteredProducts = selectedVariant
@@ -69,10 +69,7 @@ export default function CocinasScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Barra de estado */}
       <StatusBar style="light" backgroundColor="#045700" />
-
-      {/* HEADER igual al de HomeScreen */}
       <View style={styles.header}>
         <Image source={require("../assets/logo.png")} style={styles.logo} />
         <Text style={styles.headerText}>GENERAL LUX</Text>
@@ -80,7 +77,6 @@ export default function CocinasScreen() {
 
       <Text style={styles.title}>Climatización</Text>
 
-      {/* Filtros */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -123,7 +119,6 @@ export default function CocinasScreen() {
         ))}
       </ScrollView>
 
-      {/* Lista de productos */}
       <FlatList
         data={filteredProducts}
         renderItem={renderProduct}
@@ -138,7 +133,6 @@ export default function CocinasScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f2f2f2" },
 
-  /* HEADER */
   header: {
     flexDirection: "row",
     alignItems: "center",

@@ -181,8 +181,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: "#ffffff",
   },
-
-  /* HEADER */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -201,8 +199,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#fff",
   },
-
-  /* Carrusel */
   carouselContainer: {
     width: "100%",
     height: 220,
@@ -217,8 +213,6 @@ const styles = StyleSheet.create({
     height: 220,
     resizeMode: "cover",
   },
-
-  /* Bienvenida */
   welcomeContainer: {
     paddingVertical: 18,
     paddingHorizontal: 20,
@@ -236,8 +230,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-
-  /* Categorías */
   categoriesSection: {
     paddingHorizontal: 16,
     paddingTop: 6,
@@ -280,7 +272,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
 
-  /* CTA */
   ctaWrap: {
     paddingHorizontal: 20,
     marginTop: 6,
@@ -302,7 +293,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  /* Nota */
   noteWrap: {
     paddingHorizontal: 20,
     marginTop: 12,
@@ -314,7 +304,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  /* WhatsApp */
   whatsappButton: {
     position: "absolute",
     bottom: 20,
@@ -333,7 +322,6 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
 
-  /* Modal */
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
