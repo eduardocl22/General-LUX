@@ -78,7 +78,7 @@ export default function CocinasScreen() {
         <Text style={styles.headerText}>GENERAL LUX</Text>
       </View>
 
-      <Text style={styles.title}>Cocinas</Text>
+      <Text style={styles.title}>Climatización</Text>
 
       {/* Filtros */}
       <ScrollView

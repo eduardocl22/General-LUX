@@ -22,15 +22,15 @@ export default function HomeScreen({ navigation }) {
   const [whatsappVisible, setWhatsappVisible] = useState(false);
 
   const categorias = [
-    { nombre: "Cocinas", img: require("../assets/images/cocinas.jpg") },
-    { nombre: "Refrigeración", img: require("../assets/images/refrigeración.png") },
-    { nombre: "Lavadoras", img: require("../assets/images/lavadoras.png") },
-    { nombre: "Microondas", img: require("../assets/images/microondas.png") },
     { nombre: "Climatización", img: require("../assets/images/climatización.jpg") },
-    { nombre: "Televisores", img: require("../assets/images/televisores.jpg") },
-    { nombre: "Licuadoras", img: require("../assets/images/licuadoras.jpg") },
+    { nombre: "Cocinas", img: require("../assets/images/cocinas.jpg") },
     { nombre: "Dispensadores", img: require("../assets/images/dispensadores.png") },
+    { nombre: "Lavadoras", img: require("../assets/images/lavadoras.png") },
+    { nombre: "Licuadoras", img: require("../assets/images/licuadoras.jpg") },
+    { nombre: "Microondas", img: require("../assets/images/microondas.png") },
     { nombre: "Planchas", img: require("../assets/images/planchas.jpg") },
+    { nombre: "Refrigeración", img: require("../assets/images/refrigeración.png") },
+    { nombre: "Televisores", img: require("../assets/images/televisores.jpg") },
   ];
 
   const openWhatsapp = () => {
@@ -41,16 +41,13 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <StatusBar
-        backgroundColor="#045700"
-        barStyle="light-content"
-      />
-      {/* HEADER integrado */}
+      <StatusBar backgroundColor="#045700" barStyle="light-content" />
+      
+      {/* HEADER */}
       <View style={styles.header}>
         <Image source={require("../assets/logo.png")} style={styles.logo} />
         <Text style={styles.headerText}>GENERAL LUX</Text>
       </View>
-    
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Carrusel */}
@@ -64,9 +61,9 @@ export default function HomeScreen({ navigation }) {
             height={220}
             containerStyle={styles.swiper}
           >
-            <Image source={require("../assets/1.jpg")} style={styles.carouselImage} />
-            <Image source={require("../assets/2.jpg")} style={styles.carouselImage} />
-            <Image source={require("../assets/3.png")} style={styles.carouselImage} />
+            <Image source={require("../assets/1.png")} style={styles.carouselImage} resizeMode="contain"/>
+            <Image source={require("../assets/2.jpg")} style={styles.carouselImage} resizeMode="contain"/>
+            <Image source={require("../assets/3.png")} style={styles.carouselImage} resizeMode="contain"/>
           </Swiper>
         </View>
 
@@ -90,9 +87,7 @@ export default function HomeScreen({ navigation }) {
                 style={styles.card}
                 onPress={() => navigation.navigate(cat.nombre)}
               >
-                <View style={styles.cardImageWrap}>
-                  <Image source={cat.img} style={styles.cardImage} />
-                </View>
+                <Image source={cat.img} style={styles.cardImage} />
                 <Text style={styles.cardTitle}>{cat.nombre}</Text>
               </TouchableOpacity>
             ))}
@@ -101,23 +96,22 @@ export default function HomeScreen({ navigation }) {
 
         {/* CTA */}
         <View style={styles.ctaWrap}>
-  <TouchableOpacity
-    style={styles.contactButton}
-    activeOpacity={0.9}
-    onPress={() => navigation.navigate("Contáctanos")}
-  >
-    <Text style={styles.contactText}>📞 Contáctanos</Text>
-  </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.contactButton}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate("Contáctanos")}
+          >
+            <Text style={styles.contactText}>📞 Contáctanos</Text>
+          </TouchableOpacity>
 
-  <TouchableOpacity
-    style={[styles.contactButton, { marginLeft: 10, backgroundColor: "#006600" }]}
-    activeOpacity={0.9}
-    onPress={() => navigation.navigate("Sobre Nosotros")}
-  >
-    <Text style={styles.contactText}>ℹ️ Sobre Nosotros</Text>
-  </TouchableOpacity>
-</View>
-
+          <TouchableOpacity
+            style={[styles.contactButton, { marginLeft: 10, backgroundColor: "#006600" }]}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate("Sobre Nosotros")}
+          >
+            <Text style={styles.contactText}>ℹ️ Sobre Nosotros</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Nota */}
         <View style={styles.noteWrap}>
@@ -130,7 +124,7 @@ export default function HomeScreen({ navigation }) {
       {/* Footer */}
       <Footer />
 
-      {/* Icono de WhatsApp flotante */}
+      {/* Icono WhatsApp flotante */}
       <TouchableOpacity
         style={styles.whatsappButton}
         onPress={() => setWhatsappVisible(true)}
@@ -215,6 +209,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#004d00",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#ffffff",
   },
   swiper: {},
   carouselImage: {
@@ -261,48 +256,38 @@ const styles = StyleSheet.create({
   },
   card: {
     width: CARD_WIDTH,
-    backgroundColor: "#f7f7f7",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
+    overflow: "hidden",
     alignItems: "center",
-    marginBottom: 12,
-    elevation: 2,
+    marginBottom: 14,
+    elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-  },
-  cardImageWrap: {
-    width: 84,
-    height: 84,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-    backgroundColor: "#fff",
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
   cardImage: {
-    width: 70,
-    height: 70,
-    resizeMode: "contain",
+    width: "100%",
+    height: 120,
+    resizeMode: "cover",
   },
   cardTitle: {
     fontSize: 15,
     fontWeight: "600",
     color: "#222",
     textAlign: "center",
+    paddingVertical: 8,
   },
 
-
+  /* CTA */
   ctaWrap: {
-  paddingHorizontal: 20,
-  marginTop: 6,
-  alignItems: "center",
-  flexDirection: "row",
-  justifyContent: "center",
-},
-
+    paddingHorizontal: 20,
+    marginTop: 6,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
   contactButton: {
     width: "40%",
     backgroundColor: "#045700",
@@ -329,6 +314,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  /* WhatsApp */
   whatsappButton: {
     position: "absolute",
     bottom: 20,
@@ -398,3 +384,4 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
+
