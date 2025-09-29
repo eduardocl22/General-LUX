@@ -67,7 +67,6 @@ export default function HomeScreen({ navigation }) {
           </Swiper>
         </View>
 
-        {/* Bienvenida */}
         <View style={styles.welcomeContainer}>
           <Text style={styles.welcomeTitle}>Bienvenido a General Lux</Text>
           <Text style={styles.welcomeSubtitle}>
@@ -94,7 +93,6 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* CTA */}
         <View style={styles.ctaWrap}>
           <TouchableOpacity
             style={styles.contactButton}
@@ -113,7 +111,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Nota */}
         <View style={styles.noteWrap}>
           <Text style={styles.noteText}>
             ¿No encontraste lo que buscabas? Escríbenos y te ayudamos.
@@ -121,10 +118,7 @@ export default function HomeScreen({ navigation }) {
         </View>
       </ScrollView>
 
-      {/* Footer */}
       <Footer />
-
-      {/* Icono WhatsApp flotante */}
       <TouchableOpacity
         style={styles.whatsappButton}
         onPress={() => setWhatsappVisible(true)}
@@ -134,8 +128,7 @@ export default function HomeScreen({ navigation }) {
           style={styles.whatsappIcon}
         />
       </TouchableOpacity>
-
-      {/* Modal de chat */}
+      
       <Modal
         visible={whatsappVisible}
         transparent
