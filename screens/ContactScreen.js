@@ -15,7 +15,7 @@ export default function ContactScreen() {
 
         {/* Tarjeta Teléfono */}
         <View style={styles.card}>
-          <Phone size={28} color="#0056b3" style={styles.icon} />
+          <Phone size={28} color="#10be00ff" style={styles.icon} />
           <View>
             <Text style={styles.label}>Teléfono</Text>
             <Text style={styles.value}>+(591) 72112333</Text>
@@ -24,7 +24,7 @@ export default function ContactScreen() {
 
         {/* Tarjeta Correo */}
         <View style={styles.card}>
-          <Mail size={28} color="#0056b3" style={styles.icon} />
+          <Mail size={28} color="#10be00ff" style={styles.icon} />
           <View>
             <Text style={styles.label}>Correo</Text>
             <Text style={styles.value}>info@generallux.com.bo</Text>
@@ -33,7 +33,7 @@ export default function ContactScreen() {
 
         {/* Tarjeta Dirección */}
         <View style={styles.card}>
-          <MapPin size={28} color="#0056b3" style={styles.icon} />
+          <MapPin size={28} color="#10be00ff" style={styles.icon} />
           <View>
             <Text style={styles.label}>Dirección</Text>
             <Text style={styles.value}>4to Anillo, Av. 3 Pasos al Frente</Text>
