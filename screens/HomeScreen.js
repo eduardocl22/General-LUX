@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   noteText: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#666",
     textAlign: "center",
   },
@@ -323,9 +323,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   whatsappIcon: {
-    width: 35,
-    height: 35,
+    width: 50,
+    height: 50,
     resizeMode: "contain",
+    borderRadius: 20,
   },
 
   /* ------------------
@@ -410,10 +411,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   modalWhatsappIcon: {
-    width: 26,
-    height: 26,
+    width: 30,
+    height: 30,
     marginRight: 10,
     resizeMode: "contain",
+    borderRadius: 30,
   },
   modalWhatsappText: {
     color: "#fff",

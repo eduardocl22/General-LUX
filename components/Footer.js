@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 export default function Footer() {
   return (
     <View style={styles.footer}>
-      <Text style={styles.footerText}>© General Lux - 2022. Todos los Derechos Reservados.</Text>
+      <Text style={styles.footerText}>© General Lux - 2025. Todos los Derechos Reservados.</Text>
     </View>
   );
 }
