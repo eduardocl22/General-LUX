@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 
-  title: { fontSize: 22, fontWeight: "bold", margin: 16, color: "#333" },
+  title: { fontSize: 35, fontWeight: "bold", margin: 16, color: "#333" ,textAlign: 'center',},
 
   chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
   chip: {

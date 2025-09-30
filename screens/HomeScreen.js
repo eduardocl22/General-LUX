@@ -1,3 +1,4 @@
+// screens/HomeScreen.js
 import React, { useState } from "react";
 import {
   View,
@@ -9,11 +10,12 @@ import {
   Dimensions,
   Linking,
   Modal,
+  Platform,
+  StatusBar as RNStatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Swiper from "react-native-swiper";
 import Footer from "../components/Footer";
-import { StatusBar } from "react-native";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = Math.round(width * 0.27);
@@ -41,8 +43,12 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <StatusBar backgroundColor="#045700" barStyle="light-content" />
-      
+      {/* StatusBar nativa para Android/iOS */}
+      <RNStatusBar
+        backgroundColor="#045700"
+        barStyle="light-content"
+      />
+
       {/* HEADER */}
       <View style={styles.header}>
         <Image source={require("../assets/logo.png")} style={styles.logo} />
@@ -61,9 +67,9 @@ export default function HomeScreen({ navigation }) {
             height={220}
             containerStyle={styles.swiper}
           >
-            <Image source={require("../assets/1.png")} style={styles.carouselImage} resizeMode="contain"/>
-            <Image source={require("../assets/2.jpg")} style={styles.carouselImage} resizeMode="contain"/>
-            <Image source={require("../assets/3.png")} style={styles.carouselImage} resizeMode="contain"/>
+            <Image source={require("../assets/1.png")} style={styles.carouselImage} resizeMode="contain" />
+            <Image source={require("../assets/2.jpg")} style={styles.carouselImage} resizeMode="contain" />
+            <Image source={require("../assets/3.png")} style={styles.carouselImage} resizeMode="contain" />
           </Swiper>
         </View>
 
@@ -119,6 +125,7 @@ export default function HomeScreen({ navigation }) {
       </ScrollView>
 
       <Footer />
+
       <TouchableOpacity
         style={styles.whatsappButton}
         onPress={() => setWhatsappVisible(true)}
@@ -128,35 +135,33 @@ export default function HomeScreen({ navigation }) {
           style={styles.whatsappIcon}
         />
       </TouchableOpacity>
-      
+
       <Modal
         visible={whatsappVisible}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setWhatsappVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.chatContainer}>
-            <Text style={styles.chatBubble}>
-              En General Lux sabemos que la vida es algo más que tener la última tecnología. Se trata de crear experiencias mediante todos nuestros productos, los que podrás usar para entretenerte, descansar o incluso hacerte más fácil la vida.
-            </Text>
+          <View style={styles.modalWrapper}>
+            <View style={styles.modalTitleBar}>
+              <Text style={styles.modalTitleText}>General Lux</Text>
+              <TouchableOpacity onPress={() => setWhatsappVisible(false)} style={styles.modalCloseBtn}>
+                <Text style={styles.modalCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
-            <TouchableOpacity
-              style={styles.openWhatsappButton}
-              onPress={openWhatsapp}
-            >
-              <Image
-                source={require("../assets/whatsapp.jpg")}
-                style={styles.openWhatsappIcon}
-              />
-              <Text style={styles.openWhatsappText}>Abrir chat WhatsApp</Text>
-            </TouchableOpacity>
+            <View style={styles.bubbleWrap}>
+              <View style={styles.bubble}>
+                <Text style={styles.bubbleText}>
+                  En General Lux sabemos que la vida es algo más que tener la última tecnología. Se trata de crear experiencias mediante todos nuestros productos, los que podrás usar para entretenerte, descansar o incluso hacerte más fácil la vida.
+                </Text>
+              </View>
+            </View>
 
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setWhatsappVisible(false)}
-            >
-              <Text style={styles.closeText}>Cerrar</Text>
+            <TouchableOpacity style={styles.modalWhatsappButton} onPress={openWhatsapp} activeOpacity={0.9}>
+              <Image source={require("../assets/whatsapp.jpg")} style={styles.modalWhatsappIcon} />
+              <Text style={styles.modalWhatsappText}>Abrir chat WhatsApp</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -174,6 +179,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: "#ffffff",
   },
+
+  /* HEADER */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -187,17 +194,17 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     marginRight: 10,
     borderRadius: 10,
-
   },
   headerText: {
     fontSize: 20,
     fontWeight: "700",
     color: "#fff",
   },
+
+  /* Carrusel */
   carouselContainer: {
     width: "100%",
     height: 220,
-    backgroundColor: "#004d00",
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ffffff",
@@ -206,8 +213,10 @@ const styles = StyleSheet.create({
   carouselImage: {
     width: width,
     height: 220,
-    resizeMode: "cover",
+    resizeMode: "contain",
   },
+
+  /* Bienvenida */
   welcomeContainer: {
     paddingVertical: 18,
     paddingHorizontal: 20,
@@ -225,6 +234,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
+
+  /* Categorías */
   categoriesSection: {
     paddingHorizontal: 16,
     paddingTop: 6,
@@ -267,6 +278,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
 
+  /* CTA */
   ctaWrap: {
     paddingHorizontal: 20,
     marginTop: 6,
@@ -317,54 +329,96 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
 
+  /* ------------------
+     Modal styles
+     ------------------ */
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  chatContainer: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "60%",
-  },
-  chatBubble: {
-    backgroundColor: "#f1f1f1",
-    padding: 14,
-    borderRadius: 12,
-    fontSize: 14,
-    color: "#222",
-    marginBottom: 20,
-  },
-  openWhatsappButton: {
-    flexDirection: "row",
-    backgroundColor: "#25D366",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.35)",
     justifyContent: "center",
-    marginBottom: 12,
+    alignItems: "center",
+    paddingHorizontal: 12,
   },
-  openWhatsappIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 8,
+
+  // caja principal del modal
+  modalWrapper: {
+    width: "92%",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    overflow: "hidden",
+    alignItems: "center",
+    paddingBottom: 14,
   },
-  openWhatsappText: {
+
+  // barra superior (verde) con título y botón cerrar
+  modalTitleBar: {
+    width: "100%",
+    backgroundColor: "#25D366",
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === "ios" ? 16 : 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  modalTitleText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  modalCloseBtn: {
+    padding: 6,
+  },
+  modalCloseText: {
+    color: "#000000ff",
+    fontSize: 20,
+    fontWeight: "700",
+  },
+
+  // contenedor del bocadillo (para centrar)
+  bubbleWrap: {
+    width: "90%",
+    alignItems: "center",
+    marginTop: 14,
+  },
+  // el rectángulo del bocadillo
+  bubble: {
+    backgroundColor: "#f2f2f2",
+    padding: 16,
+    borderRadius: 12,
+    width: "100%",
+    // sombra ligera
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  bubbleText: {
+    color: "#222",
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "left",
+  },
+  // Botón grande WhatsApp
+  modalWhatsappButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#25D366",
+    marginTop: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 28,
+    width: "86%",
+    justifyContent: "center",
+  },
+  modalWhatsappIcon: {
+    width: 26,
+    height: 26,
+    marginRight: 10,
+    resizeMode: "contain",
+  },
+  modalWhatsappText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "700",
   },
-  closeButton: {
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  closeText: {
-    fontSize: 14,
-    color: "#045700",
-    fontWeight: "700",
-  },
 });
-
