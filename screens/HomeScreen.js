@@ -23,14 +23,23 @@ export default function HomeScreen({ navigation }) {
   const [whatsappVisible, setWhatsappVisible] = useState(false);
 
   const categorias = [
-    { nombre: "Climatización", img: require("../assets/images/climatización.jpg") },
+    {
+      nombre: "Climatización",
+      img: require("../assets/images/climatización.jpg"),
+    },
     { nombre: "Cocinas", img: require("../assets/images/cocinas.jpg") },
-    { nombre: "Dispensadores", img: require("../assets/images/dispensadores.png") },
+    {
+      nombre: "Dispensadores",
+      img: require("../assets/images/dispensadores.png"),
+    },
     { nombre: "Lavadoras", img: require("../assets/images/lavadoras.png") },
     { nombre: "Licuadoras", img: require("../assets/images/licuadoras.jpg") },
     { nombre: "Microondas", img: require("../assets/images/microondas.png") },
     { nombre: "Planchas", img: require("../assets/images/planchas.jpg") },
-    { nombre: "Refrigeración", img: require("../assets/images/refrigeración.png") },
+    {
+      nombre: "Refrigeración",
+      img: require("../assets/images/refrigeración.png"),
+    },
     { nombre: "Televisores", img: require("../assets/images/televisores.jpg") },
   ];
 
@@ -43,10 +52,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
       {/* StatusBar nativa para Android/iOS */}
-      <RNStatusBar
-        backgroundColor="#045700"
-        barStyle="light-content"
-      />
+      <RNStatusBar backgroundColor="#045700" barStyle="light-content" />
 
       {/* HEADER */}
       <View style={styles.header}>
@@ -66,16 +72,29 @@ export default function HomeScreen({ navigation }) {
             height={220}
             containerStyle={styles.swiper}
           >
-            <Image source={require("../assets/1.png")} style={styles.carouselImage} resizeMode="contain" />
-            <Image source={require("../assets/2.jpg")} style={styles.carouselImage} resizeMode="contain" />
-            <Image source={require("../assets/3.png")} style={styles.carouselImage} resizeMode="contain" />
+            <Image
+              source={require("../assets/1.png")}
+              style={styles.carouselImage}
+              resizeMode="contain"
+            />
+            <Image
+              source={require("../assets/2.jpg")}
+              style={styles.carouselImage}
+              resizeMode="contain"
+            />
+            <Image
+              source={require("../assets/3.png")}
+              style={styles.carouselImage}
+              resizeMode="contain"
+            />
           </Swiper>
         </View>
 
         <View style={styles.welcomeContainer}>
           <Text style={styles.welcomeTitle}>Bienvenido a General Lux</Text>
           <Text style={styles.welcomeSubtitle}>
-            Innovación y tecnología para tu hogar — descubre nuestras categorías y productos.
+            Innovación y tecnología para tu hogar — descubre nuestras categorías
+            y productos.
           </Text>
         </View>
 
@@ -108,7 +127,10 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.contactButton, { marginLeft: 10, backgroundColor: "#006600" }]}
+            style={[
+              styles.contactButton,
+              { marginLeft: 10, backgroundColor: "#006600" },
+            ]}
             activeOpacity={0.9}
             onPress={() => navigation.navigate("Sobre Nosotros")}
           >
@@ -145,7 +167,10 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.modalWrapper}>
             <View style={styles.modalTitleBar}>
               <Text style={styles.modalTitleText}>General Lux</Text>
-              <TouchableOpacity onPress={() => setWhatsappVisible(false)} style={styles.modalCloseBtn}>
+              <TouchableOpacity
+                onPress={() => setWhatsappVisible(false)}
+                style={styles.modalCloseBtn}
+              >
                 <Text style={styles.modalCloseText}>✕</Text>
               </TouchableOpacity>
             </View>
@@ -153,13 +178,23 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.bubbleWrap}>
               <View style={styles.bubble}>
                 <Text style={styles.bubbleText}>
-                  En General Lux sabemos que la vida es algo más que tener la última tecnología. Se trata de crear experiencias mediante todos nuestros productos, los que podrás usar para entretenerte, descansar o incluso hacerte más fácil la vida.
+                  En General Lux sabemos que la vida es algo más que tener la
+                  última tecnología. Se trata de crear experiencias mediante
+                  todos nuestros productos, los que podrás usar para
+                  entretenerte, descansar o incluso hacerte más fácil la vida.
                 </Text>
               </View>
             </View>
 
-            <TouchableOpacity style={styles.modalWhatsappButton} onPress={openWhatsapp} activeOpacity={0.9}>
-              <Image source={require("../assets/whatsapp.jpg")} style={styles.modalWhatsappIcon} />
+            <TouchableOpacity
+              style={styles.modalWhatsappButton}
+              onPress={openWhatsapp}
+              activeOpacity={0.9}
+            >
+              <Image
+                source={require("../assets/whatsapp.jpg")}
+                style={styles.modalWhatsappIcon}
+              />
               <Text style={styles.modalWhatsappText}>Abrir chat WhatsApp</Text>
             </TouchableOpacity>
           </View>
@@ -336,7 +371,7 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#25D366",
     paddingHorizontal: 16,
-    paddingVertical: Platform.OS === "ios" ? 16 : 12,
+    paddingVertical: Platform.OS === "android" ? 16 : 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
