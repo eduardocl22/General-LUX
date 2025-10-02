@@ -178,8 +178,6 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: "#ffffff",
   },
-
-  /* HEADER */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -199,8 +197,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#fff",
   },
-
-  /* Carrusel */
   carouselContainer: {
     width: "100%",
     height: 220,
@@ -214,8 +210,6 @@ const styles = StyleSheet.create({
     height: 220,
     resizeMode: "contain",
   },
-
-  /* Bienvenida */
   welcomeContainer: {
     paddingVertical: 18,
     paddingHorizontal: 20,
@@ -233,8 +227,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-
-  /* Categorías */
   categoriesSection: {
     paddingHorizontal: 16,
     paddingTop: 6,
@@ -276,8 +268,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingVertical: 8,
   },
-
-  /* CTA */
   ctaWrap: {
     paddingHorizontal: 20,
     marginTop: 6,
@@ -309,7 +299,6 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
   },
-
   whatsappButton: {
     position: "absolute",
     bottom: 20,
@@ -328,10 +317,6 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     borderRadius: 20,
   },
-
-  /* ------------------
-     Modal styles
-     ------------------ */
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.35)",
@@ -339,8 +324,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 12,
   },
-
-  // caja principal del modal
   modalWrapper: {
     width: "92%",
     backgroundColor: "#fff",
@@ -349,8 +332,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 14,
   },
-
-  // barra superior (verde) con título y botón cerrar
   modalTitleBar: {
     width: "100%",
     backgroundColor: "#25D366",
@@ -373,20 +354,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
   },
-
-  // contenedor del bocadillo (para centrar)
   bubbleWrap: {
     width: "90%",
     alignItems: "center",
     marginTop: 14,
   },
-  // el rectángulo del bocadillo
   bubble: {
     backgroundColor: "#f2f2f2",
     padding: 16,
     borderRadius: 12,
     width: "100%",
-    // sombra ligera
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 4,
@@ -398,7 +375,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: "left",
   },
-  // Botón grande WhatsApp
   modalWhatsappButton: {
     flexDirection: "row",
     alignItems: "center",
