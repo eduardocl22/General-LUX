@@ -1,4 +1,3 @@
-// Header.js
 import React from "react";
 import {
   View,
@@ -7,13 +6,12 @@ import {
   StyleSheet,
   StatusBar as RNStatusBar,
   TouchableOpacity,
-  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-export default function Header({ title }) {
+export default function Header() {
   const navigation = useNavigation();
 
   return (
@@ -25,7 +23,7 @@ export default function Header({ title }) {
       <View style={styles.header}>
         {/* Menú hamburguesa */}
         <TouchableOpacity
-          onPress={() => navigation.toggleDrawer()}
+          onPress={() => navigation.toggleDrawer()} // ✅ Funciona con Drawer
           style={styles.iconButton}
         >
           <Ionicons name="menu" size={28} color="#fff" />
@@ -38,12 +36,12 @@ export default function Header({ title }) {
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.headerText}>{title || "GENERAL LUX"}</Text>
+          <Text style={styles.headerText}>GENERAL LUX</Text>
         </View>
 
         {/* Carrito */}
         <TouchableOpacity
-          onPress={() => navigation.navigate("CarritoScreen")}
+          onPress={() => navigation.navigate("Contáctanos")} // Cambia a tu pantalla de carrito si la tienes
           style={styles.iconButton}
         >
           <Ionicons name="cart" size={26} color="#fff" />
