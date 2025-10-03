@@ -18,7 +18,6 @@ import LicuadorasScreen from "./screens/LicuadorasScreen";
 import DispensadoresScreen from "./screens/DispensadoresScreen";
 import PlanchasScreen from "./screens/PlanchasScreen";
 
-
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -26,6 +25,7 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {/* Pantallas */}
           <Stack.Screen name="Inicio" component={HomeScreen} />
           <Stack.Screen name="Contáctanos" component={ContactScreen} />
           <Stack.Screen name="Sobre Nosotros" component={AboutScreen} />
@@ -40,7 +40,6 @@ export default function App() {
           <Stack.Screen name="Licuadoras" component={LicuadorasScreen} />
           <Stack.Screen name="Dispensadores" component={DispensadoresScreen} />
           <Stack.Screen name="Planchas" component={PlanchasScreen} />
-
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

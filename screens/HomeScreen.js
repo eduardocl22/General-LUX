@@ -10,10 +10,9 @@ import {
   Linking,
   Modal,
   Platform,
-  StatusBar as RNStatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Swiper from "react-native-swiper";
+import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 const { width } = Dimensions.get("window");
@@ -41,19 +40,11 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      {/* StatusBar nativa para Android/iOS */}
-      <RNStatusBar
-        backgroundColor="#045700"
-        barStyle="light-content"
-      />
+    <View style={styles.container}>
+      {/* ✅ HEADER personalizado */}
+      <Header navigation={navigation} />
 
-      {/* HEADER */}
-      <View style={styles.header}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.headerText}>GENERAL LUX</Text>
-      </View>
-
+      {/* Scroll principal */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Carrusel */}
         <View style={styles.carouselContainer}>
@@ -64,7 +55,6 @@ export default function HomeScreen({ navigation }) {
             activeDotColor="#fff"
             dotColor="rgba(255,255,255,0.4)"
             height={220}
-            containerStyle={styles.swiper}
           >
             <Image source={require("../assets/1.png")} style={styles.carouselImage} resizeMode="contain" />
             <Image source={require("../assets/2.jpg")} style={styles.carouselImage} resizeMode="contain" />
@@ -72,6 +62,7 @@ export default function HomeScreen({ navigation }) {
           </Swiper>
         </View>
 
+        {/* Bienvenida */}
         <View style={styles.welcomeContainer}>
           <Text style={styles.welcomeTitle}>Bienvenido a General Lux</Text>
           <Text style={styles.welcomeSubtitle}>
@@ -82,7 +73,6 @@ export default function HomeScreen({ navigation }) {
         {/* Categorías */}
         <View style={styles.categoriesSection}>
           <Text style={styles.sectionTitle}>Productos</Text>
-
           <View style={styles.grid}>
             {categorias.map((cat) => (
               <TouchableOpacity
@@ -98,6 +88,7 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
+        {/* Botones de acción */}
         <View style={styles.ctaWrap}>
           <TouchableOpacity
             style={styles.contactButton}
@@ -116,6 +107,7 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
+        {/* Nota */}
         <View style={styles.noteWrap}>
           <Text style={styles.noteText}>
             ¿No encontraste lo que buscabas? Escríbenos y te ayudamos.
@@ -123,18 +115,18 @@ export default function HomeScreen({ navigation }) {
         </View>
       </ScrollView>
 
+      {/* Footer */}
       <Footer />
 
+      {/* WhatsApp flotante */}
       <TouchableOpacity
         style={styles.whatsappButton}
         onPress={() => setWhatsappVisible(true)}
       >
-        <Image
-          source={require("../assets/whatsapp.jpg")}
-          style={styles.whatsappIcon}
-        />
+        <Image source={require("../assets/whatsapp.jpg")} style={styles.whatsappIcon} />
       </TouchableOpacity>
 
+      {/* Modal WhatsApp */}
       <Modal
         visible={whatsappVisible}
         transparent
@@ -143,258 +135,35 @@ export default function HomeScreen({ navigation }) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalWrapper}>
-            <View style={styles.modalTitleBar}>
-              <Text style={styles.modalTitleText}>General Lux</Text>
-              <TouchableOpacity onPress={() => setWhatsappVisible(false)} style={styles.modalCloseBtn}>
-                <Text style={styles.modalCloseText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.bubbleWrap}>
-              <View style={styles.bubble}>
-                <Text style={styles.bubbleText}>
-                  En General Lux sabemos que la vida es algo más que tener la última tecnología. Se trata de crear experiencias mediante todos nuestros productos, los que podrás usar para entretenerte, descansar o incluso hacerte más fácil la vida.
-                </Text>
-              </View>
-            </View>
-
-            <TouchableOpacity style={styles.modalWhatsappButton} onPress={openWhatsapp} activeOpacity={0.9}>
-              <Image source={require("../assets/whatsapp.jpg")} style={styles.modalWhatsappIcon} />
-              <Text style={styles.modalWhatsappText}>Abrir chat WhatsApp</Text>
-            </TouchableOpacity>
+            {/* Aquí va el contenido del modal */}
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  scrollContainer: {
-    paddingBottom: 20,
-    backgroundColor: "#ffffff",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "#045700",
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain",
-    marginRight: 10,
-    borderRadius: 10,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  carouselContainer: {
-    width: "100%",
-    height: 220,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-  },
-  swiper: {},
-  carouselImage: {
-    width: width,
-    height: 220,
-    resizeMode: "contain",
-  },
-  welcomeContainer: {
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    alignItems: "center",
-  },
-  welcomeTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#045700",
-    marginBottom: 6,
-  },
-  welcomeSubtitle: {
-    fontSize: 14,
-    color: "#555",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  categoriesSection: {
-    paddingHorizontal: 16,
-    paddingTop: 6,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    color: "#045700",
-    fontWeight: "700",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  card: {
-    width: CARD_WIDTH,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    overflow: "hidden",
-    alignItems: "center",
-    marginBottom: 14,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-  },
-  cardImage: {
-    width: "100%",
-    height: 120,
-    resizeMode: "cover",
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#222",
-    textAlign: "center",
-    paddingVertical: 8,
-  },
-  ctaWrap: {
-    paddingHorizontal: 20,
-    marginTop: 6,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  contactButton: {
-    width: "40%",
-    backgroundColor: "#045700",
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  contactText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  noteWrap: {
-    paddingHorizontal: 20,
-    marginTop: 12,
-    alignItems: "center",
-  },
-  noteText: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-  },
-  whatsappButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#25D366",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-  },
-  whatsappIcon: {
-    width: 50,
-    height: 50,
-    resizeMode: "contain",
-    borderRadius: 20,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 12,
-  },
-  modalWrapper: {
-    width: "92%",
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    overflow: "hidden",
-    alignItems: "center",
-    paddingBottom: 14,
-  },
-  modalTitleBar: {
-    width: "100%",
-    backgroundColor: "#25D366",
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === "ios" ? 16 : 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  modalTitleText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  modalCloseBtn: {
-    padding: 6,
-  },
-  modalCloseText: {
-    color: "#000000ff",
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  bubbleWrap: {
-    width: "90%",
-    alignItems: "center",
-    marginTop: 14,
-  },
-  bubble: {
-    backgroundColor: "#f2f2f2",
-    padding: 16,
-    borderRadius: 12,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  bubbleText: {
-    color: "#222",
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: "left",
-  },
-  modalWhatsappButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#25D366",
-    marginTop: 18,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 28,
-    width: "86%",
-    justifyContent: "center",
-  },
-  modalWhatsappIcon: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
-    resizeMode: "contain",
-    borderRadius: 30,
-  },
-  modalWhatsappText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
+  container: { flex: 1, backgroundColor: "#ffffff" },
+  scrollContainer: { paddingBottom: 20, backgroundColor: "#ffffff" },
+  carouselContainer: { width: "100%", height: 220, justifyContent: "center", alignItems: "center" },
+  carouselImage: { width: width, height: 220, resizeMode: "contain" },
+  welcomeContainer: { paddingVertical: 18, paddingHorizontal: 20, alignItems: "center" },
+  welcomeTitle: { fontSize: 22, fontWeight: "700", color: "#045700", marginBottom: 6 },
+  welcomeSubtitle: { fontSize: 14, color: "#555", textAlign: "center", lineHeight: 20 },
+  categoriesSection: { paddingHorizontal: 16, paddingTop: 6 },
+  sectionTitle: { fontSize: 20, color: "#045700", fontWeight: "700", marginBottom: 12, textAlign: "center" },
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
+  card: { width: CARD_WIDTH, backgroundColor: "#fff", borderRadius: 12, overflow: "hidden", alignItems: "center", marginBottom: 14, elevation: 3 },
+  cardImage: { width: "100%", height: 120, resizeMode: "cover" },
+  cardTitle: { fontSize: 15, fontWeight: "600", color: "#222", textAlign: "center", paddingVertical: 8 },
+  ctaWrap: { paddingHorizontal: 20, marginTop: 6, alignItems: "center", flexDirection: "row", justifyContent: "center" },
+  contactButton: { width: "40%", backgroundColor: "#045700", paddingVertical: 14, borderRadius: 8, alignItems: "center", marginTop: 8 },
+  contactText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  noteWrap: { paddingHorizontal: 20, marginTop: 12, alignItems: "center" },
+  noteText: { fontSize: 14, color: "#666", textAlign: "center" },
+  whatsappButton: { position: "absolute", bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: "#25D366", justifyContent: "center", alignItems: "center", elevation: 5 },
+  whatsappIcon: { width: 50, height: 50, resizeMode: "contain", borderRadius: 20 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "center", alignItems: "center", paddingHorizontal: 12 },
+  modalWrapper: { width: "92%", backgroundColor: "#fff", borderRadius: 14, overflow: "hidden", alignItems: "center", paddingBottom: 14 },
 });
