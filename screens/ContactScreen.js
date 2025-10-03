@@ -16,7 +16,6 @@ import Footer from "../components/Footer";
 import { StatusBar } from "expo-status-bar";
 
 export default function ContactScreen() {
-  // Coordenadas exactas según URL de Google Maps
   const location = {
     latitude: -17.7977663,
     longitude: -63.150086,
@@ -123,8 +122,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    elevation: 3, // sombra en Android
-    shadowColor: "#000", // sombra en iOS
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
