@@ -11,6 +11,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
+// Importa el header global
+import Header from "../components/Header";
+
 const subproductos = [
   "4 Hornallas",
   "5 Hornallas",
@@ -622,14 +625,11 @@ export default function CocinasScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Barra de estado */}
+      {/* StatusBar */}
       <StatusBar style="light" backgroundColor="#045700" />
 
-      {/* HEADER igual al de HomeScreen */}
-      <View style={styles.header}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.headerText}>GENERAL LUX</Text>
-      </View>
+      {/* HEADER global */}
+      <Header />
 
       <Text style={styles.title}>Cocinas</Text>
 
@@ -691,28 +691,13 @@ export default function CocinasScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f2f2f2" },
 
-  /* HEADER */
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "#045700",
+  title: {
+    fontSize: 35,
+    fontWeight: "bold",
+    margin: 16,
+    color: "#333",
+    textAlign: "center",
   },
-  logo: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain",
-    marginRight: 10,
-    borderRadius: 10,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#fff",
-  },
-
-  title: { fontSize: 35, fontWeight: "bold", margin: 16, color: "#333" ,textAlign: 'center',},
 
   chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
   chip: {
