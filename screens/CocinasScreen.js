@@ -1,3 +1,4 @@
+// CocinasScreen.js
 import React, { useState } from "react";
 import {
   View,
@@ -7,12 +8,10 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
-
-// Importa el header global
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const subproductos = [
   "4 Hornallas",
@@ -624,77 +623,87 @@ export default function CocinasScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* StatusBar */}
-      <StatusBar style="light" backgroundColor="#045700" />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#045700" />
 
-      {/* HEADER global */}
+      {/* Header */}
       <Header />
 
-      <Text style={styles.title}>Cocinas</Text>
+      {/* Contenido */}
+      <View style={styles.content}>
+        <Text style={styles.title}>Cocinas</Text>
 
-      {/* Filtros */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.chipContainer}
-      >
-        <TouchableOpacity
-          style={[styles.chip, selectedVariant === null && styles.chipSelected]}
-          onPress={() => setSelectedVariant(null)}
+        {/* Chips de filtro */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.chipContainer}
         >
-          <Text
-            style={[
-              styles.chipText,
-              selectedVariant === null && styles.chipTextSelected,
-            ]}
-          >
-            Todas
-          </Text>
-        </TouchableOpacity>
-
-        {subproductos.map((item, index) => (
           <TouchableOpacity
-            key={index}
-            style={[
-              styles.chip,
-              selectedVariant === item && styles.chipSelected,
-            ]}
-            onPress={() => setSelectedVariant(item)}
+            style={[styles.chip, selectedVariant === null && styles.chipSelected]}
+            onPress={() => setSelectedVariant(null)}
           >
             <Text
               style={[
                 styles.chipText,
-                selectedVariant === item && styles.chipTextSelected,
+                selectedVariant === null && styles.chipTextSelected,
               ]}
-              numberOfLines={1}
-              ellipsizeMode="tail"
             >
-              {item}
+              Todas
             </Text>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
 
-      {/* Lista de productos */}
-      <FlatList
-        data={filteredProducts}
-        renderItem={renderProduct}
-        keyExtractor={(item, index) => index.toString()}
-        numColumns={3}
-        contentContainerStyle={{ paddingVertical: 16 }}
-      />
-    </SafeAreaView>
+          {subproductos.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.chip, selectedVariant === item && styles.chipSelected]}
+              onPress={() => setSelectedVariant(item)}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedVariant === item && styles.chipTextSelected,
+                ]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Lista de productos */}
+        <FlatList
+          data={filteredProducts}
+          renderItem={renderProduct}
+          keyExtractor={(item, index) => index.toString()}
+          numColumns={3}
+          contentContainerStyle={{ paddingVertical: 16 }}
+        />
+      </View>
+
+      {/* Footer */}
+      <Footer />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f2f2f2" },
+  container: {
+    flex: 1,
+    backgroundColor: "#f2f2f2",
+  },
+
+  content: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
 
   title: {
     fontSize: 35,
     fontWeight: "bold",
-    margin: 16,
+    marginVertical: 16,
     color: "#333",
     textAlign: "center",
   },

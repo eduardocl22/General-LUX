@@ -47,11 +47,10 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.carouselContainer}>
           <Swiper
             autoplay
-            autoplayTimeout={3.5}
+            autoplayTimeout={2.5}
             showsPagination
             activeDotColor="#fff"
-            dotColor="rgba(255,255,255,0.4)"
-            height={220}>
+            dotColor="rgba(255,255,255,0.4)">
             <Image source={require("../assets/1.png")} style={styles.carouselImage} resizeMode="contain" />
             <Image source={require("../assets/2.jpg")} style={styles.carouselImage} resizeMode="contain" />
             <Image source={require("../assets/3.png")} style={styles.carouselImage} resizeMode="contain" />

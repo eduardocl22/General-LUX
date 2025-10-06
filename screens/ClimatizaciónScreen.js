@@ -1,3 +1,4 @@
+// ClimatizaciónScreen.js
 import React, { useState } from "react";
 import {
   View,
@@ -7,9 +8,10 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  StatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const subproductos = [
   "Aires Acondicionados Smart",
@@ -68,15 +70,16 @@ export default function ClimatizaciónScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="light" backgroundColor="#045700" />
-      <View style={styles.header}>
-        <Image source={require("../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.headerText}>GENERAL LUX</Text>
-      </View>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#045700" />
 
+      {/* Header personalizado */}
+      <Header />
+
+      {/* Título */}
       <Text style={styles.title}>Climatización</Text>
 
+      {/* Chips de filtros */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -99,10 +102,7 @@ export default function ClimatizaciónScreen() {
         {subproductos.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={[
-              styles.chip,
-              selectedVariant === item && styles.chipSelected,
-            ]}
+            style={[styles.chip, selectedVariant === item && styles.chipSelected]}
             onPress={() => setSelectedVariant(item)}
           >
             <Text
@@ -119,6 +119,7 @@ export default function ClimatizaciónScreen() {
         ))}
       </ScrollView>
 
+      {/* Lista de productos */}
       <FlatList
         data={filteredProducts}
         renderItem={renderProduct}
@@ -126,34 +127,26 @@ export default function ClimatizaciónScreen() {
         numColumns={3}
         contentContainerStyle={{ paddingVertical: 16 }}
       />
-    </SafeAreaView>
+
+      {/* Footer personalizado */}
+      <Footer />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f2f2f2" },
-
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "#045700",
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain",
-    marginRight: 10,
-    borderRadius: 10,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#fff",
+  container: {
+    flex: 1,
+    backgroundColor: "#f2f2f2",
   },
 
-  title: { fontSize: 35, fontWeight: "bold", margin: 16, color: "#333" ,textAlign: 'center',},
+  title: {
+    fontSize: 35,
+    fontWeight: "bold",
+    margin: 16,
+    color: "#333",
+    textAlign: "center",
+  },
 
   chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
   chip: {

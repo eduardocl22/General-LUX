@@ -69,7 +69,7 @@ function CustomDrawerContent(props) {
           <Text style={styles.menuText}>Productos</Text>
         </TouchableOpacity>
 
-        {productosOpen && (
+        {productosOpen && ( 
           <View style={{ paddingLeft: 20 }}>
             {productosItems.map((item) => (
               <TouchableOpacity
