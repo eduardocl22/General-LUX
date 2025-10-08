@@ -1,9 +1,29 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { useFonts } from "expo-font";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 export default function AboutUsScreen() {
+  // 🔠 Cargar fuentes Aller
+  const [fontsLoaded] = useFonts({
+    Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
+    Aller_BdIt: require("../assets/fonts/Aller_BdIt.ttf"),
+    Aller_It: require("../assets/fonts/Aller_It.ttf"),
+    Aller_Lt: require("../assets/fonts/Aller_Lt.ttf"),
+    Aller_LtIt: require("../assets/fonts/Aller_LtIt.ttf"),
+    Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#5BA33B" />
+        <Text style={styles.loadingText}>Cargando fuentes...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Header />
@@ -99,20 +119,14 @@ export default function AboutUsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f9f9f9" },
   scrollContent: { padding: 20, paddingBottom: 40 },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#045700",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#045700",
-    marginBottom: 10,
-  },
-  text: { fontSize: 16, color: "#333", lineHeight: 22, textAlign: "start" },
+
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { fontSize: 16, marginTop: 8, color: "#5BA33B", fontFamily: "Aller_Bd" },
+
+  title: { fontSize: 26, color: "#5BA33B", marginBottom: 20, textAlign: "center", fontFamily: "Aller_BdIt" },
+  subtitle: { fontSize: 18, color: "#5BA33B", marginBottom: 10, fontFamily: "Aller_BdIt" },
+  text: { fontSize: 16, color: "#333", lineHeight: 22, textAlign: "left", fontFamily: "Aller_Rg" },
+
   card: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -124,11 +138,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 10,
   },
-  bulletItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 6,
-  },
+
+  bulletItem: { flexDirection: "row", alignItems: "flex-start", marginBottom: 6 },
   bullet: { fontSize: 16, marginRight: 8, color: "#045700" },
-  bulletText: { fontSize: 15, color: "#333", flex: 1 },
+  bulletText: { fontSize: 15, color: "#333", flex: 1, fontFamily: "Aller_Rg" },
 });

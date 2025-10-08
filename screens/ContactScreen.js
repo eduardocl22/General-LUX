@@ -7,7 +7,9 @@ import {
   Image,
   Linking,
   Platform,
+  ActivityIndicator,
 } from "react-native";
+import { useFonts } from "expo-font";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, Callout } from "react-native-maps";
 import { Phone, Mail, MapPin } from "lucide-react-native";
@@ -16,6 +18,15 @@ import Footer from "../components/Footer";
 import { StatusBar } from "expo-status-bar";
 
 export default function ContactScreen() {
+  const [fontsLoaded] = useFonts({
+    Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
+    Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
+    Aller_It: require("../assets/fonts/Aller_It.ttf"),
+    Aller_Lt: require("../assets/fonts/Aller_Lt.ttf"),
+    Aller_LtIt: require("../assets/fonts/Aller_LtIt.ttf"),
+    Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
+  });
+
   const location = {
     latitude: -17.7977663,
     longitude: -63.150086,
@@ -41,10 +52,10 @@ export default function ContactScreen() {
   return (
     <View style={styles.container}>
       <Header />
-      <StatusBar style="light" backgroundColor="#045700" />
+      <StatusBar style="light" backgroundColor="#5BA33B" />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Contáctanos</Text>
+        <Text style={styles.title}>CONTACTANOS</Text>
 
         {/* Tarjeta Teléfono */}
         <View style={styles.card}>
@@ -76,7 +87,7 @@ export default function ContactScreen() {
         </View>
 
         {/* Mapa embebido */}
-        <Text style={[styles.sectionTitle, { marginTop: 10 }]}>📍 Nuestra Ubicación</Text>
+        <Text style={styles.sectionTitle}>📍 Nuestra Ubicación</Text>
         <MapView
           ref={mapRef}
           style={styles.map}
@@ -88,11 +99,10 @@ export default function ContactScreen() {
           <Marker coordinate={location}>
             <Callout>
               <View style={{ padding: 5, maxWidth: 220 }}>
-                <Text style={{ fontWeight: "bold" }}>General Lux</Text>
-                <Text>Cuarto Anillo & Av 3 Pasos al Frente</Text>
-                <Text>Santa Cruz de la Sierra, Bolivia</Text>
-                <Text>Tel: +(591) 72112333</Text>
-                <Text>Email: info@generallux.com.bo</Text>
+                <Text style={{ fontFamily: "Aller_Bd" }}>Cuarto Anillo & Av 3 Pasos al Frente</Text>
+                <Text style={{ fontFamily: "Aller_Bd" }}>Santa Cruz de la Sierra, Bolivia</Text>
+                <Text style={{ fontFamily: "Aller_Bd" }}>Tel: +(591) 72112333</Text>
+                <Text style={{ fontFamily: "Aller_Bd" }}>Email: info@generallux.com.bo</Text>
               </View>
             </Callout>
           </Marker>
@@ -107,13 +117,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f9f9f9" },
   scrollContent: { padding: 20, paddingBottom: 40 },
 
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#222",
-    marginBottom: 25,
-    textAlign: "center",
-  },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { fontSize: 16, marginTop: 8, color: "#5BA33B", fontFamily: "Aller_Bd" },
+
+  title: { fontSize: 26, color: "#5BA33B", marginBottom: 25, textAlign: "center", fontFamily: "Aller_Bd" },
 
   card: {
     flexDirection: "row",
@@ -129,10 +136,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   icon: { marginRight: 12 },
-  label: { fontSize: 14, fontWeight: "600", color: "#555" },
-  value: { fontSize: 16, fontWeight: "bold", color: "#000" },
+  label: { fontSize: 16, color: "#555", fontFamily: "Aller_Bd" },
+  value: { fontSize: 18, color: "#000", fontFamily: "Aller_BdIt" },
 
-  // Mapa
   map: {
     width: "100%",
     height: 250,
@@ -140,6 +146,5 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 8,
   },
-  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#045700", marginBottom: 10 },
-  note: { textAlign: "center", fontSize: 14, color: "#555", marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: "700", color: "#5BA33B", marginBottom: 10, fontFamily: "Aller_BdIt" },
 });

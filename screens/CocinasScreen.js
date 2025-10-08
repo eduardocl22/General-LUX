@@ -10,6 +10,7 @@ import {
   ScrollView,
   StatusBar,
 } from "react-native";
+import { useFonts } from "expo-font";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
@@ -519,7 +520,8 @@ const productos = [
     nombre: "GLUX-H35DSS",
     variante: "Hornos Eléctricos",
     img: require("../assets/images/Cocina/Hornos Eléctricos/GLUX-H35DSS.png"),
-  },{
+  },
+  {
     nombre: "GLUX-H45DSS",
     variante: "Hornos Eléctricos",
     img: require("../assets/images/Cocina/Hornos Eléctricos/GLUX-H45DSS.png"),
@@ -609,6 +611,19 @@ const productos = [
 export default function CocinasScreen() {
   const [selectedVariant, setSelectedVariant] = useState(null);
 
+  const [fontsLoaded] = useFonts({
+    Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
+    Aller_BdIt: require("../assets/fonts/Aller_BdIt.ttf"),
+    Aller_It: require("../assets/fonts/Aller_It.ttf"),
+    Aller_Lt: require("../assets/fonts/Aller_Lt.ttf"),
+    Aller_LtIt: require("../assets/fonts/Aller_LtIt.ttf"),
+    Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
+  }
+
   const filteredProducts = selectedVariant
     ? productos.filter((item) => item.variante === selectedVariant)
     : productos;
@@ -616,7 +631,11 @@ export default function CocinasScreen() {
   const renderProduct = ({ item }) => (
     <View style={styles.productCard}>
       <Image source={item.img} style={styles.productImage} />
-      <Text style={styles.productText} numberOfLines={2} ellipsizeMode="tail">
+      <Text
+        style={[styles.productText, { fontFamily: "Aller_Bd" }]}
+        numberOfLines={2}
+        ellipsizeMode="tail"
+      >
         {item.nombre}
       </Text>
     </View>
@@ -626,87 +645,74 @@ export default function CocinasScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#045700" />
 
-      {/* Header */}
       <Header />
 
-      {/* Contenido */}
-      <View style={styles.content}>
-        <Text style={styles.title}>Cocinas</Text>
+      {/* Título */}
+      <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>Cocinas</Text>
 
-        {/* Chips de filtro */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.chipContainer}
+      {/* Chips de filtros */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.chipContainer}
+      >
+        <TouchableOpacity
+          style={[styles.chip, selectedVariant === null && styles.chipSelected]}
+          onPress={() => setSelectedVariant(null)}
         >
+          <Text
+            style={[
+              styles.chipText,
+              selectedVariant === null && styles.chipTextSelected,
+              { fontFamily: "Aller_BdIt" },
+            ]}
+          >
+            Todas
+          </Text>
+        </TouchableOpacity>
+
+        {subproductos.map((item, index) => (
           <TouchableOpacity
-            style={[styles.chip, selectedVariant === null && styles.chipSelected]}
-            onPress={() => setSelectedVariant(null)}
+            key={index}
+            style={[
+              styles.chip,
+              selectedVariant === item && styles.chipSelected,
+            ]}
+            onPress={() => setSelectedVariant(item)}
           >
             <Text
               style={[
                 styles.chipText,
-                selectedVariant === null && styles.chipTextSelected,
+                selectedVariant === item && styles.chipTextSelected,
+                { fontFamily: "Aller_BdIt" },
               ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
-              Todas
+              {item}
             </Text>
           </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-          {subproductos.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[styles.chip, selectedVariant === item && styles.chipSelected]}
-              onPress={() => setSelectedVariant(item)}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  selectedVariant === item && styles.chipTextSelected,
-                ]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+      {/* Lista de productos */}
+      <FlatList
+        data={filteredProducts}
+        renderItem={renderProduct}
+        keyExtractor={(item, index) => index.toString()}
+        numColumns={3}
+        contentContainerStyle={{ paddingVertical: 16 }}
+      />
 
-        {/* Lista de productos */}
-        <FlatList
-          data={filteredProducts}
-          renderItem={renderProduct}
-          keyExtractor={(item, index) => index.toString()}
-          numColumns={3}
-          contentContainerStyle={{ paddingVertical: 16 }}
-        />
-      </View>
-
-      {/* Footer */}
       <Footer />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-  },
+  container: { flex: 1, backgroundColor: "#f2f2f2" },
 
-  content: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-
-  title: {
-    fontSize: 35,
-    fontWeight: "bold",
-    marginVertical: 16,
-    color: "#333",
-    textAlign: "center",
-  },
+  title: { fontSize: 35, margin: 16, color: "#5BA33B", textAlign: "center" },
 
   chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
   chip: {
@@ -720,11 +726,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  chipSelected: {
-    backgroundColor: "#045700",
-    borderColor: "#045700",
-  },
-  chipText: { fontSize: 14, color: "#333" },
+  chipSelected: { backgroundColor: "#5BA33B", borderColor: "#5BA33B" },
+  chipText: { fontSize: 16, color: "#333" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
 
   productCard: {
@@ -738,5 +741,5 @@ const styles = StyleSheet.create({
     maxHeight: 250,
   },
   productImage: { width: 100, height: 150, marginBottom: 10 },
-  productText: { fontSize: 14, fontWeight: "bold", textAlign: "center" },
+  productText: { fontSize: 14, textAlign: "center" },
 });
