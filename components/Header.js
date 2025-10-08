@@ -2,7 +2,6 @@ import React from "react";
 import {
   View,
   Image,
-  Text,
   StyleSheet,
   StatusBar as RNStatusBar,
   TouchableOpacity,
@@ -16,33 +15,34 @@ export default function Header() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      {/* StatusBar */}
-      <RNStatusBar backgroundColor="#045700" barStyle="light-content" />
+      {/* Barra de estado */}
+      <RNStatusBar backgroundColor="#5BA33B" barStyle="light-content" />
 
       {/* HEADER */}
       <View style={styles.header}>
-        {/* Menú hamburguesa */}
+        {/* Botón de menú hamburguesa */}
         <TouchableOpacity
-          onPress={() => navigation.toggleDrawer()} // ✅ Funciona con Drawer
+          onPress={() => navigation.toggleDrawer()}
           style={styles.iconButton}
+          activeOpacity={0.8}
         >
-          <Ionicons name="menu" size={28} color="#fff" />
+          <Ionicons name="menu" size={30} color="#fff" />
         </TouchableOpacity>
 
-        {/* Logo + Texto */}
+        {/* LOGO CENTRAL */}
         <View style={styles.centerContent}>
           <Image
-            source={require("../assets/logo.png")}
+            source={require("../assets/logo general lux-(Blanco).png")}
             style={styles.logo}
             resizeMode="contain"
           />
-          <Text style={styles.headerText}>GENERAL LUX</Text>
         </View>
 
-        {/* Carrito */}
+        {/* Botón de carrito */}
         <TouchableOpacity
-          onPress={() => navigation.navigate("Contáctanos")} // Cambia a tu pantalla de carrito si la tienes
+          onPress={() => navigation.navigate("CarritoScreen")}
           style={styles.iconButton}
+          activeOpacity={0.8}
         >
           <Ionicons name="cart" size={26} color="#fff" />
         </TouchableOpacity>
@@ -53,35 +53,28 @@ export default function Header() {
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: "#045700",
+    backgroundColor: "#5BA33B",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 56,
+    height: 64,
     paddingHorizontal: 12,
-    backgroundColor: "#045700",
+    backgroundColor: "#5BA33B",
+    elevation: 6,
   },
   iconButton: {
     width: 40,
     alignItems: "center",
+    justifyContent: "center",
   },
   centerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     flex: 1,
+    alignItems: "center",
   },
   logo: {
-    width: 34,
-    height: 34,
-    marginRight: 6,
-    borderRadius: 8,
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
+    width: 200,
+    height: 80,
   },
 });
