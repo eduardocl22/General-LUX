@@ -1,5 +1,5 @@
 // CocinasScreen.js
-import React, { useState } from "react";
+import React, { useState, useMemo, memo } from "react";
 import {
   View,
   Text,
@@ -608,6 +608,15 @@ const productos = [
   },
 ];
 
+const ProductCard = memo(({ item }) => (
+  <View style={styles.productCard}>
+    <Image source={item.img} style={styles.productImage} />
+    <Text style={[styles.productText, { fontFamily: "Aller_Bd" }]} numberOfLines={2} ellipsizeMode="tail">
+      {item.nombre}
+    </Text>
+  </View>
+));
+
 export default function CocinasScreen() {
   const [selectedVariant, setSelectedVariant] = useState(null);
 
@@ -624,22 +633,12 @@ export default function CocinasScreen() {
     return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
   }
 
-  const filteredProducts = selectedVariant
-    ? productos.filter((item) => item.variante === selectedVariant)
-    : productos;
-
-  const renderProduct = ({ item }) => (
-    <View style={styles.productCard}>
-      <Image source={item.img} style={styles.productImage} />
-      <Text
-        style={[styles.productText, { fontFamily: "Aller_Bd" }]}
-        numberOfLines={2}
-        ellipsizeMode="tail"
-      >
-        {item.nombre}
-      </Text>
-    </View>
-  );
+  // Memorizar productos filtrados
+  const filteredProducts = useMemo(() => {
+    return selectedVariant
+      ? productos.filter((item) => item.variante === selectedVariant)
+      : productos;
+  }, [selectedVariant]);
 
   return (
     <View style={styles.container}>
@@ -651,11 +650,7 @@ export default function CocinasScreen() {
       <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>Cocinas</Text>
 
       {/* Chips de filtros */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.chipContainer}
-      >
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipContainer}>
         <TouchableOpacity
           style={[styles.chip, selectedVariant === null && styles.chipSelected]}
           onPress={() => setSelectedVariant(null)}
@@ -674,10 +669,7 @@ export default function CocinasScreen() {
         {subproductos.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={[
-              styles.chip,
-              selectedVariant === item && styles.chipSelected,
-            ]}
+            style={[styles.chip, selectedVariant === item && styles.chipSelected]}
             onPress={() => setSelectedVariant(item)}
           >
             <Text
@@ -698,10 +690,14 @@ export default function CocinasScreen() {
       {/* Lista de productos */}
       <FlatList
         data={filteredProducts}
-        renderItem={renderProduct}
-        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => <ProductCard item={item} />}
+        keyExtractor={(item) => item.nombre}
         numColumns={3}
         contentContainerStyle={{ paddingVertical: 16 }}
+        initialNumToRender={9}
+        windowSize={5}
+        removeClippedSubviews={true}
+        extraData={selectedVariant} // importante para que FlatList actualice solo al cambiar categoría
       />
 
       <Footer />
@@ -743,3 +739,4 @@ const styles = StyleSheet.create({
   productImage: { width: 100, height: 150, marginBottom: 10 },
   productText: { fontSize: 14, textAlign: "center" },
 });
+

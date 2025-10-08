@@ -130,16 +130,6 @@ export default function App() {
     Aller_Rg: require("./assets/fonts/Aller_Rg.ttf"),
   });
 
-  // Esperar a que las fuentes se carguen
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#045700" />
-        <Text style={{ fontSize: 16, marginTop: 8, color: "#045700" }}>Cargando fuentes...</Text>
-      </View>
-    );
-  }
-
   return (
     <NavigationContainer>
       <Drawer.Navigator
@@ -170,7 +160,6 @@ export default function App() {
   );
 }
 
-// 🎨 Estilos
 const styles = StyleSheet.create({
   menuItem: {
     flexDirection: "row",
@@ -191,7 +180,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#5BA33B",
     marginLeft: 12,
-    fontFamily: "Aller_BdIt", // ← Fuente aplicada aquí
+    fontFamily: "Aller_BdIt",
   },
   activeItem: {
     backgroundColor: "#5BA33B",
