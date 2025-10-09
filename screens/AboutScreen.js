@@ -15,15 +15,6 @@ export default function AboutUsScreen() {
     Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
   });
 
-  if (!fontsLoaded) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#5BA33B" />
-        <Text style={styles.loadingText}>Cargando fuentes...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <Header />

@@ -52,7 +52,7 @@ export default function ContactScreen() {
   return (
     <View style={styles.container}>
       <Header />
-      <StatusBar style="light" backgroundColor="#5BA33B" />
+      <StatusBar style="light" backgroundColor="#12A14B" />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>CONTACTANOS</Text>

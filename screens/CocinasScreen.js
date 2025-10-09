@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  chipSelected: { backgroundColor: "#5BA33B", borderColor: "#5BA33B" },
+  chipSelected: { backgroundColor: "#12A14B", borderColor: "#12A14B" },
   chipText: { fontSize: 16, color: "#333" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
 
