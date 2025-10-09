@@ -15,7 +15,7 @@ import CocinasScreen from "./screens/CocinasScreen";
 import RefrigeracionScreen from "./screens/RefrigeracionScreen";
 import LavadorasScreen from "./screens/LavadorasScreen";
 import MicroondasScreen from "./screens/MicroondasScreen";
-import ClimatizaciónScreen from "./screens/ClimatizaciónScreen";
+import ClimatizacionScreen from "./screens/ClimatizacionScreen";
 import TelevisoresScreen from "./screens/TelevisoresScreen";
 import LicuadorasScreen from "./screens/LicuadorasScreen";
 import DispensadoresScreen from "./screens/DispensadoresScreen";
@@ -26,7 +26,7 @@ const { width } = Dimensions.get("window");
 
 // Submenú de productos
 const productosItems = [
-  { label: "Climatización", screen: "Climatización" },
+  { label: "Climatización", screen: "Climatizacion" },
   { label: "Cocinas", screen: "Cocinas" },
   { label: "Dispensadores", screen: "Dispensadores" },
   { label: "Lavadoras", screen: "Lavadoras" },
@@ -146,7 +146,7 @@ export default function App() {
         <Drawer.Screen name="Sobre Nosotros" component={AboutScreen} />
         <Drawer.Screen name="Contáctanos" component={ContactScreen} />
         {/* Categorías */}
-        <Drawer.Screen name="Climatización" component={ClimatizaciónScreen} />
+        <Drawer.Screen name="Climatización" component={ClimatizacionScreen} />
         <Drawer.Screen name="Cocinas" component={CocinasScreen} />
         <Drawer.Screen name="Dispensadores" component={DispensadoresScreen} />
         <Drawer.Screen name="Lavadoras" component={LavadorasScreen} />
@@ -179,8 +179,8 @@ const styles = StyleSheet.create({
   menuText: {
     fontSize: 16,
     color: "#5BA33B",
-    marginLeft: 12,
-    fontFamily: "Aller_BdIt",
+    marginLeft: 14,
+    fontFamily: "Aller_Bd",
   },
   activeItem: {
     backgroundColor: "#5BA33B",

@@ -1,4 +1,3 @@
-// CocinasScreen.js
 import React, { useState, useMemo, memo } from "react";
 import {
   View,
@@ -7,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  ImageBackground,
   ScrollView,
   StatusBar,
 } from "react-native";
@@ -25,7 +25,7 @@ const subproductos = [
   "Complementos",
 ];
 
-const productos = [
+  const productos = [
   {
     nombre: "GLUX -3SA ‘MINEIRA’",
     variante: "4 Hornallas",
@@ -611,7 +611,11 @@ const productos = [
 const ProductCard = memo(({ item }) => (
   <View style={styles.productCard}>
     <Image source={item.img} style={styles.productImage} />
-    <Text style={[styles.productText, { fontFamily: "Aller_Bd" }]} numberOfLines={2} ellipsizeMode="tail">
+    <Text
+      style={[styles.productText, { fontFamily: "Aller_Bd" }]}
+      numberOfLines={2}
+      ellipsizeMode="tail"
+    >
       {item.nombre}
     </Text>
   </View>
@@ -633,7 +637,6 @@ export default function CocinasScreen() {
     return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
   }
 
-  // Memorizar productos filtrados
   const filteredProducts = useMemo(() => {
     return selectedVariant
       ? productos.filter((item) => item.variante === selectedVariant)
@@ -641,79 +644,105 @@ export default function CocinasScreen() {
   }, [selectedVariant]);
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require("../assets/fondo.jpeg")}
+      style={styles.background}
+      resizeMode="cover"
+    >
       <StatusBar barStyle="light-content" backgroundColor="#045700" />
 
       <Header />
 
-      {/* Título */}
-      <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>Cocinas</Text>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        {/* Título */}
+        <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>Cocinas</Text>
 
-      {/* Chips de filtros */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipContainer}>
-        <TouchableOpacity
-          style={[styles.chip, selectedVariant === null && styles.chipSelected]}
-          onPress={() => setSelectedVariant(null)}
+        {/* Chips de filtros */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.chipContainer}
         >
-          <Text
-            style={[
-              styles.chipText,
-              selectedVariant === null && styles.chipTextSelected,
-              { fontFamily: "Aller_BdIt" },
-            ]}
-          >
-            Todas
-          </Text>
-        </TouchableOpacity>
-
-        {subproductos.map((item, index) => (
           <TouchableOpacity
-            key={index}
-            style={[styles.chip, selectedVariant === item && styles.chipSelected]}
-            onPress={() => setSelectedVariant(item)}
+            style={[styles.chip, selectedVariant === null && styles.chipSelected]}
+            onPress={() => setSelectedVariant(null)}
           >
             <Text
               style={[
                 styles.chipText,
-                selectedVariant === item && styles.chipTextSelected,
+                selectedVariant === null && styles.chipTextSelected,
                 { fontFamily: "Aller_BdIt" },
               ]}
-              numberOfLines={1}
-              ellipsizeMode="tail"
             >
-              {item}
+              Todas
             </Text>
           </TouchableOpacity>
-        ))}
+
+          {subproductos.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.chip, selectedVariant === item && styles.chipSelected]}
+              onPress={() => setSelectedVariant(item)}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedVariant === item && styles.chipTextSelected,
+                  { fontFamily: "Aller_BdIt" },
+                ]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Lista de productos */}
+        <FlatList
+          data={filteredProducts}
+          renderItem={({ item }) => <ProductCard item={item} />}
+          keyExtractor={(item) => item.nombre}
+          numColumns={3}
+          contentContainerStyle={{ paddingVertical: 16 }}
+          initialNumToRender={9}
+          windowSize={5}
+          removeClippedSubviews={true}
+          extraData={selectedVariant}
+          scrollEnabled={false}
+        />
       </ScrollView>
 
-      {/* Lista de productos */}
-      <FlatList
-        data={filteredProducts}
-        renderItem={({ item }) => <ProductCard item={item} />}
-        keyExtractor={(item) => item.nombre}
-        numColumns={3}
-        contentContainerStyle={{ paddingVertical: 16 }}
-        initialNumToRender={9}
-        windowSize={5}
-        removeClippedSubviews={true}
-        extraData={selectedVariant} // importante para que FlatList actualice solo al cambiar categoría
-      />
-
       <Footer />
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f2f2f2" },
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#f2f2f2",
+  },
 
-  title: { fontSize: 35, margin: 16, color: "#5BA33B", textAlign: "center" },
+  container: { flex: 1, backgroundColor: "transparent" },
+
+  title: {
+    fontSize: 35,
+    margin: 16,
+    color: "#000000ff",
+    textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
 
   chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
   chip: {
     paddingHorizontal: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255,255,255,0.85)",
     borderRadius: 16,
     marginRight: 10,
     borderWidth: 1,
@@ -729,14 +758,18 @@ const styles = StyleSheet.create({
   productCard: {
     flex: 1,
     margin: 5,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255,255,255,0.9)",
     alignItems: "center",
     borderRadius: 12,
     padding: 10,
-    elevation: 2,
+    elevation: 3,
     maxHeight: 250,
   },
   productImage: { width: 100, height: 150, marginBottom: 10 },
-  productText: { fontSize: 14, textAlign: "center" },
+  productText: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "#000",
+  },
 });
 

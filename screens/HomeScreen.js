@@ -10,6 +10,7 @@ import {
   Dimensions,
   Linking,
   Modal,
+  ImageBackground,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { useFonts } from "expo-font";
@@ -58,155 +59,162 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Header navigation={navigation} />
+    <View style={{ flex: 1 }}>
+      <ImageBackground
+        source={require("../assets/fondo.jpeg")}
+        style={styles.background}
+        resizeMode="cover">
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Carrusel */}
-        <View style={styles.carouselContainer}>
-          <Carousel
-            loop
-            width={width}
-            height={220}
-            autoPlay
-            autoPlayInterval={2500}
-            scrollAnimationDuration={1000}
-            data={carouselImages}
-            renderItem={({ item }) => (
-              <Image source={item} style={styles.carouselImage} resizeMode="contain" />
-            )}
-          />
-        </View>
+        <Header navigation={navigation} />
 
-        {/* Bienvenida */}
-        <View style={styles.welcomeContainer}>
-          <Text style={[styles.welcomeTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
-            Bienvenido a General Lux
-          </Text>
-          <Text style={[styles.welcomeSubtitle, { fontFamily: fontFamilyOrDefault("Aller_It") }]}>
-            Innovación y tecnología para tu hogar - descubre nuestras categorías y productos.
-          </Text>
-        </View>
-
-        {/* Categorías */}
-        <View style={styles.categoriesSection}>
-          <Text style={[styles.sectionTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
-            Productos
-          </Text>
-          <View style={styles.grid}>
-            {categorias.map((cat) => (
-              <TouchableOpacity
-                key={cat.nombre}
-                activeOpacity={0.85}
-                style={styles.card}
-                onPress={() => navigation.navigate(cat.nombre)}
-              >
-                <Image source={cat.img} style={styles.cardImage} />
-                <Text style={[styles.cardTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
-                  {cat.nombre}
-                </Text>
-              </TouchableOpacity>
-            ))}
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {/* Carrusel */}
+          <View style={styles.carouselContainer}>
+            <Carousel
+              loop
+              width={width}
+              height={220}
+              autoPlay
+              autoPlayInterval={2500}
+              scrollAnimationDuration={1000}
+              data={carouselImages}
+              renderItem={({ item }) => (
+                <Image source={item} style={styles.carouselImage} resizeMode="stretch" />
+              )}
+            />
           </View>
-        </View>
 
-        {/* Botones de acción */}
-        <View style={styles.ctaWrap}>
-          <TouchableOpacity
-            style={styles.contactButton}
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate("Contáctanos")}
-          >
-            <Text style={[styles.contactText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
-              📞 Contáctanos
+          {/* Bienvenida */}
+          <View style={styles.welcomeContainer}>
+            <Text style={[styles.welcomeTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
+              Bienvenido a General Lux
             </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.contactButton, { marginLeft: 10, backgroundColor: "#5BA33B"}]}
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate("Sobre Nosotros")}
-          >
-            <Text style={[styles.contactText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
-              ℹ️ Sobre Nosotros
+            <Text style={[styles.welcomeSubtitle, { fontFamily: fontFamilyOrDefault("Aller_It") }]}>
+              Innovación y tecnología para tu hogar - descubre nuestras categorías y productos.
             </Text>
-          </TouchableOpacity>
-        </View>
+          </View>
 
-        <View style={styles.noteWrap}>
-          <Text style={[styles.noteText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-            ¿No encontraste lo que buscabas? Escríbenos y te ayudamos.
-          </Text>
-        </View>
-      </ScrollView>
+          {/* Categorías */}
+          <View style={styles.categoriesSection}>
+            <Text style={[styles.sectionTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
+              Productos
+            </Text>
+            <View style={styles.grid}>
+              {categorias.map((cat) => (
+                <TouchableOpacity
+                  key={cat.nombre}
+                  activeOpacity={0.85}
+                  style={styles.card}
+                  onPress={() => navigation.navigate(cat.nombre)}
+                >
+                  <Image source={cat.img} style={styles.cardImage} />
+                  <Text style={[styles.cardTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
+                    {cat.nombre}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
-      <Footer />
-
-      {/* Botón flotante WhatsApp */}
-      <TouchableOpacity style={styles.whatsappButton} onPress={() => setWhatsappVisible(true)}>
-        <Image source={require("../assets/whatsapp.jpg")} style={styles.whatsappIcon} />
-      </TouchableOpacity>
-
-      {/* Modal WhatsApp */}
-      <Modal
-        visible={whatsappVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setWhatsappVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalWrapper}>
-            <View style={styles.modalTitleBar}>
-              <Text style={[styles.modalTitleText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
-                General Lux
+          {/* Botones de acción */}
+          <View style={styles.ctaWrap}>
+            <TouchableOpacity
+              style={styles.contactButton}
+              activeOpacity={0.9}
+              onPress={() => navigation.navigate("Contáctanos")}
+            >
+              <Text style={[styles.contactText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                📞 Contáctanos
               </Text>
-              <TouchableOpacity onPress={() => setWhatsappVisible(false)} style={styles.modalCloseBtn}>
-                <Text style={[styles.modalCloseText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.bubbleWrap}>
-              <View style={styles.bubble}>
-                <Text style={[styles.bubbleText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-                  En General Lux sabemos que la vida es algo más que tener la última tecnología.
-                  Se trata de crear experiencias mediante todos nuestros productos, los que podrás
-                  usar para entretenerte, descansar o incluso hacerte más fácil la vida.
-                </Text>
-              </View>
-            </View>
+            </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.modalWhatsappButton}
-              onPress={openWhatsapp}
+              style={[styles.contactButton, { marginLeft: 10, backgroundColor: "#5BA33B"}]}
               activeOpacity={0.9}
+              onPress={() => navigation.navigate("Sobre Nosotros")}
             >
-              <Image source={require("../assets/whatsapp.jpg")} style={styles.modalWhatsappIcon} />
-              <Text style={[styles.modalWhatsappText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
-                Abrir chat WhatsApp
+              <Text style={[styles.contactText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                ℹ️ Sobre Nosotros
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+
+          <View style={styles.noteWrap}>
+            <Text style={[styles.noteText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+              ¿No encontraste lo que buscabas? Escríbenos y te ayudamos.
+            </Text>
+          </View>
+        </ScrollView>
+
+        <Footer />
+
+        {/* Botón flotante WhatsApp */}
+        <TouchableOpacity style={styles.whatsappButton} onPress={() => setWhatsappVisible(true)}>
+          <Image source={require("../assets/whatsapp.jpg")} style={styles.whatsappIcon} />
+        </TouchableOpacity>
+
+        {/* Modal WhatsApp */}
+        <Modal
+          visible={whatsappVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setWhatsappVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalWrapper}>
+              <View style={styles.modalTitleBar}>
+                <Text style={[styles.modalTitleText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                  General Lux
+                </Text>
+                <TouchableOpacity onPress={() => setWhatsappVisible(false)} style={styles.modalCloseBtn}>
+                  <Text style={[styles.modalCloseText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.bubbleWrap}>
+                <View style={styles.bubble}>
+                  <Text style={[styles.bubbleText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+                    En General Lux sabemos que la vida es algo más que tener la última tecnología.
+                    Se trata de crear experiencias mediante todos nuestros productos, los que podrás
+                    usar para entretenerte, descansar o incluso hacerte más fácil la vida.
+                  </Text>
+                </View>
+              </View>
+
+              <TouchableOpacity
+                style={styles.modalWhatsappButton}
+                onPress={openWhatsapp}
+                activeOpacity={0.9}
+              >
+                <Image source={require("../assets/whatsapp.jpg")} style={styles.modalWhatsappIcon} />
+                <Text style={[styles.modalWhatsappText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                  Abrir chat WhatsApp
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ffffff" },
-  scrollContainer: { paddingBottom: 20, backgroundColor: "#ffffff" },
+  background: { flex: 1 },
+
+  scrollContainer: { paddingBottom: 20 },
 
   carouselContainer: { width: "100%", height: 220, justifyContent: "center", alignItems: "center", marginBottom: 10 },
   carouselImage: { width: width, height: 220, resizeMode: "contain" },
 
   welcomeContainer: { paddingVertical: 18, paddingHorizontal: 20, alignItems: "center" },
-  welcomeTitle: { fontSize: 25, color: "#5BA33B", marginBottom: 6 },
-  welcomeSubtitle: { fontSize: 16, color: "#555", textAlign: "center", lineHeight: 20 },
+  welcomeTitle: { fontSize: 25, color: "#000000ff", marginBottom: 6 },
+  welcomeSubtitle: { fontSize: 16, color: "#fff", textAlign: "center", lineHeight: 20 },
 
   categoriesSection: { paddingHorizontal: 16, paddingTop: 6 },
-  sectionTitle: { fontSize: 20, color: "#5BA33B", marginBottom: 12, textAlign: "center" },
+  sectionTitle: { fontSize: 20, color: "#000000ff", marginBottom: 12, textAlign: "center" },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  card: { width: CARD_WIDTH, backgroundColor: "#fff", borderRadius: 12, overflow: "hidden", alignItems: "center", marginBottom: 14, elevation: 3 },
+  card: { width: CARD_WIDTH, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 12, overflow: "hidden", alignItems: "center", marginBottom: 14, elevation: 3 },
   cardImage: { width: "100%", height: 120, resizeMode: "cover" },
   cardTitle: { fontSize: 15, color: "#222", textAlign: "center", paddingVertical: 8 },
 
@@ -215,7 +223,7 @@ const styles = StyleSheet.create({
   contactText: { color: "#fff", fontSize: 16 },
 
   noteWrap: { paddingHorizontal: 20, marginTop: 12, alignItems: "center" },
-  noteText: { fontSize: 14, color: "#666", textAlign: "center" },
+  noteText: { fontSize: 14, color: "#fff", textAlign: "center" },
 
   whatsappButton: { position: "absolute", bottom: 20, right: 20, width: 60, height: 60, borderRadius: 30, backgroundColor: "#25D366", justifyContent: "center", alignItems: "center", elevation: 5 },
   whatsappIcon: { width: 50, height: 50, resizeMode: "contain", borderRadius: 20 },
