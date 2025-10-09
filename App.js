@@ -25,7 +25,7 @@ const Drawer = createDrawerNavigator();
 const { width } = Dimensions.get("window");
 
 const productosItems = [
-  { label: "Climatización", screen: "Climatizacion" },
+  { label: "Climatización", screen: "Climatización" },
   { label: "Cocinas", screen: "Cocinas" },
   { label: "Dispensadores", screen: "Dispensadores" },
   { label: "Lavadoras", screen: "Lavadoras" },
@@ -176,10 +176,10 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   menuText: {
-    fontSize: 16,
+    fontSize: 17,
     color: "#5BA33B",
-    marginLeft: 14,
-    fontFamily: "Aller_Bd",
+    marginLeft: 12,
+    fontFamily: "Aller_It",
   },
   activeItem: {
     backgroundColor: "#5BA33B",

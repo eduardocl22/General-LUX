@@ -5,6 +5,7 @@ import {
   StyleSheet,
   StatusBar as RNStatusBar,
   TouchableOpacity,
+  ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,10 +17,14 @@ export default function Header() {
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       {/* Barra de estado */}
-      <RNStatusBar backgroundColor="#5BA33B" barStyle="light-content" />
+      <RNStatusBar backgroundColor="#12A14B" barStyle="light-content" />
 
-      {/* HEADER */}
-      <View style={styles.header}>
+      {/* HEADER con fondo de imagen */}
+      <ImageBackground
+        source={require("../assets/fondo.jpeg")}
+        style={styles.header}
+        resizeMode="cover"
+      >
         {/* Botón de menú hamburguesa */}
         <TouchableOpacity
           onPress={() => navigation.toggleDrawer()}
@@ -46,14 +51,14 @@ export default function Header() {
         >
           <Ionicons name="cart" size={26} color="#fff" />
         </TouchableOpacity>
-      </View>
+      </ImageBackground>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: "#5BA33B",
+    backgroundColor: "#12A14B", // fallback si la imagen tarda en cargar
   },
   header: {
     flexDirection: "row",
@@ -61,7 +66,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     height: 64,
     paddingHorizontal: 12,
-    backgroundColor: "#5BA33B",
     elevation: 6,
   },
   iconButton: {

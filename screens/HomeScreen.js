@@ -64,7 +64,6 @@ export default function HomeScreen({ navigation }) {
         source={require("../assets/fondo.jpeg")}
         style={styles.background}
         resizeMode="cover">
-
         <Header navigation={navigation} />
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -129,7 +128,7 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.contactButton, { marginLeft: 10, backgroundColor: "#5BA33B"}]}
+              style={[styles.contactButton, { marginLeft: 10, backgroundColor: "#12A14B"}]}
               activeOpacity={0.9}
               onPress={() => navigation.navigate("Sobre Nosotros")}
             >
@@ -219,7 +218,7 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 15, color: "#222", textAlign: "center", paddingVertical: 8 },
 
   ctaWrap: { paddingHorizontal: 20, marginTop: 6, alignItems: "center", flexDirection: "row", justifyContent: "center" },
-  contactButton: { width: "40%", backgroundColor: "#5BA33B", paddingVertical: 14, borderRadius: 8, alignItems: "center", marginTop: 8 },
+  contactButton: { width: "40%", backgroundColor: "#12A14B", paddingVertical: 14, borderRadius: 8, alignItems: "center", marginTop: 8 },
   contactText: { color: "#fff", fontSize: 16 },
 
   noteWrap: { paddingHorizontal: 20, marginTop: 12, alignItems: "center" },
@@ -231,13 +230,13 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "center", alignItems: "center", paddingHorizontal: 12 },
   modalWrapper: { width: "92%", backgroundColor: "#fff", borderRadius: 14, overflow: "hidden", alignItems: "center", paddingBottom: 14 },
   modalTitleBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%", padding: 12, borderBottomWidth: 1, borderColor: "#ddd" },
-  modalTitleText: { fontSize: 18, color: "#5BA33B" },
+  modalTitleText: { fontSize: 20, color: "#12A14B" },
   modalCloseBtn: { padding: 4 },
   modalCloseText: { fontSize: 18, color: "#333" },
   bubbleWrap: { paddingHorizontal: 16, paddingVertical: 12 },
   bubble: { backgroundColor: "#f2f2f2", borderRadius: 12, padding: 12 },
   bubbleText: { fontSize: 14, color: "#333", lineHeight: 20, textAlign: "center" },
-  modalWhatsappButton: { flexDirection: "row", alignItems: "center", backgroundColor: "#5BA33B", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginTop: 10 },
+  modalWhatsappButton: { flexDirection: "row", alignItems: "center", backgroundColor: "#12A14B", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginTop: 10 },
   modalWhatsappIcon: { width: 28, height: 28, marginRight: 8, resizeMode: "contain" },
   modalWhatsappText: { color: "#fff", fontSize: 16 },
 });
