@@ -24,7 +24,6 @@ import PlanchasScreen from "./screens/PlanchasScreen";
 const Drawer = createDrawerNavigator();
 const { width } = Dimensions.get("window");
 
-// Submenú de productos
 const productosItems = [
   { label: "Climatización", screen: "Climatizacion" },
   { label: "Cocinas", screen: "Cocinas" },
