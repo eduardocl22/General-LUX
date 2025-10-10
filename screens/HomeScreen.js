@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   carouselImageWrapper: {
     flex: 1,
-    backgroundColor: "#fff", // rellena los lados con blanco
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
