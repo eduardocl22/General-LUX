@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
-  ScrollView,
   StatusBar,
 } from "react-native";
 import { useFonts } from "expo-font";
@@ -77,8 +76,7 @@ const ProductCard = memo(({ item }) => (
   </View>
 ));
 
-
-export default function ClimatizaciónScreen() {
+export default function ClimatizacionScreen() {
   const [selectedVariant, setSelectedVariant] = useState(null);
 
   const [fontsLoaded] = useFonts({
@@ -107,76 +105,83 @@ export default function ClimatizaciónScreen() {
       resizeMode="cover"
     >
       <StatusBar barStyle="light-content" backgroundColor="#045700" />
-
       <Header />
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* 🔹 Título */}
-        <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>
-          Climatización
-        </Text>
+      {/* Contenedor principal */}
+      <View style={styles.container}>
+        {/* 🔹 Chips fijos arriba */}
+        <View style={styles.stickyChips}>
+          <FlatList
+            data={[null, ...subproductos]}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) =>
+              item === null ? (
+                <TouchableOpacity
+                  style={[
+                    styles.chip,
+                    selectedVariant === null && styles.chipSelected,
+                  ]}
+                  onPress={() => setSelectedVariant(null)}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      selectedVariant === null && styles.chipTextSelected,
+                      { fontFamily: "Aller_BdIt" },
+                    ]}
+                  >
+                    Todas
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={[
+                    styles.chip,
+                    selectedVariant === item && styles.chipSelected,
+                  ]}
+                  onPress={() => setSelectedVariant(item)}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      selectedVariant === item && styles.chipTextSelected,
+                      { fontFamily: "Aller_BdIt" },
+                    ]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )
+            }
+          />
+        </View>
 
-        {/* 🔹 Chips de filtro */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.chipContainer}
-        >
-          <TouchableOpacity
-            style={[styles.chip, selectedVariant === null && styles.chipSelected]}
-            onPress={() => setSelectedVariant(null)}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                selectedVariant === null && styles.chipTextSelected,
-                { fontFamily: "Aller_BdIt" },
-              ]}
-            >
-              Todas
-            </Text>
-          </TouchableOpacity>
-
-          {subproductos.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.chip,
-                selectedVariant === item && styles.chipSelected,
-              ]}
-              onPress={() => setSelectedVariant(item)}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  selectedVariant === item && styles.chipTextSelected,
-                  { fontFamily: "Aller_BdIt" },
-                ]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* 🔹 Lista de productos */}
+        {/* 🔹 FlatList de productos */}
         <FlatList
           data={filteredProducts}
           renderItem={({ item }) => <ProductCard item={item} />}
           keyExtractor={(item, index) => index.toString()}
           numColumns={3}
-          contentContainerStyle={{ paddingVertical: 16 }}
-          initialNumToRender={9}
+          contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 5 }}
+          initialNumToRender={6}
           windowSize={5}
-          removeClippedSubviews={true}
+          removeClippedSubviews
           extraData={selectedVariant}
-          scrollEnabled={false}
+          ListHeaderComponent={
+            <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>
+              Climatización
+            </Text>
+          }
+          style={{ flex: 1 }}
         />
-      </ScrollView>
 
-      <Footer />
+        {/* Footer fijo */}
+        <Footer />
+      </View>
     </ImageBackground>
   );
 }
@@ -186,21 +191,30 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
-    backgroundColor: "#f2f2f2",
+  },
+  container: {
+    flex: 1,
+    justifyContent: "space-between", // Footer queda abajo
   },
   title: {
     fontSize: 35,
     margin: 16,
-    color: "#000000ff",
+    color: "#000",
     textAlign: "center",
     textShadowColor: "rgba(0,0,0,0.2)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
+  stickyChips: {
+    backgroundColor: "#12A14B",
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderColor: "#12A14B",
+    zIndex: 10,
+  },
   chip: {
     paddingHorizontal: 12,
-    backgroundColor: "rgba(255,255,255,0.85)",
+    backgroundColor: "rgba(255,255,255,0.9)",
     borderRadius: 16,
     marginRight: 10,
     borderWidth: 1,
@@ -212,51 +226,45 @@ const styles = StyleSheet.create({
   chipSelected: { backgroundColor: "#12A14B", borderColor: "#12A14B" },
   chipText: { fontSize: 16, color: "#333" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
-productCardWrapper: {
-  flex: 1 / 3,
-  padding: 5,
-},
-
-productCard: {
-  backgroundColor: "rgba(255,255,255,0.9)",
-  borderRadius: 12,
-  overflow: "hidden",
-  elevation: 3,
-  height: 200,
-  justifyContent: "flex-end",
-  alignItems: "center",
-},
-
-productImage: {
-  width: "100%",
-  height: "50%",
-  resizeMode: "contain",
-},
-
-productLabel: {
-  backgroundColor: "rgba(255,255,255,0.85)",
-  paddingVertical: 6,
-  alignItems: "center",
-},
-
-productText: {
-  fontSize: 14,
-  textAlign: "center",
-  color: "#000",
-},
-
-readMoreButton: {
-  marginTop: 6,
-  backgroundColor: "#5BA33B",
-  paddingVertical: 6,
-  paddingHorizontal: 12,
-  borderRadius: 8,
-},
-
-readMoreText: {
-  color: "#fff",
-  fontWeight: "bold",
-  fontSize: 12,
-  textAlign: "center",
-},
+  productCardWrapper: {
+    flex: 1 / 3,
+    padding: 5,
+  },
+  productCard: {
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 12,
+    overflow: "hidden",
+    elevation: 3,
+    height: 200,
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  productImage: {
+    width: "100%",
+    height: "50%",
+    resizeMode: "contain",
+  },
+  productLabel: {
+    backgroundColor: "rgba(255,255,255,0.85)",
+    paddingVertical: 6,
+    alignItems: "center",
+  },
+  productText: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "#000",
+  },
+  readMoreButton: {
+    marginTop: 6,
+    backgroundColor: "#5BA33B",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  readMoreText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 12,
+    textAlign: "center",
+  },
 });

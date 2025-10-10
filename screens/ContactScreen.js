@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { fontSize: 16, marginTop: 8, color: "#5BA33B", fontFamily: "Aller_Bd" },
 
-  title: { fontSize: 26, color: "#5BA33B", marginBottom: 25, textAlign: "center", fontFamily: "Aller_Bd" },
+  title: { fontSize: 24, color: "#5BA33B", marginBottom: 25, textAlign: "center", fontFamily: "Aller_Bd" },
 
   card: {
     flexDirection: "row",
@@ -136,8 +136,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   icon: { marginRight: 12 },
-  label: { fontSize: 16, color: "#555", fontFamily: "Aller_Bd" },
-  value: { fontSize: 18, color: "#000", fontFamily: "Aller_BdIt" },
+  label: { fontSize: 14, color: "#555", fontFamily: "Aller_Bd" },
+  value: { fontSize: 16, color: "#000", fontFamily: "Aller_BdIt" },
 
   map: {
     width: "100%",

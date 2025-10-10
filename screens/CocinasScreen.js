@@ -25,13 +25,14 @@ const subproductos = [
   "Complementos",
 ];
 
-  const productos = [
+// 🔹 Productos (mantén los tuyos)
+const productos = [
   {
     nombre: "GLUX -3SA ‘MINEIRA’",
     variante: "4 Hornallas",
     img: require("../assets/images/Cocina/4 Hornallas/GLUX -3SA MINEIRA.png"),
   },
-  {
+    {
     nombre: "GLUX – T50 BS «LYS»",
     variante: "4 Hornallas",
     img: require("../assets/images/Cocina/4 Hornallas/GLUX – T50 BS LYS.png"),
@@ -633,9 +634,7 @@ export default function CocinasScreen() {
     Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
   });
 
-  if (!fontsLoaded) {
-    return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
-  }
+  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
 
   const filteredProducts = useMemo(() => {
     return selectedVariant
@@ -650,56 +649,58 @@ export default function CocinasScreen() {
       resizeMode="cover"
     >
       <StatusBar barStyle="light-content" backgroundColor="#045700" />
-
       <Header />
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* Título */}
-        <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>Cocinas</Text>
-
-        {/* Chips de filtros */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.chipContainer}
-        >
-          <TouchableOpacity
-            style={[styles.chip, selectedVariant === null && styles.chipSelected]}
-            onPress={() => setSelectedVariant(null)}
+      {/* 🔹 Contenedor principal */}
+      <View style={{ flex: 1 }}>
+        {/* 🔹 Chips fijos arriba */}
+        <View style={styles.stickyChips}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipContainer}
           >
-            <Text
-              style={[
-                styles.chipText,
-                selectedVariant === null && styles.chipTextSelected,
-                { fontFamily: "Aller_BdIt" },
-              ]}
-            >
-              Todas
-            </Text>
-          </TouchableOpacity>
-
-          {subproductos.map((item, index) => (
             <TouchableOpacity
-              key={index}
-              style={[styles.chip, selectedVariant === item && styles.chipSelected]}
-              onPress={() => setSelectedVariant(item)}
+              style={[styles.chip, selectedVariant === null && styles.chipSelected]}
+              onPress={() => setSelectedVariant(null)}
             >
               <Text
                 style={[
                   styles.chipText,
-                  selectedVariant === item && styles.chipTextSelected,
+                  selectedVariant === null && styles.chipTextSelected,
                   { fontFamily: "Aller_BdIt" },
                 ]}
-                numberOfLines={1}
-                ellipsizeMode="tail"
               >
-                {item}
+                Todas
               </Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
 
-        {/* Lista de productos */}
+            {subproductos.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.chip,
+                  selectedVariant === item && styles.chipSelected,
+                ]}
+                onPress={() => setSelectedVariant(item)}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    selectedVariant === item && styles.chipTextSelected,
+                    { fontFamily: "Aller_BdIt" },
+                  ]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* 🔹 Scroll de productos debajo */}
         <FlatList
           data={filteredProducts}
           renderItem={({ item }) => <ProductCard item={item} />}
@@ -708,13 +709,17 @@ export default function CocinasScreen() {
           contentContainerStyle={{ paddingVertical: 16 }}
           initialNumToRender={9}
           windowSize={5}
-          removeClippedSubviews={true}
+          removeClippedSubviews
           extraData={selectedVariant}
-          scrollEnabled={false}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>
+              Cocinas
+            </Text>
+          }
+          ListFooterComponent={<Footer />}
         />
-      </ScrollView>
-
-      <Footer />
+      </View>
     </ImageBackground>
   );
 }
@@ -724,25 +729,29 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
-    backgroundColor: "#f2f2f2",
   },
-
-  container: { flex: 1, backgroundColor: "transparent" },
-
   title: {
     fontSize: 35,
     margin: 16,
-    color: "#000000ff",
+    color: "#000",
     textAlign: "center",
     textShadowColor: "rgba(0,0,0,0.2)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-
-  chipContainer: { marginBottom: 16, paddingHorizontal: 10 },
+  stickyChips: {
+    backgroundColor: "#12A14B",
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderColor: "#12A14B",
+    zIndex: 10,
+  },
+  chipContainer: {
+    paddingHorizontal: 10,
+  },
   chip: {
     paddingHorizontal: 12,
-    backgroundColor: "rgba(255,255,255,0.85)",
+    backgroundColor: "rgba(255,255,255,0.9)",
     borderRadius: 16,
     marginRight: 10,
     borderWidth: 1,
@@ -751,10 +760,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  chipSelected: { backgroundColor: "#12A14B", borderColor: "#12A14B" },
+  chipSelected: {
+    backgroundColor: "#12A14B",
+    borderColor: "#12A14B",
+  },
   chipText: { fontSize: 16, color: "#333" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
-
   productCard: {
     flex: 1,
     margin: 5,
@@ -772,4 +783,3 @@ const styles = StyleSheet.create({
     color: "#000",
   },
 });
-
