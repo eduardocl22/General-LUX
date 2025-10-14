@@ -139,7 +139,7 @@ export default function App() {
           headerShown: false,
           drawerStyle: {
             width: 250,
-            backgroundColor: "#f0f0f0",
+            backgroundColor: "#d1d1d1ff",
           },
         }}
       >

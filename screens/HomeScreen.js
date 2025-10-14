@@ -60,14 +60,14 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <ImageBackground
+      <ImageBackground  
         source={require("../assets/fondo.jpeg")}
         style={styles.background}
         resizeMode="cover"
       >
         <Header navigation={navigation} />
-
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 0 }}>
           {/* Carrusel */}
           <View style={styles.carouselContainer}>
             <Carousel
@@ -150,16 +150,17 @@ export default function HomeScreen({ navigation }) {
               ¿No encontraste lo que buscabas? Escríbenos y te ayudamos.
             </Text>
           </View>
-        </ScrollView>
 
-        <Footer />
+          {/* Footer dentro del ScrollView; pasar useSafeArea={false} para no añadir espacio inferior */}
+          <Footer useSafeArea={false} />
+        </ScrollView>
 
         {/* Botón flotante WhatsApp */}
         <TouchableOpacity style={styles.whatsappButton} onPress={() => setWhatsappVisible(true)}>
           <Image source={require("../assets/whatsapp.jpg")} style={styles.whatsappIcon} />
         </TouchableOpacity>
 
-        {/* Modal WhatsApp usando react-native-modal */}
+        {/* Modal WhatsApp */}
         <Modal
           isVisible={whatsappVisible}
           backdropColor="black"
@@ -175,9 +176,7 @@ export default function HomeScreen({ navigation }) {
                   General Lux
                 </Text>
                 <TouchableOpacity onPress={() => setWhatsappVisible(false)} style={styles.modalCloseBtn}>
-                  <Text style={[styles.modalCloseText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-                    ✕
-                  </Text>
+                  <Text style={[styles.modalCloseText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>✕</Text>
                 </TouchableOpacity>
               </View>
 
@@ -211,29 +210,10 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
-  scrollContainer: { paddingBottom: 20 },
 
-  carouselContainer: {
-    width: "100%",
-    height: 220,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  carouselImageWrapper: {
-    flex: 1,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    height: "100%",
-    borderRadius: 8,
-  },
-  carouselImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
-  },
+  carouselContainer: { width: "100%", height: 220, justifyContent: "center", alignItems: "center", marginBottom: 10 },
+  carouselImageWrapper: { flex: 1, backgroundColor: "#fff", justifyContent: "center", alignItems: "center", width: "100%", height: "100%", borderRadius: 8 },
+  carouselImage: { width: "100%", height: "100%", resizeMode: "contain" },
 
   welcomeContainer: { paddingVertical: 18, paddingHorizontal: 20, alignItems: "center" },
   welcomeTitle: { fontSize: 25, color: "#000000ff", marginBottom: 6 },
