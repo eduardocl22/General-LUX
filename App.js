@@ -20,6 +20,8 @@ import TelevisoresScreen from "./screens/TelevisoresScreen";
 import LicuadorasScreen from "./screens/LicuadorasScreen";
 import DispensadoresScreen from "./screens/DispensadoresScreen";
 import PlanchasScreen from "./screens/PlanchasScreen";
+import CarritoScreen from "./screens/CarritoScreen";
+
 
 const Drawer = createDrawerNavigator();
 const { width } = Dimensions.get("window");
@@ -154,6 +156,7 @@ export default function App() {
         <Drawer.Screen name="Planchas" component={PlanchasScreen} />
         <Drawer.Screen name="Refrigeración" component={RefrigeracionScreen} />
         <Drawer.Screen name="Televisores" component={TelevisoresScreen} />
+        <Drawer.Screen name="CarritoScreen" component={CarritoScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
