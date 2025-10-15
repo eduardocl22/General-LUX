@@ -96,7 +96,8 @@ export default function HomeScreen({ navigation }) {
               Bienvenido a General Lux
             </Text>
             <Text style={[styles.welcomeSubtitle, { fontFamily: fontFamilyOrDefault("Aller_It") }]}>
-              Innovación y tecnología para tu hogar - descubre nuestras categorías y productos.
+              Innovación y tecnología para tu hogar,
+              descubre nuestras categorías y productos.
             </Text>
           </View>
 
@@ -220,7 +221,7 @@ const styles = StyleSheet.create({
   welcomeSubtitle: { fontSize: 16, color: "#fff", textAlign: "center", lineHeight: 20 },
 
   categoriesSection: { paddingHorizontal: 16, paddingTop: 6 },
-  sectionTitle: { fontSize: 20, color: "#000000ff", marginBottom: 12, textAlign: "center" },
+  sectionTitle: { fontSize: 24, color: "#000000ff", marginBottom: 12, textAlign: "center" },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   card: { width: CARD_WIDTH, backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 12, overflow: "hidden", alignItems: "center", marginBottom: 14, elevation: 3 },
   cardImage: { width: "100%", height: 120, resizeMode: "cover" },
