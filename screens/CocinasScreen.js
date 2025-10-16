@@ -650,10 +650,7 @@ export default function CocinasScreen() {
     >
       <StatusBar barStyle="light-content" backgroundColor="#045700" />
       <Header />
-
-      {/* 🔹 Contenedor principal */}
       <View style={{ flex: 1 }}>
-        {/* 🔹 Chips fijos arriba */}
         <View style={styles.stickyChips}>
           <ScrollView
             horizontal
