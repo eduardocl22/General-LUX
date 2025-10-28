@@ -1,11 +1,14 @@
-// App.js
 import "react-native-gesture-handler";
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator, DrawerContentScrollView } from "@react-navigation/drawer";
+import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
+
+// Importar Header
+import Header from "./components/Header";
 
 // Pantallas principales
 import HomeScreen from "./screens/HomeScreen";
@@ -21,10 +24,10 @@ import LicuadorasScreen from "./screens/LicuadorasScreen";
 import DispensadoresScreen from "./screens/DispensadoresScreen";
 import PlanchasScreen from "./screens/PlanchasScreen";
 import CarritoScreen from "./screens/CarritoScreen";
-
+import DetallesProductoScreen from "./screens/DetallesProductoScreen";
 
 const Drawer = createDrawerNavigator();
-const { width } = Dimensions.get("window");
+const Stack = createStackNavigator();
 
 const productosItems = [
   { label: "Climatización", screen: "Climatización" },
@@ -38,6 +41,7 @@ const productosItems = [
   { label: "Televisores", screen: "Televisores" },
 ];
 
+// ------------------ Drawer personalizado ------------------
 function CustomDrawerContent(props) {
   const [productosOpen, setProductosOpen] = useState(false);
   const [activeItem, setActiveItem] = useState("Inicio");
@@ -50,17 +54,20 @@ function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <ScrollView style={{ marginTop: 20 }}>
-        {/* --- Items del Drawer --- */}
-        {/* Inicio */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Inicio" && styles.activeItem]}
           onPress={() => handleNavigation("Inicio")}
         >
-          <Ionicons name="home-outline" size={20} color={activeItem === "Inicio" ? "#fff" : "#045700"} />
-          <Text style={[styles.menuText, activeItem === "Inicio" && styles.activeText]}>Inicio</Text>
+          <Ionicons
+            name="home-outline"
+            size={20}
+            color={activeItem === "Inicio" ? "#fff" : "#045700"}
+          />
+          <Text style={[styles.menuText, activeItem === "Inicio" && styles.activeText]}>
+            Inicio
+          </Text>
         </TouchableOpacity>
 
-        {/* Productos desplegable */}
         <TouchableOpacity style={styles.menuItem} onPress={() => setProductosOpen(!productosOpen)}>
           <Ionicons
             name={productosOpen ? "chevron-up-outline" : "chevron-down-outline"}
@@ -86,7 +93,6 @@ function CustomDrawerContent(props) {
           </View>
         )}
 
-        {/* Sobre Nosotros */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Sobre Nosotros" && styles.activeItem]}
           onPress={() => handleNavigation("Sobre Nosotros")}
@@ -101,7 +107,6 @@ function CustomDrawerContent(props) {
           </Text>
         </TouchableOpacity>
 
-        {/* Contáctanos */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Contáctanos" && styles.activeItem]}
           onPress={() => handleNavigation("Contáctanos")}
@@ -120,8 +125,44 @@ function CustomDrawerContent(props) {
   );
 }
 
+// ------------------ Stacks para cada sección ------------------
+function createStack(screenName, ScreenComponent) {
+  return () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* Stack interno con nombre único */}
+      <Stack.Screen name={`${screenName}Stack`} component={ScreenComponent} />
+      <Stack.Screen name="DetallesProducto" component={DetallesProductoScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// ------------------ Drawer principal ------------------
+function DrawerNavigator() {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{ headerShown: false, drawerStyle: { width: 250, backgroundColor: "#fff" } }}
+    >
+      <Drawer.Screen name="Inicio" component={createStack("Inicio", HomeScreen)} />
+      <Drawer.Screen name="Climatización" component={createStack("Climatización", ClimatizacionScreen)} />
+      <Drawer.Screen name="Cocinas" component={createStack("Cocinas", CocinasScreen)} />
+      <Drawer.Screen name="Dispensadores" component={createStack("Dispensadores", DispensadoresScreen)} />
+      <Drawer.Screen name="Lavadoras" component={createStack("Lavadoras", LavadorasScreen)} />
+      <Drawer.Screen name="Licuadoras" component={createStack("Licuadoras", LicuadorasScreen)} />
+      <Drawer.Screen name="Microondas" component={createStack("Microondas", MicroondasScreen)} />
+      <Drawer.Screen name="Planchas" component={createStack("Planchas", PlanchasScreen)} />
+      <Drawer.Screen name="Refrigeración" component={createStack("Refrigeración", RefrigeracionScreen)} />
+      <Drawer.Screen name="Televisores" component={createStack("Televisores", TelevisoresScreen)} />
+      <Drawer.Screen name="Sobre Nosotros" component={AboutScreen} />
+      <Drawer.Screen name="Contáctanos" component={ContactScreen} />
+      <Drawer.Screen name="CarritoScreen" component={CarritoScreen} />
+    </Drawer.Navigator>
+  );
+}
+
+
+// ------------------ App principal ------------------
 export default function App() {
-  // 🔠 Cargar las fuentes Aller
   const [fontsLoaded] = useFonts({
     Aller_Bd: require("./assets/fonts/Aller_Bd.ttf"),
     Aller_BdIt: require("./assets/fonts/Aller_BdIt.ttf"),
@@ -131,37 +172,21 @@ export default function App() {
     Aller_Rg: require("./assets/fonts/Aller_Rg.ttf"),
   });
 
+  if (!fontsLoaded)
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text></Text>
+      </View>
+    );
+
   return (
     <NavigationContainer>
-      <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
-        screenOptions={{
-          headerShown: false,
-          drawerStyle: {
-            width: 250,
-            backgroundColor: "#ffffffff",
-          },
-        }}
-      >
-        <Drawer.Screen name="Inicio" component={HomeScreen} />
-        <Drawer.Screen name="Sobre Nosotros" component={AboutScreen} />
-        <Drawer.Screen name="Contáctanos" component={ContactScreen} />
-        {/* Categorías */}
-        <Drawer.Screen name="Climatización" component={ClimatizacionScreen} />
-        <Drawer.Screen name="Cocinas" component={CocinasScreen} />
-        <Drawer.Screen name="Dispensadores" component={DispensadoresScreen} />
-        <Drawer.Screen name="Lavadoras" component={LavadorasScreen} />
-        <Drawer.Screen name="Licuadoras" component={LicuadorasScreen} />
-        <Drawer.Screen name="Microondas" component={MicroondasScreen} />
-        <Drawer.Screen name="Planchas" component={PlanchasScreen} />
-        <Drawer.Screen name="Refrigeración" component={RefrigeracionScreen} />
-        <Drawer.Screen name="Televisores" component={TelevisoresScreen} />
-        <Drawer.Screen name="CarritoScreen" component={CarritoScreen} />
-      </Drawer.Navigator>
+      <DrawerNavigator />
     </NavigationContainer>
   );
 }
 
+// ------------------ Estilos ------------------
 const styles = StyleSheet.create({
   menuItem: {
     flexDirection: "row",
@@ -178,17 +203,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 2,
   },
-  menuText: {
-    fontSize: 17,
-    color: "#5BA33B",
-    marginLeft: 12,
-    fontFamily: "Aller_It",
-  },
-  activeItem: {
-    backgroundColor: "#5BA33B",
-    borderRadius: 50,
-  },
-  activeText: {
-    color: "#fff",
-  },
+  menuText: { fontSize: 17, color: "#5BA33B", marginLeft: 12, fontFamily: "Aller_It" },
+  activeItem: { backgroundColor: "#5BA33B", borderRadius: 50 },
+  activeText: { color: "#fff" },
 });

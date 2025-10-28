@@ -151,12 +151,8 @@ export default function HomeScreen({ navigation }) {
               ¿No encontraste lo que buscabas? Escríbenos y te ayudamos.
             </Text>
           </View>
-
-          {/* Footer dentro del ScrollView; pasar useSafeArea={false} para no añadir espacio inferior */}
           <Footer useSafeArea={false} />
         </ScrollView>
-
-        {/* Botón flotante WhatsApp */}
         <TouchableOpacity style={styles.whatsappButton} onPress={() => setWhatsappVisible(true)}>
           <Image source={require("../assets/whatsapp.jpg")} style={styles.whatsappIcon} />
         </TouchableOpacity>
