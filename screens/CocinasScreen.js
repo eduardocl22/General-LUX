@@ -181,6 +181,8 @@ export default function CocinasScreen({ navigation }) {
                 Cocinas
               </Text>
             }
+            numColumns={3}
+            columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 15 }}
           />
         )}
       </ImageBackground>
@@ -235,10 +237,12 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     alignItems: "center",
+    flex: 1,
+    marginHorizontal: 5,
   },
   productImage: {
-    width: 140,
-    height: 140,
+    width: 150,
+    height: 150,
     resizeMode: "contain",
     marginBottom: 10,
   },
