@@ -1,4 +1,4 @@
-import React, { useState, useMemo, memo } from "react";
+import React, { useEffect, useState, useMemo, memo } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,15 @@ import {
   Image,
   ImageBackground,
   StatusBar,
+  ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { useFonts } from "expo-font";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebase";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-// 🔹 Subcategorías
 const subproductos = [
   "Aires Acondicionados Smart",
   "Aires Convencionales",
@@ -21,64 +24,64 @@ const subproductos = [
   "Soportes Para Aire",
 ];
 
-// 🔹 Productos
-const productos = [
-  {
-    nombre: "AIRES SMART",
-    variante: "Aires Acondicionados Smart",
-    img: require("../assets/images/Climatización/AIRES SMART.png"),
-  },
-  {
-    nombre: "AIRES ON/OFF",
-    variante: "Aires Acondicionados Smart",
-    img: require("../assets/images/Climatización/AIRES ONOFF.jpg"),
-  },
-  {
-    nombre: "AIRES ON/OFF",
-    variante: "Aires Convencionales",
-    img: require("../assets/images/Climatización/AIRES ONOFF1.jpg"),
-  },
-  {
-    nombre: "AIRES INVERTER",
-    variante: "DC Inverter Smart",
-    img: require("../assets/images/Climatización/AIRES INVERTER.jpg"),
-  },
-  {
-    nombre: "GLUX-BA007",
-    variante: "Soportes Para Aire",
-    img: require("../assets/images/Climatización/GLUX-BA007.jpg"),
-  },
-  {
-    nombre: "GLUX-BA008",
-    variante: "Soportes Para Aire",
-    img: require("../assets/images/Climatización/GLUX-BA008.png"),
-  },
-];
+const localImages = {
+  "AIRES SMART.png": require("../assets/images/Climatización/AIRES SMART.png"),
+  "AIRES ONOFF.jpg": require("../assets/images/Climatización/AIRES ONOFF.jpg"),
+  "AIRES ONOFF1.jpg": require("../assets/images/Climatización/AIRES ONOFF1.jpg"),
+  "AIRES INVERTER.jpg": require("../assets/images/Climatización/AIRES INVERTER.jpg"),
+  "GLUX-BA007.jpg": require("../assets/images/Climatización/GLUX-BA007.jpg"),
+  "GLUX-BA008.png": require("../assets/images/Climatización/GLUX-BA008.png"),
+};
 
-// 🔸 Componente de producto optimizado
-const ProductCard = memo(({ item }) => (
-  <View style={styles.productCardWrapper}>
-    <View style={styles.productCard}>
-      <Image source={item.img} style={styles.productImage} />
-      <View style={styles.productLabel}>
-        <Text
-          style={[styles.productText, { fontFamily: "Aller_Bd" }]}
-          numberOfLines={2}
-          ellipsizeMode="tail"
-        >
-          {item.nombre}
-        </Text>
-        <TouchableOpacity style={styles.readMoreButton}>
-          <Text style={styles.readMoreText}>Leer más</Text>
-        </TouchableOpacity>
+const ProductCard = memo(({ item, onPress }) => {
+  const imageSource = localImages[item.imagen];
+
+  return (
+    <View style={styles.productCardWrapper}>
+      <View style={styles.productCard}>
+        {imageSource ? (
+          <Image source={imageSource} style={styles.productImage} />
+        ) : (
+          <View
+            style={{
+              width: "100%",
+              height: "55%",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.05)",
+            }}
+          >
+            <Text style={{ color: "#666", fontSize: 12 }}>Sin imagen</Text>
+          </View>
+        )}
+
+        <View style={styles.productLabel}>
+          <Text
+            style={[styles.productText, { fontFamily: "Aller_Bd" }]}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {item.nombre}
+          </Text>
+
+          <TouchableOpacity
+            style={styles.readMoreButton}
+            onPress={() => onPress(item)}
+          >
+            <Text style={styles.readMoreText}>Leer más</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
-  </View>
-));
+  );
+});
 
-export default function ClimatizacionScreen() {
+export default function ClimatizacionScreen({ navigation }) {
+  const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedVariant, setSelectedVariant] = useState(null);
 
+  // 🔹 Cargar fuentes personalizadas
   const [fontsLoaded] = useFonts({
     Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
     Aller_BdIt: require("../assets/fonts/Aller_BdIt.ttf"),
@@ -88,15 +91,45 @@ export default function ClimatizacionScreen() {
     Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
   });
 
-  if (!fontsLoaded) {
-    return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
-  }
+  // 🔹 Obtener productos desde Firestore (colección 'climatizacion')
+  useEffect(() => {
+    let mounted = true;
+    const fetchProductos = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "Climatizacion"));
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        if (mounted) setProductos(data);
+      } catch (err) {
+        console.error("Error al cargar productos de climatización:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
 
+    fetchProductos();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // 🔹 Filtrar por variante (subcategoría)
   const filteredProducts = useMemo(() => {
-    return selectedVariant
-      ? productos.filter((item) => item.variante === selectedVariant)
-      : productos;
-  }, [selectedVariant]);
+    if (!selectedVariant || selectedVariant === "Todas") return productos;
+    return productos.filter((item) => item.variante === selectedVariant);
+  }, [productos, selectedVariant]);
+
+  // 🔹 Ir a la pantalla de detalles
+  const handleOpenDetails = (item) => {
+    navigation.navigate("DetallesProducto", { producto: item });
+  };
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#12A14B" />
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
@@ -107,79 +140,90 @@ export default function ClimatizacionScreen() {
       <StatusBar barStyle="light-content" backgroundColor="#045700" />
       <Header />
 
-      {/* Contenedor principal */}
       <View style={styles.container}>
-        {/* 🔹 Chips fijos arriba */}
+        {/* 🔹 Subcategorías */}
         <View style={styles.stickyChips}>
-          <FlatList
-            data={[null, ...subproductos]}
+          <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) =>
-              item === null ? (
-                <TouchableOpacity
+            contentContainerStyle={{ paddingHorizontal: 8 }}
+          >
+            <TouchableOpacity
+              style={[
+                styles.chip,
+                (selectedVariant === null || selectedVariant === "Todas") &&
+                  styles.chipSelected,
+              ]}
+              onPress={() => setSelectedVariant("Todas")}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  (selectedVariant === null || selectedVariant === "Todas") &&
+                    styles.chipTextSelected,
+                  { fontFamily: "Aller_BdIt" },
+                ]}
+              >
+                Todas
+              </Text>
+            </TouchableOpacity>
+
+            {subproductos.map((sub) => (
+              <TouchableOpacity
+                key={sub}
+                style={[
+                  styles.chip,
+                  selectedVariant === sub && styles.chipSelected,
+                ]}
+                onPress={() => setSelectedVariant(sub)}
+              >
+                <Text
                   style={[
-                    styles.chip,
-                    selectedVariant === null && styles.chipSelected,
+                    styles.chipText,
+                    selectedVariant === sub && styles.chipTextSelected,
+                    { fontFamily: "Aller_BdIt" },
                   ]}
-                  onPress={() => setSelectedVariant(null)}
                 >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      selectedVariant === null && styles.chipTextSelected,
-                      { fontFamily: "Aller_BdIt" },
-                    ]}
-                  >
-                    Todas
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  style={[
-                    styles.chip,
-                    selectedVariant === item && styles.chipSelected,
-                  ]}
-                  onPress={() => setSelectedVariant(item)}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      selectedVariant === item && styles.chipTextSelected,
-                      { fontFamily: "Aller_BdIt" },
-                    ]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )
-            }
-          />
+                  {sub}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
-        {/* 🔹 FlatList de productos */}
-        <FlatList
-          data={filteredProducts}
-          renderItem={({ item }) => <ProductCard item={item} />}
-          keyExtractor={(item, index) => index.toString()}
-          numColumns={3}
-          contentContainerStyle={{ paddingVertical: 16, paddingHorizontal: 5 }}
-          initialNumToRender={6}
-          windowSize={5}
-          removeClippedSubviews
-          extraData={selectedVariant}
-          ListHeaderComponent={
-            <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>
-              Climatización
+        {/* 🔹 Lista de productos */}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#12A14B" />
+          </View>
+        ) : filteredProducts.length === 0 ? (
+          <View style={{ padding: 20 }}>
+            <Text style={[styles.mensajeVacio, { fontFamily: "Aller_Rg" }]}>
+              No hay productos disponibles.
             </Text>
-          }
-          style={{ flex: 1 }}
-        />
+          </View>
+        ) : (
+          <FlatList
+            data={filteredProducts}
+            renderItem={({ item }) => (
+              <ProductCard item={item} onPress={handleOpenDetails} />
+            )}
+            keyExtractor={(item) => item.id}
+            numColumns={3}
+            contentContainerStyle={{
+              paddingVertical: 16,
+              paddingHorizontal: 8,
+              paddingBottom: 90,
+            }}
+            ListHeaderComponent={
+              <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>
+                Climatización
+              </Text>
+            }
+            showsVerticalScrollIndicator={false}
+          />
+        )}
 
-        {/* Footer fijo */}
         <Footer />
       </View>
     </ImageBackground>
@@ -187,15 +231,8 @@ export default function ClimatizacionScreen() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  container: {
-    flex: 1,
-    justifyContent: "space-between", // Footer queda abajo
-  },
+  background: { flex: 1, width: "100%", height: "100%" },
+  container: { flex: 1, justifyContent: "space-between" },
   title: {
     fontSize: 35,
     margin: 16,
@@ -226,12 +263,9 @@ const styles = StyleSheet.create({
   chipSelected: { backgroundColor: "#12A14B", borderColor: "#12A14B" },
   chipText: { fontSize: 16, color: "#333" },
   chipTextSelected: { color: "#fff", fontWeight: "bold" },
-  productCardWrapper: {
-    flex: 1 / 3,
-    padding: 5,
-  },
+  productCardWrapper: { flex: 1 / 3, padding: 5 },
   productCard: {
-    backgroundColor: "rgba(255,255,255,0.9)",
+    backgroundColor: "rgba(255,255,255,0.95)",
     borderRadius: 12,
     overflow: "hidden",
     elevation: 3,
@@ -239,21 +273,13 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "center",
   },
-  productImage: {
-    width: "100%",
-    height: "50%",
-    resizeMode: "contain",
-  },
+  productImage: { width: "100%", height: "55%", resizeMode: "contain" },
   productLabel: {
-    backgroundColor: "rgba(255,255,255,0.85)",
-    paddingVertical: 6,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    paddingVertical: 8,
     alignItems: "center",
   },
-  productText: {
-    fontSize: 14,
-    textAlign: "center",
-    color: "#000",
-  },
+  productText: { fontSize: 14, textAlign: "center", color: "#000" },
   readMoreButton: {
     marginTop: 6,
     backgroundColor: "#5BA33B",
@@ -266,5 +292,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 12,
     textAlign: "center",
+  },
+  mensajeVacio: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#333",
+    marginTop: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
