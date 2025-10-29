@@ -91,7 +91,6 @@ export default function ClimatizacionScreen({ navigation }) {
     Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
   });
 
-  // 🔹 Obtener productos desde Firestore (colección 'climatizacion')
   useEffect(() => {
     let mounted = true;
     const fetchProductos = async () => {
