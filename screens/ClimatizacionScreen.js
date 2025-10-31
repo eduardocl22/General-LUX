@@ -68,7 +68,7 @@ const ProductCard = memo(({ item, onPress }) => {
             style={styles.readMoreButton}
             onPress={() => onPress(item)}
           >
-            <Text style={styles.readMoreText}>Leer más</Text>
+            <Text style={styles.readMoreText}>Ver más</Text>
           </TouchableOpacity>
         </View>
       </View>

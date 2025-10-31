@@ -17,6 +17,13 @@ import { useFonts } from "expo-font";
 const imagenes = {
   "GLUX - 3SA MINEIRA.png": require("../assets/images/Cocina/4 Hornallas/GLUX - 3SA MINEIRA.png"),
   "GLUX - T50 BS LYS.png": require("../assets/images/Cocina/4 Hornallas/GLUX – T50 BS LYS.png"),
+  // Climatización
+  "AIRES SMART.png": require("../assets/images/Climatización/AIRES SMART.png"),
+  "AIRES ONOFF.jpg": require("../assets/images/Climatización/AIRES ONOFF.jpg"),
+  "AIRES ONOFF1.jpg": require("../assets/images/Climatización/AIRES ONOFF1.jpg"),
+  "AIRES INVERTER.jpg": require("../assets/images/Climatización/AIRES INVERTER.jpg"),
+  "GLUX-BA007.jpg": require("../assets/images/Climatización/GLUX-BA007.jpg"),
+  "GLUX-BA008.png": require("../assets/images/Climatización/GLUX-BA008.png"),
 };
 
 export default function DetallesProductoScreen({ route }) {
@@ -113,7 +120,7 @@ export default function DetallesProductoScreen({ route }) {
         {/* Precio */}
         <View style={styles.precioContainer}>
           <Text style={[styles.precio, { fontFamily: "Aller_Bd" }]}>
-            Precio: ${producto.precio ?? "0.00"}
+            Precio: Bs {producto.precio ?? "0.00"}
           </Text>
         </View>
 
