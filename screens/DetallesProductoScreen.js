@@ -13,11 +13,13 @@ import Footer from "../components/Footer";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 
-//Mapeo de imágenes locales
-const imagenes = {
+// ✅ Mapeo de imágenes locales
+const imagenesLocales = {
+  // Cocinas
   "GLUX - 3SA MINEIRA.png": require("../assets/images/Cocina/4 Hornallas/GLUX - 3SA MINEIRA.png"),
   "GLUX - T50 BS LYS.png": require("../assets/images/Cocina/4 Hornallas/GLUX – T50 BS LYS.png"),
-  // Climatización
+
+  // ✅ Climatización
   "AIRES SMART.png": require("../assets/images/Climatización/AIRES SMART.png"),
   "AIRES ONOFF.jpg": require("../assets/images/Climatización/AIRES ONOFF.jpg"),
   "AIRES ONOFF1.jpg": require("../assets/images/Climatización/AIRES ONOFF1.jpg"),
@@ -45,39 +47,53 @@ export default function DetallesProductoScreen({ route }) {
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Cargando...</Text>
+        <Text></Text>
       </View>
     );
   }
-
-  const imagenLocal = imagenes[producto.imagen];
 
   return (
     <View style={styles.container}>
       <Header />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Imagen del producto */}
-        {imagenLocal ? (
-          <View style={styles.imageContainer}>
-            <Image
-              source={imagenLocal}
-              style={styles.imagenProducto}
-              resizeMode="contain"
-            />
-          </View>
-        ) : (
-          <View style={styles.imageContainer}>
-            <Text style={{ color: "#888" }}>No se encontró la imagen</Text>
-          </View>
-        )}
+        
+        {/* ✅ Carrusel de imágenes */}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          style={styles.carousel}
+        >
+          {producto.imagenes && producto.imagenes.length > 0 ? (
+            producto.imagenes.map((img, index) => {
+              const imgSrc = imagenesLocales[img];
+              return (
+                <View key={index} style={styles.imageContainer}>
+                  {imgSrc ? (
+                    <Image
+                      source={imgSrc}
+                      style={styles.imagenProducto}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <Text style={{ color: "#888" }}>No hay imagen: {img}</Text>
+                  )}
+                </View>
+              );
+            })
+          ) : (
+            <Text>No hay imágenes para este producto</Text>
+          )}
+        </ScrollView>
 
-        {/* Nombre y categoría */}
+        {/* Nombre */}
         <Text style={[styles.nombre, { fontFamily: "Aller_Bd" }]}>
-          {producto.nombre || "Producto sin nombre"}
+          {producto.nombre}
         </Text>
+
         <Text style={[styles.subcategoria, { fontFamily: "Aller_Rg" }]}>
-          {producto.variante || "Sin categoría"}
+          {producto.variante}
         </Text>
 
         {/* Características */}
@@ -85,26 +101,14 @@ export default function DetallesProductoScreen({ route }) {
           <Text style={[styles.seccionTitulo, { fontFamily: "Aller_BdIt" }]}>
             Características
           </Text>
-          {producto.caracteristicas &&
-          Array.isArray(producto.caracteristicas) &&
-          producto.caracteristicas.length > 0 ? (
-            producto.caracteristicas.map((car, index) => (
-              <View key={index} style={styles.bulletContainer}>
-                <Text
-                  style={[styles.bullet, { fontFamily: "Aller_Bd" }]}
-                >{`∝`}</Text>
-                <Text
-                  style={[styles.caracteristica, { fontFamily: "Aller_Rg" }]}
-                >
-                  {car}
-                </Text>
-              </View>
-            ))
-          ) : (
-            <Text style={[styles.caracteristica, { fontFamily: "Aller_Rg" }]}>
-              No hay características registradas.
-            </Text>
-          )}
+          {producto.caracteristicas?.map((car, i) => (
+            <View key={i} style={styles.bulletContainer}>
+              <Text style={[styles.bullet, { fontFamily: "Aller_Bd" }]}>∝</Text>
+              <Text style={[styles.caracteristica, { fontFamily: "Aller_Rg" }]}>
+                {car}
+              </Text>
+            </View>
+          ))}
         </View>
 
         {/* Descripción */}
@@ -113,37 +117,33 @@ export default function DetallesProductoScreen({ route }) {
             Descripción
           </Text>
           <Text style={[styles.descripcion, { fontFamily: "Aller_Rg" }]}>
-            {producto.descripcion || "Sin descripción disponible."}
+            {producto.descripcion}
           </Text>
         </View>
 
         {/* Precio */}
         <View style={styles.precioContainer}>
           <Text style={[styles.precio, { fontFamily: "Aller_Bd" }]}>
-            Precio: Bs {producto.precio ?? "0.00"}
+            Precio: Bs {producto.precio}
           </Text>
         </View>
 
-        {/* Selector de cantidad */}
+        {/* Cantidad */}
         <View style={styles.cantidadContainer}>
-          <TouchableOpacity
-            style={styles.botonCantidad}
-            onPress={disminuirCantidad}
-          >
+          <TouchableOpacity style={styles.botonCantidad} onPress={disminuirCantidad}>
             <Ionicons name="remove" size={20} color="#fff" />
           </TouchableOpacity>
+
           <Text style={[styles.cantidadTexto, { fontFamily: "Aller_Bd" }]}>
             {cantidad}
           </Text>
-          <TouchableOpacity
-            style={styles.botonCantidad}
-            onPress={aumentarCantidad}
-          >
+
+          <TouchableOpacity style={styles.botonCantidad} onPress={aumentarCantidad}>
             <Ionicons name="add" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
 
-        {/* Botón añadir al carrito */}
+        {/* Botón Carrito */}
         <TouchableOpacity style={styles.botonCarrito}>
           <Ionicons name="cart-outline" size={20} color="#fff" />
           <Text style={[styles.textoCarrito, { fontFamily: "Aller_BdIt" }]}>
@@ -157,121 +157,72 @@ export default function DetallesProductoScreen({ route }) {
   );
 }
 
+// ✅ Estilos
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F7FFF9",
-  },
-  scrollContainer: {
-    padding: 20,
-    paddingBottom: 100,
+  container: { flex: 1, backgroundColor: "#F7FFF9" },
+  scrollContainer: { padding: 20, paddingBottom: 130 },
+
+  carousel: {
+    width: "100%",
+    height: 260,
+    marginBottom: 20,
   },
   imageContainer: {
+    width: 350,
+    height: 240,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#fff",
     borderRadius: 15,
+    marginRight: 10,
     elevation: 4,
-    marginBottom: 20,
-    alignItems: "center",
   },
-  imagenProducto: {
-    width: "90%",
-    height: 250,
-    borderRadius: 15,
-  },
-  nombre: {
-    fontSize: 26,
-    textAlign: "center",
-    color: "#000",
-    marginBottom: 5,
-  },
-  subcategoria: {
-    fontSize: 20,
-    textAlign: "center",
-    color: "#12A14B",
-    marginBottom: 20,
-  },
+  imagenProducto: { width: "90%", height: "90%", borderRadius: 10 },
+
+  nombre: { fontSize: 26, textAlign: "center", marginBottom: 5, color: "#000" },
+  subcategoria: { fontSize: 20, textAlign: "center", color: "#12A14B", marginBottom: 15 },
+
   card: {
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 15,
     marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
     elevation: 2,
   },
-  seccionTitulo: {
-    fontSize: 18,
-    color: "#12A14B",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  bulletContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 6,
-  },
-  bullet: {
-    color: "#12A14B",
-    fontSize: 16,
-    marginRight: 6,
-  },
-  caracteristica: {
-    fontSize: 15,
-    color: "#333",
-    flex: 1,
-  },
-  descripcion: {
-    fontSize: 15,
-    color: "#333",
-    textAlign: "justify",
-    lineHeight: 22,
-  },
+  seccionTitulo: { fontSize: 18, color: "#12A14B", marginBottom: 10, textAlign: "center" },
+  bulletContainer: { flexDirection: "row", marginBottom: 6 },
+  bullet: { color: "#12A14B", fontSize: 16, marginRight: 6 },
+  caracteristica: { fontSize: 15, color: "#333" },
+  descripcion: { fontSize: 15, color: "#333", textAlign: "justify", lineHeight: 22 },
+
   precioContainer: {
     backgroundColor: "#E8F7ED",
-    borderRadius: 10,
     padding: 10,
+    borderRadius: 10,
     alignItems: "center",
     marginBottom: 15,
   },
-  precio: {
-    fontSize: 20,
-    color: "#12A14B",
-    fontWeight: "bold",
-  },
-  cantidadContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-  },
+  precio: { fontSize: 20, color: "#12A14B", fontWeight: "bold" },
+
+  cantidadContainer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
   botonCantidad: {
     backgroundColor: "#12A14B",
     width: 40,
     height: 40,
-    borderRadius: 10,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
-  cantidadTexto: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginHorizontal: 15,
-  },
+  cantidadTexto: { fontSize: 18, marginHorizontal: 15 },
+
   botonCarrito: {
+    backgroundColor: "#12A14B",
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#12A14B",
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 20,
-    elevation: 3,
     gap: 8,
   },
-  textoCarrito: {
-    color: "#fff",
-    fontSize: 16,
-  },
+  textoCarrito: { color: "#fff", fontSize: 16 },
 });
