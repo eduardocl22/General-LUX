@@ -181,7 +181,7 @@ export default function CocinasScreen({ navigation }) {
                 Cocinas
               </Text>
             }
-            numColumns={3}
+            numColumns={2}
             columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 15 }}
           />
         )}

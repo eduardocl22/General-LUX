@@ -1,5 +1,4 @@
-// DetallesProductoScreen.js
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,11 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Animated,
 } from "react-native";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
+import { useCart } from "../context/CartContext";
+import { useNavigation } from "@react-navigation/native";
 
 // ✅ Mapeo de imágenes locales
 const imagenesLocales = {
@@ -30,10 +32,72 @@ const imagenesLocales = {
 
 export default function DetallesProductoScreen({ route }) {
   const { producto } = route.params;
+  const navigation = useNavigation();
+  const { addToCart, cartItems } = useCart();
+
   const [cantidad, setCantidad] = useState(1);
+  const [yaEnCarrito, setYaEnCarrito] = useState(false);
+
+  // ✅ Detectar si el producto ya está en el carrito
+  useEffect(() => {
+    const existe = cartItems.some((item) => item.id === producto.id);
+    setYaEnCarrito(existe);
+  }, [cartItems]);
+
+  // ✅ Animación del mensaje emergente
+  const [mensajeVisible, setMensajeVisible] = useState(false);
+  const animacion = useRef(new Animated.Value(-80)).current;
+  const opacidad = useRef(new Animated.Value(0)).current;
+
+  const mostrarMensaje = () => {
+    setMensajeVisible(true);
+    Animated.parallel([
+      Animated.timing(animacion, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacidad, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(animacion, {
+          toValue: -80,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacidad, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start(() => setMensajeVisible(false));
+    }, 5000); // ⏱️ desaparece a los 5 segundos
+  };
 
   const aumentarCantidad = () => setCantidad(cantidad + 1);
   const disminuirCantidad = () => cantidad > 1 && setCantidad(cantidad - 1);
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: producto.id,
+      nombre: producto.nombre,
+      precio: producto.precio,
+      imagen:
+        imagenesLocales[producto.imagenes?.[0]] ||
+        require("../assets/images/climatización.jpg"),
+      cantidad,
+    });
+    mostrarMensaje();
+    setYaEnCarrito(true);
+  };
+
+  const handleVerCarrito = () => navigation.navigate("Carrito");
 
   const [fontsLoaded] = useFonts({
     Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
@@ -56,8 +120,22 @@ export default function DetallesProductoScreen({ route }) {
     <View style={styles.container}>
       <Header />
 
+      {/* ✅ Mensaje emergente debajo del Header */}
+      {mensajeVisible && (
+        <Animated.View
+          style={[
+            styles.mensajeEmergente,
+            { opacity: opacidad, transform: [{ translateY: animacion }] },
+          ]}
+        >
+          <Ionicons name="checkmark-circle" size={18} color="#fff" />
+          <Text style={[styles.textoMensaje, { fontFamily: "Aller_BdIt" }]}>
+            “{producto.nombre}” se ha añadido a tu carrito.
+          </Text>
+        </Animated.View>
+      )}
+
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        
         {/* ✅ Carrusel de imágenes */}
         <ScrollView
           horizontal
@@ -130,7 +208,10 @@ export default function DetallesProductoScreen({ route }) {
 
         {/* Cantidad */}
         <View style={styles.cantidadContainer}>
-          <TouchableOpacity style={styles.botonCantidad} onPress={disminuirCantidad}>
+          <TouchableOpacity
+            style={styles.botonCantidad}
+            onPress={disminuirCantidad}
+          >
             <Ionicons name="remove" size={20} color="#fff" />
           </TouchableOpacity>
 
@@ -138,16 +219,29 @@ export default function DetallesProductoScreen({ route }) {
             {cantidad}
           </Text>
 
-          <TouchableOpacity style={styles.botonCantidad} onPress={aumentarCantidad}>
+          <TouchableOpacity
+            style={styles.botonCantidad}
+            onPress={aumentarCantidad}
+          >
             <Ionicons name="add" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
 
-        {/* Botón Carrito */}
-        <TouchableOpacity style={styles.botonCarrito}>
-          <Ionicons name="cart-outline" size={20} color="#fff" />
+        {/* ✅ Botón dinámico */}
+        <TouchableOpacity
+          style={[
+            styles.botonCarrito,
+            yaEnCarrito && { backgroundColor: "#0F8641" },
+          ]}
+          onPress={yaEnCarrito ? handleVerCarrito : handleAddToCart}
+        >
+          <Ionicons
+            name={yaEnCarrito ? "eye-outline" : "cart-outline"}
+            size={20}
+            color="#fff"
+          />
           <Text style={[styles.textoCarrito, { fontFamily: "Aller_BdIt" }]}>
-            Añadir al carrito
+            {yaEnCarrito ? "Ver carrito" : "Añadir al carrito"}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -161,6 +255,28 @@ export default function DetallesProductoScreen({ route }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7FFF9" },
   scrollContainer: { padding: 20, paddingBottom: 130 },
+
+  // 🔹 Mensaje debajo del Header
+  mensajeEmergente: {
+    position: "absolute",
+    top: 90, // justo debajo del Header
+    left: 20,
+    right: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#12A14B",
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 6,
+    elevation: 5,
+    zIndex: 10,
+  },
+  textoMensaje: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 15,
+  },
 
   carousel: {
     width: "100%",
@@ -180,7 +296,12 @@ const styles = StyleSheet.create({
   imagenProducto: { width: "90%", height: "90%", borderRadius: 10 },
 
   nombre: { fontSize: 26, textAlign: "center", marginBottom: 5, color: "#000" },
-  subcategoria: { fontSize: 20, textAlign: "center", color: "#12A14B", marginBottom: 15 },
+  subcategoria: {
+    fontSize: 20,
+    textAlign: "center",
+    color: "#12A14B",
+    marginBottom: 15,
+  },
 
   card: {
     backgroundColor: "#fff",
@@ -189,11 +310,21 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 2,
   },
-  seccionTitulo: { fontSize: 18, color: "#12A14B", marginBottom: 10, textAlign: "center" },
+  seccionTitulo: {
+    fontSize: 18,
+    color: "#12A14B",
+    marginBottom: 10,
+    textAlign: "center",
+  },
   bulletContainer: { flexDirection: "row", marginBottom: 6 },
   bullet: { color: "#12A14B", fontSize: 16, marginRight: 6 },
   caracteristica: { fontSize: 15, color: "#333" },
-  descripcion: { fontSize: 15, color: "#333", textAlign: "justify", lineHeight: 22 },
+  descripcion: {
+    fontSize: 15,
+    color: "#333",
+    textAlign: "justify",
+    lineHeight: 22,
+  },
 
   precioContainer: {
     backgroundColor: "#E8F7ED",
@@ -204,7 +335,11 @@ const styles = StyleSheet.create({
   },
   precio: { fontSize: 20, color: "#12A14B", fontWeight: "bold" },
 
-  cantidadContainer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
+  cantidadContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   botonCantidad: {
     backgroundColor: "#12A14B",
     width: 40,
@@ -219,6 +354,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#12A14B",
     flexDirection: "row",
     justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 20,

@@ -196,7 +196,7 @@ export default function ClimatizacionScreen({ navigation }) {
           </Text>
         ) : (
           <FlatList
-            key={"3"} // <- Esto evita el error de numColumns
+            key={"2"} // <- Esto evita el error de numColumns
             data={filteredProducts}
             renderItem={renderProduct}
             keyExtractor={(item) => item.id}
@@ -206,7 +206,7 @@ export default function ClimatizacionScreen({ navigation }) {
                 Climatización
               </Text>
             }
-            numColumns={3}
+            numColumns={2}
             columnWrapperStyle={{
               justifyContent: "space-between",
               marginBottom: 15,

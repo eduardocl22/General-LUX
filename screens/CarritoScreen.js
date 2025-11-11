@@ -17,17 +17,17 @@ import {
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useFonts } from "expo-font";
+import { useCart } from "../context/CartContext";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function CarritoScreen() {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: "1",
-      nombre: "AIRES ON/OFF - Blanco, 12000 BTUs",
-      precio: 0.0,
-      cantidad: 1,
-      imagen: require("../assets/images/climatización.jpg"),
-    },
-  ]);
+export default function CarritoScreen({ navigation }) {
+  // Usamos el contexto del carrito (cartItems, funciones y subtotal vienen del contexto)
+  const {
+    cartItems,
+    removeFromCart,
+    updateQuantity,
+    subtotal: subtotalContext,
+  } = useCart();
 
   const [couponCode, setCouponCode] = useState("");
   const [direccionVisible, setDireccionVisible] = useState(false);
@@ -40,15 +40,19 @@ export default function CarritoScreen() {
   const [paisModalVisible, setPaisModalVisible] = useState(false);
   const [departamentoModalVisible, setDepartamentoModalVisible] = useState(false);
 
+  // Fuentes
   const [fontsLoaded] = useFonts({
     Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
     Aller_BdIt: require("../assets/fonts/Aller_BdIt.ttf"),
     Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
   });
 
-  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
+  if (!fontsLoaded)
+    return (
+      <View style={{ flex: 1, backgroundColor: "#fff" }} />
+    );
 
-  // Animación del acordeón
+  // Animación del acordeón de dirección
   const toggleDireccion = () => {
     Animated.timing(alturaAnimada, {
       toValue: direccionVisible ? 0 : 320,
@@ -58,7 +62,7 @@ export default function CarritoScreen() {
     setDireccionVisible(!direccionVisible);
   };
 
-  // Lista de países completa (orden alfabético)
+  // Lista de países (mismo listado que tenías)
   const allCountries = [
     "Afganistán","Albania","Alemania","Andorra","Angola","Antigua y Barbuda","Arabia Saudita",
     "Argelia","Argentina","Armenia","Australia","Austria","Azerbaiyán","Bahamas","Bangladés",
@@ -92,26 +96,39 @@ export default function CarritoScreen() {
     c.toLowerCase().includes(busquedaPais.toLowerCase())
   );
 
-  const subtotal = useMemo(
-    () => cartItems.reduce((sum, item) => sum + item.precio * item.cantidad, 0),
+  // Totales (si tu CartContext ya provee subtotal, lo usamos; si no, calculamos aquí)
+  const subtotal = subtotalContext ?? useMemo(
+    () => (cartItems || []).reduce((sum, it) => sum + (it.precio || 0) * (it.cantidad || 0), 0),
     [cartItems]
   );
   const shippingCost = 0;
   const total = subtotal + shippingCost;
 
+  // Cambiar cantidad usando la función del contexto
   const changeQuantity = (id, delta) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, cantidad: Math.max(1, item.cantidad + delta) }
-          : item
-      )
-    );
+    updateQuantity(id, delta);
   };
 
+  // Eliminar (usa función del contexto)
   const removeItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+    removeFromCart(id);
   };
+
+  // Si carrito vacío
+  const renderEmpty = () => (
+    <View style={{ padding: 30, alignItems: "center" }}>
+      <Ionicons name="cart-outline" size={64} color="#ccc" />
+      <Text style={{ marginTop: 12, fontSize: 16, color: "#666" }}>
+        Tu carrito está vacío.
+      </Text>
+      <TouchableOpacity
+        style={{ marginTop: 16, backgroundColor: "#12A14B", padding: 10, borderRadius: 8 }}
+        onPress={() => navigation.navigate("Inicio")}
+      >
+        <Text style={{ color: "#fff" }}>Seguir comprando</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -126,53 +143,75 @@ export default function CarritoScreen() {
             Carrito de Compras
           </Text>
 
-          {cartItems.map((item) => (
-            <View key={item.id} style={styles.cartRow}>
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => removeItem(item.id)}
-              >
-                <Text style={styles.removeText}>Eliminar</Text>
-              </TouchableOpacity>
-
-              <View style={styles.productInfo}>
-                <Image source={item.imagen} style={styles.thumbnail} />
-                <Text style={[styles.productName, { fontFamily: "Aller_Rg" }]}>
-                  {item.nombre}
-                </Text>
-              </View>
-
-              <View style={styles.priceSection}>
-                <Text style={[styles.priceText, { fontFamily: "Aller_Rg" }]}>
-                  Bs. {item.precio.toFixed(2)}
-                </Text>
-              </View>
-
-              <View style={styles.quantitySection}>
+          {/* Productos del carrito */}
+          {(!cartItems || cartItems.length === 0) ? (
+            renderEmpty()
+          ) : (
+            cartItems.map((item) => (
+              <View key={item.id} style={styles.cartRow}>
                 <TouchableOpacity
-                  style={styles.qtyButton}
-                  onPress={() => changeQuantity(item.id, -1)}
+                  style={styles.removeButton}
+                  onPress={() => removeItem(item.id)}
                 >
-                  <Text style={styles.qtyButtonText}>−</Text>
+                  <Text style={styles.removeText}>Eliminar</Text>
                 </TouchableOpacity>
-                <Text style={[styles.qtyText, { fontFamily: "Aller_Rg" }]}>
-                  {item.cantidad}
-                </Text>
-                <TouchableOpacity
-                  style={styles.qtyButton}
-                  onPress={() => changeQuantity(item.id, +1)}
-                >
-                  <Text style={styles.qtyButtonText}>＋</Text>
-                </TouchableOpacity>
-              </View>
 
-              <View style={styles.subtotalSection}>
-                <Text style={[styles.subtotalText, { fontFamily: "Aller_Rg" }]}>
-                  Bs. {(item.precio * item.cantidad).toFixed(2)}
-                </Text>
+                <View style={styles.productInfo}>
+                  {/* Si item.imagen viene como require() o string local, lo mostramos; si no, placeholder */}
+                  {item.imagen ? (
+                    <Image
+                      source={item.imagen}
+                      style={styles.thumbnail}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.thumbnail, { justifyContent: "center", alignItems: "center" }]}>
+                      <Ionicons name="image-outline" size={28} color="#bbb" />
+                    </View>
+                  )}
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.productName, { fontFamily: "Aller_Rg" }]}>
+                      {item.nombre}
+                    </Text>
+                    <Text style={{ color: "#666", marginTop: 6, fontSize: 13 }}>
+                      Precio unitario: Bs. {(item.precio || 0).toFixed(2)}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.priceSection}>
+                  <Text style={[styles.priceText, { fontFamily: "Aller_Rg" }]}>
+                    Bs. {(item.precio || 0).toFixed(2)}
+                  </Text>
+                </View>
+
+                <View style={styles.quantitySection}>
+                  <TouchableOpacity
+                    style={styles.qtyButton}
+                    onPress={() => changeQuantity(item.id, -1)}
+                  >
+                    <Text style={styles.qtyButtonText}>−</Text>
+                  </TouchableOpacity>
+                  <Text style={[styles.qtyText, { fontFamily: "Aller_Rg" }]}>
+                    {item.cantidad}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.qtyButton}
+                    onPress={() => changeQuantity(item.id, +1)}
+                  >
+                    <Text style={styles.qtyButtonText}>＋</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.subtotalSection}>
+                  <Text style={[styles.subtotalText, { fontFamily: "Aller_Rg" }]}>
+                    Bs. {((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}
+                  </Text>
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
 
           {/* Cupón */}
           <View style={styles.couponContainer}>
@@ -180,11 +219,12 @@ export default function CarritoScreen() {
               Código de cupón
             </Text>
             <View style={styles.couponRow}>
-              <View style={styles.couponInputPlaceholder}>
-                <Text style={{ color: "#999" }}>
-                  {couponCode || "Aplicar cupón"}
-                </Text>
-              </View>
+              <TextInput
+                placeholder="Ingresa código"
+                value={couponCode}
+                onChangeText={setCouponCode}
+                style={[styles.couponInputPlaceholder, { padding: 10 }]}
+              />
               <TouchableOpacity style={styles.couponButton}>
                 <Text style={[styles.couponButtonText, { fontFamily: "Aller_Bd" }]}>
                   Aplicar
@@ -216,7 +256,13 @@ export default function CarritoScreen() {
           </View>
 
           {/* Botón finalizar compra */}
-          <TouchableOpacity style={styles.checkoutButton}>
+          <TouchableOpacity
+            style={styles.checkoutButton}
+            onPress={() => {
+              // placeholder: flujo de checkout. Aquí podrías navegar a pantalla de pago.
+              navigation.navigate("Inicio");
+            }}
+          >
             <Text style={[styles.checkoutText, { fontFamily: "Aller_Bd" }]}>
               Finalizar compra
             </Text>
@@ -355,11 +401,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
+    backgroundColor: "#fff",
   },
   removeButton: { alignSelf: "flex-end" },
   removeText: { color: "red", fontSize: 14 },
   productInfo: { flexDirection: "row", alignItems: "center", marginVertical: 8 },
-  thumbnail: { width: 60, height: 60, borderRadius: 6, marginRight: 10 },
+  thumbnail: { width: 60, height: 60, borderRadius: 6, marginRight: 10, backgroundColor: "#f5f5f5" },
   productName: { flex: 1, fontSize: 16 },
   priceSection: { marginVertical: 6 },
   priceText: { fontSize: 16, color: "#333" },
@@ -372,6 +419,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 4,
+    backgroundColor: "#fff",
   },
   qtyButtonText: { fontSize: 18, color: "#333" },
   qtyText: { marginHorizontal: 12, fontSize: 16 },

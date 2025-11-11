@@ -6,11 +6,12 @@ import { createDrawerNavigator, DrawerContentScrollView } from "@react-navigatio
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
+import { CartProvider } from "./context/CartContext";
 
 // Importar Header
 import Header from "./components/Header";
 
-// Pantallas principales
+// Pantallas
 import HomeScreen from "./screens/HomeScreen";
 import AboutScreen from "./screens/AboutScreen";
 import ContactScreen from "./screens/ContactScreen";
@@ -41,7 +42,6 @@ const productosItems = [
   { label: "Televisores", screen: "Televisores" },
 ];
 
-// ------------------ Drawer personalizado ------------------
 function CustomDrawerContent(props) {
   const [productosOpen, setProductosOpen] = useState(false);
   const [activeItem, setActiveItem] = useState("Inicio");
@@ -58,22 +58,12 @@ function CustomDrawerContent(props) {
           style={[styles.menuItem, activeItem === "Inicio" && styles.activeItem]}
           onPress={() => handleNavigation("Inicio")}
         >
-          <Ionicons
-            name="home-outline"
-            size={20}
-            color={activeItem === "Inicio" ? "#fff" : "#045700"}
-          />
-          <Text style={[styles.menuText, activeItem === "Inicio" && styles.activeText]}>
-            Inicio
-          </Text>
+          <Ionicons name="home-outline" size={20} color={activeItem === "Inicio" ? "#fff" : "#045700"} />
+          <Text style={[styles.menuText, activeItem === "Inicio" && styles.activeText]}>Inicio</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem} onPress={() => setProductosOpen(!productosOpen)}>
-          <Ionicons
-            name={productosOpen ? "chevron-up-outline" : "chevron-down-outline"}
-            size={20}
-            color="#045700"
-          />
+          <Ionicons name={productosOpen ? "chevron-up-outline" : "chevron-down-outline"} size={20} color="#045700" />
           <Text style={styles.menuText}>Productos</Text>
         </TouchableOpacity>
 
@@ -116,27 +106,22 @@ function CustomDrawerContent(props) {
             size={20}
             color={activeItem === "Contáctanos" ? "#fff" : "#045700"}
           />
-          <Text style={[styles.menuText, activeItem === "Contáctanos" && styles.activeText]}>
-            Contáctanos
-          </Text>
+          <Text style={[styles.menuText, activeItem === "Contáctanos" && styles.activeText]}>Contáctanos</Text>
         </TouchableOpacity>
       </ScrollView>
     </DrawerContentScrollView>
   );
 }
 
-// ------------------ Stacks para cada sección ------------------
 function createStack(screenName, ScreenComponent) {
   return () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* Stack interno con nombre único */}
       <Stack.Screen name={`${screenName}Stack`} component={ScreenComponent} />
       <Stack.Screen name="DetallesProducto" component={DetallesProductoScreen} />
     </Stack.Navigator>
   );
 }
 
-// ------------------ Drawer principal ------------------
 function DrawerNavigator() {
   return (
     <Drawer.Navigator
@@ -160,8 +145,6 @@ function DrawerNavigator() {
   );
 }
 
-
-// ------------------ App principal ------------------
 export default function App() {
   const [fontsLoaded] = useFonts({
     Aller_Bd: require("./assets/fonts/Aller_Bd.ttf"),
@@ -180,13 +163,14 @@ export default function App() {
     );
 
   return (
-    <NavigationContainer>
-      <DrawerNavigator />
-    </NavigationContainer>
+    <CartProvider>
+      <NavigationContainer>
+        <DrawerNavigator />
+      </NavigationContainer>
+    </CartProvider>
   );
 }
 
-// ------------------ Estilos ------------------
 const styles = StyleSheet.create({
   menuItem: {
     flexDirection: "row",
