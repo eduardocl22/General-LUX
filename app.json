@@ -4,11 +4,11 @@
     "slug": "GENERAL-LUX-APP",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/LOGO G (VERDE).png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/LOGO G (VERDE).png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,13 +17,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/LOGO G (VERDE).png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/LOGO G (VERDE).png"
+      "favicon": "./assets/logo.png"
     }
   }
 }

@@ -15,7 +15,6 @@ import { useFonts } from "expo-font";
 import { useCart } from "../context/CartContext";
 import { useNavigation } from "@react-navigation/native";
 
-// ✅ Mapeo de imágenes locales
 const imagenesLocales = {
   // Cocinas
   "GLUX - 3SA MINEIRA.png": require("../assets/images/Cocina/4 Hornallas/GLUX - 3SA MINEIRA.png"),
@@ -38,13 +37,11 @@ export default function DetallesProductoScreen({ route }) {
   const [cantidad, setCantidad] = useState(1);
   const [yaEnCarrito, setYaEnCarrito] = useState(false);
 
-  // ✅ Detectar si el producto ya está en el carrito
   useEffect(() => {
     const existe = cartItems.some((item) => item.id === producto.id);
     setYaEnCarrito(existe);
   }, [cartItems]);
 
-  // ✅ Animación del mensaje emergente
   const [mensajeVisible, setMensajeVisible] = useState(false);
   const animacion = useRef(new Animated.Value(-80)).current;
   const opacidad = useRef(new Animated.Value(0)).current;
@@ -77,7 +74,7 @@ export default function DetallesProductoScreen({ route }) {
           useNativeDriver: true,
         }),
       ]).start(() => setMensajeVisible(false));
-    }, 5000); // ⏱️ desaparece a los 5 segundos
+    }, 5000);
   };
 
   const aumentarCantidad = () => setCantidad(cantidad + 1);
