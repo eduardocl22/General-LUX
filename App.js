@@ -48,7 +48,25 @@ function CustomDrawerContent(props) {
 
   const handleNavigation = (screen) => {
     setActiveItem(screen);
-    props.navigation.navigate(screen);
+
+    // 🔁 Resetear la navegación del stack (para que no vuelva al detalle del producto)
+    props.navigation.reset({
+      index: 0,
+      routes: [{ name: screen }],
+    });
+
+    // Si el usuario navega fuera del menú de productos, cerrar el submenú
+    if (screen !== "Climatización" &&
+        screen !== "Cocinas" &&
+        screen !== "Dispensadores" &&
+        screen !== "Lavadoras" &&
+        screen !== "Licuadoras" &&
+        screen !== "Microondas" &&
+        screen !== "Planchas" &&
+        screen !== "Refrigeración" &&
+        screen !== "Televisores") {
+      setProductosOpen(false);
+    }
   };
 
   return (
