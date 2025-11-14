@@ -16,11 +16,11 @@ import { useCart } from "../context/CartContext";
 import { useNavigation } from "@react-navigation/native";
 
 const imagenesLocales = {
-  // Cocinas
+  //Cocinas
   "GLUX - 3SA MINEIRA.png": require("../assets/images/Cocina/4 Hornallas/GLUX - 3SA MINEIRA.png"),
   "GLUX - T50 BS LYS.png": require("../assets/images/Cocina/4 Hornallas/GLUX – T50 BS LYS.png"),
 
-  // ✅ Climatización
+  //Climatización
   "AIRES SMART.png": require("../assets/images/Climatización/AIRES SMART.png"),
   "AIRES ONOFF.jpg": require("../assets/images/Climatización/AIRES ONOFF.jpg"),
   "AIRES ONOFF1.jpg": require("../assets/images/Climatización/AIRES ONOFF1.jpg"),

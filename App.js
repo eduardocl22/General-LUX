@@ -7,8 +7,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { CartProvider } from "./context/CartContext";
-
-// Importar Header
 import Header from "./components/Header";
 
 // Pantallas
@@ -49,13 +47,11 @@ function CustomDrawerContent(props) {
   const handleNavigation = (screen) => {
     setActiveItem(screen);
 
-    // 🔁 Resetear la navegación del stack (para que no vuelva al detalle del producto)
     props.navigation.reset({
       index: 0,
       routes: [{ name: screen }],
     });
 
-    // Si el usuario navega fuera del menú de productos, cerrar el submenú
     if (screen !== "Climatización" &&
         screen !== "Cocinas" &&
         screen !== "Dispensadores" &&
