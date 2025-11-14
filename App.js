@@ -24,6 +24,8 @@ import DispensadoresScreen from "./screens/DispensadoresScreen";
 import PlanchasScreen from "./screens/PlanchasScreen";
 import CarritoScreen from "./screens/CarritoScreen";
 import DetallesProductoScreen from "./screens/DetallesProductoScreen";
+import LoginScreen from "./screens/LoginScreen";
+import RegisterScreen from "./screens/RegisterScreen";
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -155,6 +157,9 @@ function DrawerNavigator() {
       <Drawer.Screen name="Sobre Nosotros" component={AboutScreen} />
       <Drawer.Screen name="Contáctanos" component={ContactScreen} />
       <Drawer.Screen name="CarritoScreen" component={CarritoScreen} />
+      <Drawer.Screen name="Login" component={LoginScreen} />
+      <Drawer.Screen name="Register" component={RegisterScreen} />
+
     </Drawer.Navigator>
   );
 }
