@@ -94,7 +94,7 @@ export default function DetallesProductoScreen({ route }) {
     setYaEnCarrito(true);
   };
 
-  const handleVerCarrito = () => navigation.navigate("Carrito");
+  const handleVerCarrito = () => navigation.navigate("CarritoScreen");
 
   const [fontsLoaded] = useFonts({
     Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
