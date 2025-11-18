@@ -1,12 +1,14 @@
 import "react-native-gesture-handler";
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator, DrawerContentScrollView } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { CartProvider } from "./context/CartContext";
+
+// Componentes
 import Header from "./components/Header";
 
 // Pantallas
@@ -48,21 +50,11 @@ function CustomDrawerContent(props) {
 
   const handleNavigation = (screen) => {
     setActiveItem(screen);
-
     props.navigation.reset({
       index: 0,
       routes: [{ name: screen }],
     });
-
-    if (screen !== "Climatización" &&
-        screen !== "Cocinas" &&
-        screen !== "Dispensadores" &&
-        screen !== "Lavadoras" &&
-        screen !== "Licuadoras" &&
-        screen !== "Microondas" &&
-        screen !== "Planchas" &&
-        screen !== "Refrigeración" &&
-        screen !== "Televisores") {
+    if (!productosItems.some((item) => item.screen === screen)) {
       setProductosOpen(false);
     }
   };
@@ -70,16 +62,31 @@ function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <ScrollView style={{ marginTop: 20 }}>
+        {/* Inicio */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Inicio" && styles.activeItem]}
           onPress={() => handleNavigation("Inicio")}
         >
-          <Ionicons name="home-outline" size={20} color={activeItem === "Inicio" ? "#fff" : "#045700"} />
-          <Text style={[styles.menuText, activeItem === "Inicio" && styles.activeText]}>Inicio</Text>
+          <Ionicons
+            name="home-outline"
+            size={20}
+            color={activeItem === "Inicio" ? "#fff" : "#045700"}
+          />
+          <Text style={[styles.menuText, activeItem === "Inicio" && styles.activeText]}>
+            Inicio
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => setProductosOpen(!productosOpen)}>
-          <Ionicons name={productosOpen ? "chevron-up-outline" : "chevron-down-outline"} size={20} color="#045700" />
+        {/* Productos */}
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => setProductosOpen(!productosOpen)}
+        >
+          <Ionicons
+            name={productosOpen ? "chevron-up-outline" : "chevron-down-outline"}
+            size={20}
+            color="#045700"
+          />
           <Text style={styles.menuText}>Productos</Text>
         </TouchableOpacity>
 
@@ -99,6 +106,7 @@ function CustomDrawerContent(props) {
           </View>
         )}
 
+        {/* Sobre Nosotros */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Sobre Nosotros" && styles.activeItem]}
           onPress={() => handleNavigation("Sobre Nosotros")}
@@ -113,6 +121,7 @@ function CustomDrawerContent(props) {
           </Text>
         </TouchableOpacity>
 
+        {/* Contáctanos */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Contáctanos" && styles.activeItem]}
           onPress={() => handleNavigation("Contáctanos")}
@@ -122,7 +131,9 @@ function CustomDrawerContent(props) {
             size={20}
             color={activeItem === "Contáctanos" ? "#fff" : "#045700"}
           />
-          <Text style={[styles.menuText, activeItem === "Contáctanos" && styles.activeText]}>Contáctanos</Text>
+          <Text style={[styles.menuText, activeItem === "Contáctanos" && styles.activeText]}>
+            Contáctanos
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </DrawerContentScrollView>
@@ -159,7 +170,6 @@ function DrawerNavigator() {
       <Drawer.Screen name="CarritoScreen" component={CarritoScreen} />
       <Drawer.Screen name="Login" component={LoginScreen} />
       <Drawer.Screen name="Register" component={RegisterScreen} />
-
     </Drawer.Navigator>
   );
 }

@@ -51,7 +51,7 @@ export default function CocinasScreen({ navigation }) {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "productos"));
+        const querySnapshot = await getDocs(collection(db, "Cocinas"));
         const data = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),

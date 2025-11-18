@@ -9,32 +9,40 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, DrawerActions } from "@react-navigation/native";
 
 export default function Header() {
   const navigation = useNavigation();
 
+  const openMenu = () => {
+    try {
+      navigation.dispatch(DrawerActions.openDrawer());
+    } catch (error) {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      {/* Barra de estado */}
       <RNStatusBar backgroundColor="#12A14B" barStyle="light-content" />
 
-      {/* HEADER con fondo de imagen */}
       <ImageBackground
         source={require("../assets/fondo.jpeg")}
         style={styles.header}
         resizeMode="cover"
       >
-        {/* Botón de menú hamburguesa */}
+        {/* Botón de menú / atrás inteligente */}
         <TouchableOpacity
-          onPress={() => navigation.toggleDrawer()}
+          onPress={openMenu}
           style={styles.iconButton}
           activeOpacity={0.8}
         >
           <Ionicons name="menu" size={30} color="#fff" />
         </TouchableOpacity>
 
-        {/* LOGO CENTRAL */}
+        {/* Logo centrado */}
         <View style={styles.centerContent}>
           <Image
             source={require("../assets/logo general lux-(Blanco).png")}
@@ -43,23 +51,33 @@ export default function Header() {
           />
         </View>
 
-        {/* Botón de carrito */}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("CarritoScreen")}
-          style={styles.iconButton}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="cart" size={26} color="#fff" />
-        </TouchableOpacity>
+        {/* Contenedor de iconos a la derecha */}
+        <View style={styles.rightIcons}>
+          {/* Carrito */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("CarritoScreen")}
+            style={[styles.iconButton, { marginRight: 10 }]} // separa del icono de usuario
+            activeOpacity={0.8}
+          >
+            <Ionicons name="cart" size={26} color="#fff" />
+          </TouchableOpacity>
+
+          {/* Usuario */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Login")}
+            style={styles.iconButton}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="person-outline" size={26} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </ImageBackground>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: "#12A14B", // fallback si la imagen tarda en cargar
-  },
+  safeArea: { backgroundColor: "#12A14B" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -68,17 +86,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     elevation: 6,
   },
-  iconButton: {
-    width: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  centerContent: {
-    flex: 1,
-    alignItems: "center",
-  },
-  logo: {
-    width: 200,
-    height: 80,
-  },
+  iconButton: { width: 40, alignItems: "center", justifyContent: "center" },
+  centerContent: { flex: 1, alignItems: "center" },
+  logo: { width: 200, height: 80 },
+  rightIcons: { flexDirection: "row", alignItems: "center" }, // contenedor de carrito + usuario
 });

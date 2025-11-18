@@ -242,7 +242,7 @@ export default function DetallesProductoScreen({ route }) {
           </Text>
         </TouchableOpacity>
       </ScrollView>
-
+          
       <Footer />
     </View>
   );

@@ -213,46 +213,14 @@ export default function CarritoScreen({ navigation }) {
             ))
           )}
 
-          {/* Cupón */}
-          <View style={styles.couponContainer}>
-            <Text style={[styles.couponLabel, { fontFamily: "Aller_Rg" }]}>
-              Código de cupón
-            </Text>
-            <View style={styles.couponRow}>
-              <TextInput
-                placeholder="Ingresa código"
-                value={couponCode}
-                onChangeText={setCouponCode}
-                style={[styles.couponInputPlaceholder, { padding: 10 }]}
-              />
-              <TouchableOpacity style={styles.couponButton}>
-                <Text style={[styles.couponButtonText, { fontFamily: "Aller_Bd" }]}>
-                  Aplicar
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
           {/* Totales */}
           <View style={styles.totalsContainer}>
-            <View style={styles.totalRow}>
-              <Text style={[styles.label, { fontFamily: "Aller_Rg" }]}>Subtotal</Text>
-              <Text style={[styles.value, { fontFamily: "Aller_Rg" }]}>
-                Bs. {subtotal.toFixed(2)}
-              </Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={[styles.label, { fontFamily: "Aller_Rg" }]}>Envío</Text>
-              <Text style={[styles.value, { fontFamily: "Aller_Rg" }]}>
-                {shippingCost === 0 ? "Envío gratuito" : `Bs. ${shippingCost.toFixed(2)}`}
-              </Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={[styles.labelBold, { fontFamily: "Aller_Bd" }]}>Total</Text>
-              <Text style={[styles.valueBold, { fontFamily: "Aller_Bd" }]}>
-                Bs. {total.toFixed(2)}
-              </Text>
-            </View>
+                <View style={styles.totalRow}>
+                  <Text style={[styles.labelBold, { fontFamily: "Aller_Bd" }]}>Total</Text>
+                  <Text style={[styles.valueBold, { fontFamily: "Aller_Bd" }]}>
+                    Bs. {total.toFixed(2)}
+                  </Text>
+                </View>
           </View>
 
           {/* Botón finalizar compra */}
