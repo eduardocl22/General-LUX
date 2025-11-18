@@ -86,7 +86,7 @@ export default function ContactScreen() {
           </View>
         </View>
 
-        {/* Mapa embebido */}
+        {/*Mapa*/}
         <Text style={styles.sectionTitle}>📍 Nuestra Ubicación</Text>
         <MapView
           ref={mapRef}
