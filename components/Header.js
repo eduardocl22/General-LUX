@@ -10,9 +10,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
+import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
   const navigation = useNavigation();
+  const { user } = useAuth(); // 🔥 Usuario logueado o null
 
   const openMenu = () => {
     try {
@@ -21,6 +23,15 @@ export default function Header() {
       if (navigation.canGoBack()) {
         navigation.goBack();
       }
+    }
+  };
+
+  // Navegar al perfil o login según estado de auth
+  const goToUser = () => {
+    if (user) {
+      navigation.navigate("Perfil"); // 🔥 PerfilScreen
+    } else {
+      navigation.navigate("Login"); // 🔥 LoginScreen
     }
   };
 
@@ -33,7 +44,7 @@ export default function Header() {
         style={styles.header}
         resizeMode="cover"
       >
-        {/* Botón de menú / atrás inteligente */}
+        {/* Botón de menú */}
         <TouchableOpacity
           onPress={openMenu}
           style={styles.iconButton}
@@ -51,24 +62,28 @@ export default function Header() {
           />
         </View>
 
-        {/* Contenedor de iconos*/}
+        {/* Contenedor de iconos a la derecha */}
         <View style={styles.rightIcons}>
           {/* Carrito */}
           <TouchableOpacity
             onPress={() => navigation.navigate("CarritoScreen")}
-            style={[styles.iconButton, { marginRight: 10 }]} // separa del icono de usuario
+            style={[styles.iconButton, { marginRight: 10 }]}
             activeOpacity={0.8}
           >
             <Ionicons name="cart" size={26} color="#fff" />
           </TouchableOpacity>
 
-          {/* Usuario */}
+          {/* Usuario dinámico */}
           <TouchableOpacity
-            onPress={() => navigation.navigate("Login")}
+            onPress={goToUser}
             style={styles.iconButton}
             activeOpacity={0.8}
           >
-            <Ionicons name="person-outline" size={26} color="#fff" />
+            <Ionicons
+              name={user ? "person" : "person-outline"}
+              size={26}
+              color="#fff"
+            />
           </TouchableOpacity>
         </View>
       </ImageBackground>
@@ -89,5 +104,5 @@ const styles = StyleSheet.create({
   iconButton: { width: 40, alignItems: "center", justifyContent: "center" },
   centerContent: { flex: 1, alignItems: "center" },
   logo: { width: 200, height: 80 },
-  rightIcons: { flexDirection: "row", alignItems: "center" }, // contenedor de carrito + usuario
+  rightIcons: { flexDirection: "row", alignItems: "center" },
 });

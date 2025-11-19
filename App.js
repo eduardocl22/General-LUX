@@ -6,10 +6,10 @@ import { createDrawerNavigator, DrawerContentScrollView } from "@react-navigatio
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-import { CartProvider } from "./context/CartContext";
 
-// Componentes
-import Header from "./components/Header";
+// Contextos
+import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
 
 // Pantallas
 import HomeScreen from "./screens/HomeScreen";
@@ -28,6 +28,7 @@ import CarritoScreen from "./screens/CarritoScreen";
 import DetallesProductoScreen from "./screens/DetallesProductoScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
+import PerfilScreen from "./screens/PerfilScreen";
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -54,6 +55,7 @@ function CustomDrawerContent(props) {
       index: 0,
       routes: [{ name: screen }],
     });
+
     if (!productosItems.some((item) => item.screen === screen)) {
       setProductosOpen(false);
     }
@@ -62,26 +64,18 @@ function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <ScrollView style={{ marginTop: 20 }}>
+
         {/* Inicio */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Inicio" && styles.activeItem]}
           onPress={() => handleNavigation("Inicio")}
         >
-          <Ionicons
-            name="home-outline"
-            size={20}
-            color={activeItem === "Inicio" ? "#fff" : "#045700"}
-          />
-          <Text style={[styles.menuText, activeItem === "Inicio" && styles.activeText]}>
-            Inicio
-          </Text>
+          <Ionicons name="home-outline" size={20} color={activeItem === "Inicio" ? "#fff" : "#045700"} />
+          <Text style={[styles.menuText, activeItem === "Inicio" && styles.activeText]}>Inicio</Text>
         </TouchableOpacity>
 
         {/* Productos */}
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => setProductosOpen(!productosOpen)}
-        >
+        <TouchableOpacity style={styles.menuItem} onPress={() => setProductosOpen(!productosOpen)}>
           <Ionicons
             name={productosOpen ? "chevron-up-outline" : "chevron-down-outline"}
             size={20}
@@ -106,35 +100,33 @@ function CustomDrawerContent(props) {
           </View>
         )}
 
-        {/* Sobre Nosotros*/}
+        {/* Sobre Nosotros */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Sobre Nosotros" && styles.activeItem]}
           onPress={() => handleNavigation("Sobre Nosotros")}
         >
-          <Ionicons
-            name="information-circle-outline"
-            size={20}
-            color={activeItem === "Sobre Nosotros" ? "#fff" : "#045700"}
-          />
-          <Text style={[styles.menuText, activeItem === "Sobre Nosotros" && styles.activeText]}>
-            Sobre Nosotros
-          </Text>
+          <Ionicons name="information-circle-outline" size={20} color={activeItem === "Sobre Nosotros" ? "#fff" : "#045700"} />
+          <Text style={[styles.menuText, activeItem === "Sobre Nosotros" && styles.activeText]}>Sobre Nosotros</Text>
         </TouchableOpacity>
 
-        {/* Contáctanos*/}
+        {/* Contáctanos */}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Contáctanos" && styles.activeItem]}
           onPress={() => handleNavigation("Contáctanos")}
         >
-          <Ionicons
-            name="call-outline"
-            size={20}
-            color={activeItem === "Contáctanos" ? "#fff" : "#045700"}
-          />
-          <Text style={[styles.menuText, activeItem === "Contáctanos" && styles.activeText]}>
-            Contáctanos
-          </Text>
+          <Ionicons name="call-outline" size={20} color={activeItem === "Contáctanos" ? "#fff" : "#045700"} />
+          <Text style={[styles.menuText, activeItem === "Contáctanos" && styles.activeText]}>Contáctanos</Text>
         </TouchableOpacity>
+
+        {/* Perfil */}
+        <TouchableOpacity
+          style={[styles.menuItem, activeItem === "Perfil" && styles.activeItem]}
+          onPress={() => handleNavigation("Perfil")}
+        >
+          <Ionicons name="person-circle-outline" size={20} color="#045700" />
+          <Text style={styles.menuText}>Mi Perfil</Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </DrawerContentScrollView>
   );
@@ -170,6 +162,7 @@ function DrawerNavigator() {
       <Drawer.Screen name="CarritoScreen" component={CarritoScreen} />
       <Drawer.Screen name="Login" component={LoginScreen} />
       <Drawer.Screen name="Register" component={RegisterScreen} />
+      <Drawer.Screen name="Perfil" component={PerfilScreen} />
     </Drawer.Navigator>
   );
 }
@@ -184,19 +177,22 @@ export default function App() {
     Aller_Rg: require("./assets/fonts/Aller_Rg.ttf"),
   });
 
-  if (!fontsLoaded)
+  if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text></Text>
+        <Text>Cargando...</Text>
       </View>
     );
+  }
 
   return (
-    <CartProvider>
-      <NavigationContainer>
-        <DrawerNavigator />
-      </NavigationContainer>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <NavigationContainer>
+          <DrawerNavigator />
+        </NavigationContainer>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
@@ -216,7 +212,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 2,
   },
-  menuText: { fontSize: 17, color: "#5BA33B", marginLeft: 12, fontFamily: "Aller_It" },
-  activeItem: { backgroundColor: "#5BA33B", borderRadius: 50 },
-  activeText: { color: "#fff" },
+  menuText: {
+    fontSize: 17,
+    color: "#5BA33B",
+    marginLeft: 12,
+    fontFamily: "Aller_It",
+  },
+  activeItem: {
+    backgroundColor: "#5BA33B",
+    borderRadius: 50,
+  },
+  activeText: {
+    color: "#fff",
+  },
 });
