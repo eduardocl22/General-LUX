@@ -34,7 +34,7 @@ const DetallesCompraScreen = () => {
   const alturaTarjeta = useRef(new Animated.Value(0)).current;
   const alturaQR = useRef(new Animated.Value(0)).current;
 
-  // *** VALIDAR LOGIN ANTES DE PERMITIR LA COMPRA ***
+  // *** VALIDAR LOGIN ANTES DE PERMITIR LA COMPRA
   useEffect(() => {
     if (!user) {
       navigation.navigate("LoginScreen");

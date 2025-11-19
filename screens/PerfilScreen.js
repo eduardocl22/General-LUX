@@ -8,7 +8,7 @@ export default function PerfilScreen() {
     <View style={{ flex: 1 }}>
       <Header />
       <View style={styles.container}>
-        <Text style={styles.text}>Perfil del usuario (en construcción)</Text>
+        <Text style={styles.text}>Perfil del usuario (en construccion)</Text>
       </View>
       <Footer />
     </View>

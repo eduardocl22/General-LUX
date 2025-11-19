@@ -51,7 +51,7 @@ export default function Header() {
           />
         </View>
 
-        {/* Contenedor de iconos a la derecha */}
+        {/* Contenedor de iconos*/}
         <View style={styles.rightIcons}>
           {/* Carrito */}
           <TouchableOpacity

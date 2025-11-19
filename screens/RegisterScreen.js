@@ -12,7 +12,7 @@ export default function RegisterScreen({ navigation }) {
 
   const handleRegister = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Completa todos los campos.");
+      Alert.alert("Error", "Completa todos los campos requeridos.");
       return;
     }
 

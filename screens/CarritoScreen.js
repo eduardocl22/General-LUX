@@ -329,7 +329,7 @@ export default function CarritoScreen({ navigation }) {
         </View>
       </Modal>
 
-      {/* Modal Departamento */}
+      {/*Departamento */}
       <Modal visible={departamentoModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <FlatList
