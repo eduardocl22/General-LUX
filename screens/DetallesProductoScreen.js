@@ -117,7 +117,7 @@ export default function DetallesProductoScreen({ route }) {
     <View style={styles.container}>
       <Header />
 
-      {/* ✅ Mensaje emergente debajo del Header */}
+      {/* ✅ Mensaje emergente*/}
       {mensajeVisible && (
         <Animated.View
           style={[

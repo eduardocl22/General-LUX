@@ -121,7 +121,7 @@ function CustomDrawerContent(props) {
           </Text>
         </TouchableOpacity>
 
-        {/* Contáctanos */}
+        {/* Contáctanos*/}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Contáctanos" && styles.activeItem]}
           onPress={() => handleNavigation("Contáctanos")}

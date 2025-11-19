@@ -38,7 +38,6 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      // Inicio correcto -> ir a Inicio (reemplaza pantalla de login)
       navigation.reset({
         index: 0,
         routes: [{ name: "Inicio" }],
