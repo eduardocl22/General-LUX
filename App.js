@@ -106,7 +106,7 @@ function CustomDrawerContent(props) {
           </View>
         )}
 
-        {/* Sobre Nosotros */}
+        {/* Sobre Nosotros*/}
         <TouchableOpacity
           style={[styles.menuItem, activeItem === "Sobre Nosotros" && styles.activeItem]}
           onPress={() => handleNavigation("Sobre Nosotros")}
