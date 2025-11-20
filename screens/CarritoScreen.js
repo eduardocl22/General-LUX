@@ -13,21 +13,19 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground,
 } from "react-native";
+
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useFonts } from "expo-font";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function CarritoScreen({ navigation }) {
-  // Usamos el contexto del carrito (cartItems, funciones y subtotal vienen del contexto)
-  const {
-    cartItems,
-    removeFromCart,
-    updateQuantity,
-    subtotal: subtotalContext,
-  } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, subtotal: subtotalContext } = useCart();
+  const { user } = useAuth();
 
   const [couponCode, setCouponCode] = useState("");
   const [direccionVisible, setDireccionVisible] = useState(false);
@@ -40,19 +38,14 @@ export default function CarritoScreen({ navigation }) {
   const [paisModalVisible, setPaisModalVisible] = useState(false);
   const [departamentoModalVisible, setDepartamentoModalVisible] = useState(false);
 
-  // Fuentes
   const [fontsLoaded] = useFonts({
     Aller_Bd: require("../assets/fonts/Aller_Bd.ttf"),
     Aller_BdIt: require("../assets/fonts/Aller_BdIt.ttf"),
     Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
   });
 
-  if (!fontsLoaded)
-    return (
-      <View style={{ flex: 1, backgroundColor: "#fff" }} />
-    );
+  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: "#fff" }} />;
 
-  // Animación del acordeón de dirección
   const toggleDireccion = () => {
     Animated.timing(alturaAnimada, {
       toValue: direccionVisible ? 0 : 320,
@@ -62,8 +55,8 @@ export default function CarritoScreen({ navigation }) {
     setDireccionVisible(!direccionVisible);
   };
 
-  // Lista de países (mismo listado que tenías)
   const allCountries = [
+    /* lista completa de países */
     "Afganistán","Albania","Alemania","Andorra","Angola","Antigua y Barbuda","Arabia Saudita",
     "Argelia","Argentina","Armenia","Australia","Austria","Azerbaiyán","Bahamas","Bangladés",
     "Barbados","Baréin","Bélgica","Belice","Benín","Bielorrusia","Birmania","Bolivia","Bosnia y Herzegovina",
@@ -96,25 +89,17 @@ export default function CarritoScreen({ navigation }) {
     c.toLowerCase().includes(busquedaPais.toLowerCase())
   );
 
-  // Totales (si tu CartContext ya provee subtotal, lo usamos; si no, calculamos aquí)
   const subtotal = subtotalContext ?? useMemo(
     () => (cartItems || []).reduce((sum, it) => sum + (it.precio || 0) * (it.cantidad || 0), 0),
     [cartItems]
   );
+
   const shippingCost = 0;
   const total = subtotal + shippingCost;
 
-  // Cambiar cantidad usando la función del contexto
-  const changeQuantity = (id, delta) => {
-    updateQuantity(id, delta);
-  };
+  const changeQuantity = (id, delta) => updateQuantity(id, delta);
+  const removeItem = (id) => removeFromCart(id);
 
-  // Eliminar (usa función del contexto)
-  const removeItem = (id) => {
-    removeFromCart(id);
-  };
-
-  // Si carrito vacío
   const renderEmpty = () => (
     <View style={{ padding: 30, alignItems: "center" }}>
       <Ionicons name="cart-outline" size={64} color="#ccc" />
@@ -130,226 +115,157 @@ export default function CarritoScreen({ navigation }) {
     </View>
   );
 
+const handleFinalize = () => {
+  if (!user) {
+    navigation.navigate("Login");
+    return;
+  }
+  navigation.navigate("DetallesCompra");    
+};
+
   return (
     <View style={styles.container}>
       <Header />
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <ImageBackground
+          source={require("../assets/fondo.jpeg")}
+          style={styles.background}
+          imageStyle={{ opacity: 0.25 }}
+          resizeMode="cover"
+        >
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <Text style={[styles.title, { fontFamily: "Aller_Bd" }]}>Carrito de Compras</Text>
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={[styles.title, { fontFamily: "Aller_Bd" }]}>
-            Carrito de Compras
-          </Text>
+            {(!cartItems || cartItems.length === 0) ? renderEmpty() : (
+              cartItems.map((item) => (
+                <View key={item.id} style={styles.cartRow}>
+                  <TouchableOpacity style={styles.removeButton} onPress={() => removeItem(item.id)}>
+                    <Text style={styles.removeText}>Eliminar</Text>
+                  </TouchableOpacity>
 
-          {/* Productos del carrito */}
-          {(!cartItems || cartItems.length === 0) ? (
-            renderEmpty()
-          ) : (
-            cartItems.map((item) => (
-              <View key={item.id} style={styles.cartRow}>
-                <TouchableOpacity
-                  style={styles.removeButton}
-                  onPress={() => removeItem(item.id)}
-                >
-                  <Text style={styles.removeText}>Eliminar</Text>
-                </TouchableOpacity>
+                  <View style={styles.productInfo}>
+                    {item.imagen ? (
+                      <Image source={item.imagen} style={styles.thumbnail} resizeMode="cover" />
+                    ) : (
+                      <View style={[styles.thumbnail, { justifyContent: "center", alignItems: "center" }]}>
+                        <Ionicons name="image-outline" size={28} color="#bbb" />
+                      </View>
+                    )}
 
-                <View style={styles.productInfo}>
-                  {/* Si item.imagen viene como require() o string local, lo mostramos; si no, placeholder */}
-                  {item.imagen ? (
-                    <Image
-                      source={item.imagen}
-                      style={styles.thumbnail}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={[styles.thumbnail, { justifyContent: "center", alignItems: "center" }]}>
-                      <Ionicons name="image-outline" size={28} color="#bbb" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.productName, { fontFamily: "Aller_Rg" }]}>{item.nombre}</Text>
+                      <Text style={{ color: "#666", marginTop: 6, fontSize: 13 }}>
+                        Precio unitario: Bs. {(item.precio || 0).toFixed(2)}
+                      </Text>
                     </View>
-                  )}
+                  </View>
 
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.productName, { fontFamily: "Aller_Rg" }]}>
-                      {item.nombre}
-                    </Text>
-                    <Text style={{ color: "#666", marginTop: 6, fontSize: 13 }}>
-                      Precio unitario: Bs. {(item.precio || 0).toFixed(2)}
-                    </Text>
+
+                  <View style={styles.quantitySection}>
+                    <TouchableOpacity style={styles.qtyButton} onPress={() => changeQuantity(item.id, -1)}>
+                      <Text style={styles.qtyButtonText}>−</Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.qtyText, { fontFamily: "Aller_Rg" }]}>{item.cantidad}</Text>
+                    <TouchableOpacity style={styles.qtyButton} onPress={() => changeQuantity(item.id, +1)}>
+                      <Text style={styles.qtyButtonText}>＋</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
+              ))
+            )}
 
-                <View style={styles.priceSection}>
-                  <Text style={[styles.priceText, { fontFamily: "Aller_Rg" }]}>
-                    Bs. {(item.precio || 0).toFixed(2)}
-                  </Text>
-                </View>
-
-                <View style={styles.quantitySection}>
-                  <TouchableOpacity
-                    style={styles.qtyButton}
-                    onPress={() => changeQuantity(item.id, -1)}
-                  >
-                    <Text style={styles.qtyButtonText}>−</Text>
-                  </TouchableOpacity>
-                  <Text style={[styles.qtyText, { fontFamily: "Aller_Rg" }]}>
-                    {item.cantidad}
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.qtyButton}
-                    onPress={() => changeQuantity(item.id, +1)}
-                  >
-                    <Text style={styles.qtyButtonText}>＋</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.subtotalSection}>
-                  <Text style={[styles.subtotalText, { fontFamily: "Aller_Rg" }]}>
-                    Bs. {((item.precio || 0) * (item.cantidad || 0)).toFixed(2)}
-                  </Text>
-                </View>
-              </View>
-            ))
-          )}
-
-          {/* Totales */}
-          <View style={styles.totalsContainer}>
-                <View style={styles.totalRow}>
-                  <Text style={[styles.labelBold, { fontFamily: "Aller_Bd" }]}>Total</Text>
-                  <Text style={[styles.valueBold, { fontFamily: "Aller_Bd" }]}>
-                    Bs. {total.toFixed(2)}
-                  </Text>
-                </View>
-          </View>
-
-          {/* Botón finalizar compra */}
-          <TouchableOpacity
-            style={styles.checkoutButton}
-            onPress={() => {
-              // placeholder: flujo de checkout. Aquí podrías navegar a pantalla de pago.
-              navigation.navigate("Inicio");
-            }}
-          >
-            <Text style={[styles.checkoutText, { fontFamily: "Aller_Bd" }]}>
-              Finalizar compra
-            </Text>
-          </TouchableOpacity>
-
-          {/* Dirección con animación */}
-          <View style={styles.shippingInfo}>
-            <TouchableOpacity onPress={toggleDireccion}>
-              <Text style={[styles.changeAddressText, { fontFamily: "Aller_Bd" }]}>
-                Cambiar dirección
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <Animated.View style={[styles.animatedBox, { height: alturaAnimada }]}>
-            <View style={styles.addressContainer}>
-              {/* País */}
-              <Text style={[styles.addressLabel, { fontFamily: "Aller_BdIt" }]}>
-                País / Región
-              </Text>
-              <TouchableOpacity
-                style={styles.input}
-                onPress={() => setPaisModalVisible(true)}
-              >
-                <Text>{pais}</Text>
-              </TouchableOpacity>
-
-              {/* Departamento o Región */}
-              <Text style={[styles.addressLabel, { fontFamily: "Aller_BdIt" }]}>
-                {pais === "Bolivia" ? "Departamento" : "Región / Provincia"}
-              </Text>
-
-              {pais === "Bolivia" ? (
-                <TouchableOpacity
-                  style={styles.input}
-                  onPress={() => setDepartamentoModalVisible(true)}
-                >
-                  <Text>{departamento}</Text>
-                </TouchableOpacity>
-              ) : (
-                <TextInput
-                  style={styles.input}
-                  value={departamento}
-                  onChangeText={setDepartamento}
-                  placeholder="Escribir región o provincia"
-                />
-              )}
-
-              {/* Botón Actualizar */}
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={toggleDireccion}
-                activeOpacity={0.85}
-              >
-                <Text style={[styles.saveButtonText, { fontFamily: "Aller_Bd" }]}>
-                  Actualizar
+            {/* Totales */}
+            <View style={styles.totalsContainer}>
+              <View style={styles.totalRow}>
+                <Text style={[styles.labelBold, { fontFamily: "Aller_Bd" }]}>Subtotal</Text>
+                <Text style={[styles.valueBold, { fontFamily: "Aller_Bd" }]}>
+                  Bs. {subtotal.toFixed(2)}
                 </Text>
+              </View>
+              <View style={[styles.totalRow, { marginTop: 8 }]}>
+                <Text style={[styles.labelBold, { fontFamily: "Aller_Bd" }]}>Total</Text>
+                <Text style={[styles.valueBold, { fontFamily: "Aller_Bd" }]}>Bs. {total.toFixed(2)}</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.checkoutButton} onPress={handleFinalize} activeOpacity={0.9}>
+              <Text style={[styles.checkoutText, { fontFamily: "Aller_Bd" }]}>FINALIZAR COMPRA</Text>
+            </TouchableOpacity>
+
+            {/* Acordeón de dirección */}
+            <View style={styles.shippingInfo}>
+              <TouchableOpacity onPress={toggleDireccion}>
+                <Text style={[styles.changeAddressText, { fontFamily: "Aller_Bd" }]}>Cambiar dirección</Text>
               </TouchableOpacity>
             </View>
-          </Animated.View>
-        </ScrollView>
-      </KeyboardAvoidingView>
 
+            <Animated.View style={[styles.animatedBox, { height: alturaAnimada }]}>
+              <View style={styles.addressContainer}>
+                <Text style={[styles.addressLabel, { fontFamily: "Aller_BdIt" }]}>País / Región</Text>
+                <TouchableOpacity style={styles.input} onPress={() => setPaisModalVisible(true)}>
+                  <Text>{pais}</Text>
+                </TouchableOpacity>
+
+                <Text style={[styles.addressLabel, { fontFamily: "Aller_BdIt" }]}>
+                  {pais === "Bolivia" ? "Departamento" : "Región / Provincia"}
+                </Text>
+
+                {pais === "Bolivia" ? (
+                  <TouchableOpacity style={styles.input} onPress={() => setDepartamentoModalVisible(true)}>
+                    <Text>{departamento}</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TextInput
+                    style={styles.input}
+                    value={departamento}
+                    onChangeText={setDepartamento}
+                    placeholder="Escribir región o provincia"
+                  />
+                )}
+
+                <TouchableOpacity style={styles.saveButton} onPress={toggleDireccion} activeOpacity={0.85}>
+                  <Text style={[styles.saveButtonText, { fontFamily: "Aller_Bd" }]}>Actualizar</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+
+            <View style={{ height: 36 }} />
+          </ScrollView>
+        </ImageBackground>
+      </KeyboardAvoidingView>
       <Footer />
 
-      {/* Modal País */}
+      {/* MODALES de país y departamento */}
       <Modal visible={paisModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
-          <TextInput
-            style={styles.searchBox}
-            placeholder="Buscar país..."
-            value={busquedaPais}
-            onChangeText={setBusquedaPais}
-          />
+          <TextInput style={styles.searchBox} placeholder="Buscar país..." value={busquedaPais} onChangeText={setBusquedaPais} />
           <FlatList
             data={paisFiltrado}
             keyExtractor={(item) => item}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  setPais(item);
-                  setDepartamento(item === "Bolivia" ? "Santa Cruz" : "");
-                  setPaisModalVisible(false);
-                }}
-              >
+              <TouchableOpacity onPress={() => { setPais(item); setDepartamento(item === "Bolivia" ? "Santa Cruz" : ""); setPaisModalVisible(false); }}>
                 <Text style={styles.modalItem}>{item}</Text>
               </TouchableOpacity>
             )}
           />
-          <TouchableOpacity
-            style={[styles.saveButton, { marginTop: 10 }]}
-            onPress={() => setPaisModalVisible(false)}
-          >
+          <TouchableOpacity style={[styles.saveButton, { marginTop: 10 }]} onPress={() => setPaisModalVisible(false)}>
             <Text style={styles.saveButtonText}>Cerrar</Text>
           </TouchableOpacity>
         </View>
       </Modal>
 
-      {/*Departamento */}
       <Modal visible={departamentoModalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <FlatList
             data={departamentosBolivia}
             keyExtractor={(item) => item}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  setDepartamento(item);
-                  setDepartamentoModalVisible(false);
-                }}
-              >
+              <TouchableOpacity onPress={() => { setDepartamento(item); setDepartamentoModalVisible(false); }}>
                 <Text style={styles.modalItem}>{item}</Text>
               </TouchableOpacity>
             )}
           />
-          <TouchableOpacity
-            style={[styles.saveButton, { marginTop: 10 }]}
-            onPress={() => setDepartamentoModalVisible(false)}
-          >
+          <TouchableOpacity style={[styles.saveButton, { marginTop: 10 }]} onPress={() => setDepartamentoModalVisible(false)}>
             <Text style={styles.saveButtonText}>Cerrar</Text>
           </TouchableOpacity>
         </View>
@@ -358,118 +274,243 @@ export default function CarritoScreen({ navigation }) {
   );
 }
 
+/* ------------------------ ESTILOS COMPLETOS ------------------------ */
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  scrollContainer: { padding: 16, paddingBottom: 80 },
-  title: { fontSize: 24, marginBottom: 16, textAlign: "center" },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+
+  scrollContainer: {
+    padding: 16,
+    paddingBottom: 100,
+  },
+
+  title: {
+    fontSize: 26,
+    textAlign: "center",
+    marginBottom: 18,
+    letterSpacing: 0.5,
+  },
+
+  /* ---------------------- FILAS DEL CARRITO ---------------------- */
 
   cartRow: {
     borderWidth: 1,
     borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 14,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    elevation: 3,
   },
-  removeButton: { alignSelf: "flex-end" },
-  removeText: { color: "red", fontSize: 14 },
-  productInfo: { flexDirection: "row", alignItems: "center", marginVertical: 8 },
-  thumbnail: { width: 60, height: 60, borderRadius: 6, marginRight: 10, backgroundColor: "#f5f5f5" },
-  productName: { flex: 1, fontSize: 16 },
-  priceSection: { marginVertical: 6 },
-  priceText: { fontSize: 16, color: "#333" },
-  quantitySection: { flexDirection: "row", alignItems: "center", marginVertical: 6 },
+
+  removeButton: {
+    alignSelf: "flex-end",
+    marginBottom: 6,
+  },
+
+  removeText: {
+    color: "red",
+    fontSize: 14,
+  },
+
+  productInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+
+  thumbnail: {
+    width: 65,
+    height: 65,
+    borderRadius: 8,
+    marginRight: 12,
+    backgroundColor: "#f1f1f1",
+  },
+
+  productName: {
+    fontSize: 17,
+    color: "#222",
+  },
+
+  priceSection: {
+    marginBottom: 8,
+  },
+
+  priceText: {
+    fontSize: 16,
+    color: "#444",
+  },
+
+  quantitySection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+
   qtyButton: {
-    width: 30,
-    height: 30,
+    width: 32,
+    height: 32,
     borderWidth: 1,
     borderColor: "#888",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 4,
+    borderRadius: 6,
     backgroundColor: "#fff",
   },
-  qtyButtonText: { fontSize: 18, color: "#333" },
-  qtyText: { marginHorizontal: 12, fontSize: 16 },
-  subtotalSection: { marginVertical: 6, alignItems: "flex-end" },
-  subtotalText: { fontSize: 16, fontWeight: "500", color: "#000" },
-  couponContainer: { marginTop: 24, marginBottom: 16 },
-  couponLabel: { fontSize: 16, marginBottom: 8 },
-  couponRow: { flexDirection: "row" },
-  couponInputPlaceholder: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 4,
-    padding: 10,
-    marginRight: 8,
+
+  qtyButtonText: {
+    fontSize: 20,
+    color: "#333",
   },
-  couponButton: {
-    backgroundColor: "#12A14B",
-    paddingHorizontal: 16,
-    justifyContent: "center",
-    borderRadius: 4,
+
+  qtyText: {
+    marginHorizontal: 14,
+    fontSize: 17,
   },
-  couponButtonText: { color: "#fff", fontSize: 16 },
+
+  subtotalSection: {
+    alignItems: "flex-end",
+  },
+
+  subtotalText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  /* ---------------------- TOTALES ---------------------- */
+
   totalsContainer: {
     borderTopWidth: 1,
     borderColor: "#ddd",
     paddingTop: 16,
+    marginTop: 20,
     marginBottom: 24,
   },
+
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  label: { fontSize: 16, color: "#333" },
-  value: { fontSize: 16, color: "#333" },
-  labelBold: { fontSize: 18, fontWeight: "bold" },
-  valueBold: { fontSize: 18, fontWeight: "bold" },
+
+  label: {
+    fontSize: 16,
+    color: "#333",
+  },
+
+  value: {
+    fontSize: 16,
+    color: "#333",
+  },
+
+  labelBold: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+
+  valueBold: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+
+  /* ---------------------- BOTÓN FINALIZAR ---------------------- */
+
   checkoutButton: {
     backgroundColor: "#12A14B",
-    paddingVertical: 14,
-    borderRadius: 8,
+    paddingVertical: 16,
+    borderRadius: 10,
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 28,
+    marginTop: 10,
   },
-  checkoutText: { color: "#fff", fontSize: 16 },
-  shippingInfo: { marginBottom: 8 },
-  changeAddressText: { fontSize: 14, color: "#12A14B" },
 
-  // Animación dirección
-  animatedBox: { overflow: "hidden" },
+  checkoutText: {
+    color: "#fff",
+    fontSize: 17,
+    letterSpacing: 0.8,
+  },
+
+  /* ---------------------- DIRECCIÓN ---------------------- */
+
+  shippingInfo: {
+    marginBottom: 10,
+  },
+
+  changeAddressText: {
+    fontSize: 15,
+    color: "#12A14B",
+  },
+
+  animatedBox: {
+    overflow: "hidden",
+  },
+
   addressContainer: {
-    backgroundColor: "rgba(255,255,255,0.9)",
-    padding: 12,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    padding: 14,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ddd",
-    borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 30,
+    elevation: 2,
   },
-  addressLabel: { fontSize: 16, marginBottom: 6 },
-  searchBox: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 6,
-    padding: 8,
-    marginBottom: 8,
+
+  addressLabel: {
+    fontSize: 15,
+    marginBottom: 6,
+    color: "#222",
   },
+
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 6,
+    borderRadius: 8,
     padding: 10,
-    marginBottom: 12,
+    marginBottom: 14,
     backgroundColor: "#fff",
   },
+
   saveButton: {
     backgroundColor: "#12A14B",
-    paddingVertical: 10,
-    borderRadius: 6,
+    paddingVertical: 12,
     alignItems: "center",
+    borderRadius: 8,
   },
-  saveButtonText: { color: "#fff", fontSize: 16 },
-  modalContainer: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  modalItem: { padding: 12, fontSize: 16, borderBottomWidth: 1, borderColor: "#ddd" },
+
+  saveButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+
+  /* ---------------------- MODALES ---------------------- */
+
+  modalContainer: {
+    flex: 1,
+    padding: 18,
+    backgroundColor: "#fff",
+  },
+
+  modalItem: {
+    padding: 16,
+    fontSize: 17,
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  searchBox: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+  },
 });

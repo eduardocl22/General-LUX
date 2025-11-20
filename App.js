@@ -26,6 +26,7 @@ import DispensadoresScreen from "./screens/DispensadoresScreen";
 import PlanchasScreen from "./screens/PlanchasScreen";
 import CarritoScreen from "./screens/CarritoScreen";
 import DetallesProductoScreen from "./screens/DetallesProductoScreen";
+import DetallesCompraScreen from "./screens/DetallesCompraScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import PerfilScreen from "./screens/PerfilScreen";
@@ -160,6 +161,7 @@ function DrawerNavigator() {
       <Drawer.Screen name="Sobre Nosotros" component={AboutScreen} />
       <Drawer.Screen name="Contáctanos" component={ContactScreen} />
       <Drawer.Screen name="CarritoScreen" component={CarritoScreen} />
+      <Drawer.Screen name="DetallesCompra" component={DetallesCompraScreen} />
       <Drawer.Screen name="Login" component={LoginScreen} />
       <Drawer.Screen name="Register" component={RegisterScreen} />
       <Drawer.Screen name="Perfil" component={PerfilScreen} />
@@ -180,7 +182,7 @@ export default function App() {
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Cargando...</Text>
+        <Text></Text>
       </View>
     );
   }
