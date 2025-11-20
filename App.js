@@ -118,16 +118,6 @@ function CustomDrawerContent(props) {
           <Ionicons name="call-outline" size={20} color={activeItem === "Contáctanos" ? "#fff" : "#045700"} />
           <Text style={[styles.menuText, activeItem === "Contáctanos" && styles.activeText]}>Contáctanos</Text>
         </TouchableOpacity>
-
-        {/* Perfil */}
-        <TouchableOpacity
-          style={[styles.menuItem, activeItem === "Perfil" && styles.activeItem]}
-          onPress={() => handleNavigation("Perfil")}
-        >
-          <Ionicons name="person-circle-outline" size={20} color="#045700" />
-          <Text style={styles.menuText}>Mi Perfil</Text>
-        </TouchableOpacity>
-
       </ScrollView>
     </DrawerContentScrollView>
   );

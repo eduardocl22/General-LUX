@@ -13,8 +13,10 @@ import {
   Platform,
   ImageBackground,
   Alert,
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
 // Usa los hooks de tus contextos en lugar de useContext directo
 import { useCart } from "../context/CartContext";
@@ -29,11 +31,19 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 
 const DetallesCompraScreen = () => {
   const navigation = useNavigation();
-  const { cartItems, subtotal: total } = useCart();
+  const { cartItems, subtotal: total, clearCart } = useCart();
   const { user } = useAuth();
 
   // Estado para seleccionar método de pago
   const [metodoSeleccionado, setMetodoSeleccionado] = useState(null);
+
+  // Estados para los campos de tarjeta
+  const [datosTarjeta, setDatosTarjeta] = useState({
+    numero: "",
+    nombre: "",
+    vencimiento: "",
+    cvv: ""
+  });
 
   // Animaciones de despliegue para paneles
   const alturaTarjeta = useRef(new Animated.Value(0)).current;
@@ -65,28 +75,101 @@ const DetallesCompraScreen = () => {
     }).start();
   };
 
-  // Manejar selección de método de pago
+  // Manejar selección de método de pago (ACORDEÓN)
   const seleccionarMetodo = (metodo) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setMetodoSeleccionado(metodo);
-
-    animarPanel(alturaTarjeta, metodo === "tarjeta");
-    animarPanel(alturaQR, metodo === "qr");
+    
+    if (metodoSeleccionado === metodo) {
+      // Si ya está seleccionado, lo deseleccionamos (cierra el acordeón)
+      setMetodoSeleccionado(null);
+      animarPanel(alturaTarjeta, false);
+      animarPanel(alturaQR, false);
+    } else {
+      // Selecciona el nuevo método y abre su acordeón
+      setMetodoSeleccionado(metodo);
+      
+      if (metodo === "tarjeta") {
+        animarPanel(alturaTarjeta, true);
+        animarPanel(alturaQR, false);
+      } else if (metodo === "qr") {
+        animarPanel(alturaTarjeta, false);
+        animarPanel(alturaQR, true);
+      }
+    }
   };
 
   // Interpolaciones para animaciones de altura
   const panelTarjeta = alturaTarjeta.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 280],
+    outputRange: [0, 320],
   });
 
   const panelQR = alturaQR.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 220],
+    outputRange: [0, 260],
   });
+
+  // Manejar cambio en campos de tarjeta
+  const handleCambioTarjeta = (campo, valor) => {
+    setDatosTarjeta(prev => ({
+      ...prev,
+      [campo]: valor
+    }));
+  };
+
+  // Formatear número de tarjeta (XXXX XXXX XXXX XXXX)
+  const formatearNumeroTarjeta = (texto) => {
+    const textoLimpio = texto.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const grupos = textoLimpio.match(/.{1,4}/g);
+    return grupos ? grupos.join(' ') : textoLimpio;
+  };
+
+  // Formatear fecha de vencimiento (MM/YY)
+  const formatearVencimiento = (texto) => {
+    const textoLimpio = texto.replace(/[^0-9]/g, '');
+    if (textoLimpio.length >= 3) {
+      return textoLimpio.slice(0, 2) + '/' + textoLimpio.slice(2, 4);
+    }
+    return textoLimpio;
+  };
 
   // Validar carrito vacío
   const carritoVacio = !cartItems || cartItems.length === 0;
+
+  // Función para procesar el pago
+  const procesarPago = () => {
+    if (!metodoSeleccionado) {
+      Alert.alert("Método de pago requerido", "Por favor selecciona un método de pago.");
+      return;
+    }
+
+    if (metodoSeleccionado === "tarjeta") {
+      // Validar campos de tarjeta
+      if (!datosTarjeta.numero || !datosTarjeta.nombre || !datosTarjeta.vencimiento || !datosTarjeta.cvv) {
+        Alert.alert("Datos incompletos", "Por favor completa todos los campos de la tarjeta.");
+        return;
+      }
+      
+      if (datosTarjeta.numero.replace(/\s/g, '').length !== 16) {
+        Alert.alert("Número de tarjeta inválido", "El número de tarjeta debe tener 16 dígitos.");
+        return;
+      }
+    }
+
+    Alert.alert(
+      "¡Compra realizada con éxito!", 
+      `Gracias por tu compra.\nTotal: Bs. ${total?.toFixed(2)}\nMétodo: ${metodoSeleccionado === 'tarjeta' ? 'Tarjeta' : 'QR'}`,
+      [
+        { 
+          text: "Continuar", 
+          onPress: () => {
+            clearCart();
+            navigation.navigate("Inicio");
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -94,15 +177,16 @@ const DetallesCompraScreen = () => {
       <ImageBackground
         source={require("../assets/fondo.jpeg")}
         style={{ flex: 1 }}
-        imageStyle={{ opacity: 0.2 }}
+        imageStyle={{ opacity: 0.15 }}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {/* TITULO */}
-          <Text style={styles.titulo}>Detalles de la compra</Text>
+          {/* TITULO PRINCIPAL */}
+          <Text style={styles.tituloPrincipal}>Finalizar Compra</Text>
 
           {carritoVacio ? (
             <View style={styles.emptyCart}>
-              <Text style={styles.emptyText}>Tu carrito está vacío.</Text>
+              <Ionicons name="cart-outline" size={64} color="#CCC" />
+              <Text style={styles.emptyText}>Tu carrito está vacío</Text>
               <TouchableOpacity
                 style={styles.botonSeguirComprando}
                 onPress={() => navigation.navigate("Inicio")}
@@ -115,7 +199,10 @@ const DetallesCompraScreen = () => {
               
               {/* SECCIÓN 1: RESUMEN DE COMPRA */}
               <View style={styles.seccion}>
-                <Text style={styles.subtitulo}>Resumen del pedido</Text>
+                <View style={styles.headerSeccion}>
+                  <Ionicons name="receipt-outline" size={24} color="#12A14B" />
+                  <Text style={styles.subtitulo}>Resumen del Pedido</Text>
+                </View>
 
                 <View style={styles.resumenCard}>
                   {cartItems.map((item, index) => (
@@ -128,16 +215,16 @@ const DetallesCompraScreen = () => {
                         />
                       ) : (
                         <View style={[styles.resumenImg, styles.resumenImgPlaceholder]}>
-                          <Text style={styles.placeholderText}>IMG</Text>
+                          <Ionicons name="image-outline" size={24} color="#999" />
                         </View>
                       )}
                       <View style={styles.resumenInfo}>
                         <Text style={styles.resumenNombre}>{item.nombre}</Text>
-                        <Text style={styles.resumenPrecio}>
-                          {item.cantidad} x Bs. {item.precio?.toFixed(2) || "0.00"}
+                        <Text style={styles.resumenDetalle}>
+                          Cantidad: {item.cantidad} × Bs. {item.precio?.toFixed(2) || "0.00"}
                         </Text>
                         <Text style={styles.resumenSubtotal}>
-                          Subtotal: Bs. {(item.cantidad * item.precio).toFixed(2)}
+                          Bs. {(item.cantidad * item.precio).toFixed(2)}
                         </Text>
                       </View>
                     </View>
@@ -152,109 +239,163 @@ const DetallesCompraScreen = () => {
 
               {/* SECCIÓN 2: MÉTODOS DE PAGO */}
               <View style={styles.seccion}>
-                <Text style={styles.subtitulo}>Métodos de pago</Text>
+                <View style={styles.headerSeccion}>
+                  <Ionicons name="card-outline" size={24} color="#12A14B" />
+                  <Text style={styles.subtitulo}>Método de Pago</Text>
+                </View>
 
                 <View style={styles.metodosPagoContainer}>
-                  {/* Método Tarjeta */}
-                  <TouchableOpacity
-                    style={[
-                      styles.metodoPagoButton,
-                      metodoSeleccionado === "tarjeta" && styles.metodoPagoSeleccionado
-                    ]}
-                    onPress={() => seleccionarMetodo("tarjeta")}
-                  >
-                    <View style={styles.metodoPagoHeader}>
-                      <View style={styles.radioContainer}>
-                        <View
-                          style={[
-                            styles.radio,
-                            metodoSeleccionado === "tarjeta" && styles.radioSeleccionado,
-                          ]}
-                        />
-                        <Text style={styles.radioLabel}>Tarjeta de crédito o débito</Text>
+                  
+                  {/* Método Tarjeta - ACORDEÓN */}
+                  <View style={[
+                    styles.metodoPagoContainer,
+                    metodoSeleccionado === "tarjeta" && styles.metodoPagoSeleccionado
+                  ]}>
+                    <TouchableOpacity
+                      style={styles.metodoPagoHeader}
+                      onPress={() => seleccionarMetodo("tarjeta")}
+                    >
+                      <View style={styles.metodoInfo}>
+                        <View style={styles.radioContainer}>
+                          <View
+                            style={[
+                              styles.radio,
+                              metodoSeleccionado === "tarjeta" && styles.radioSeleccionado,
+                            ]}
+                          />
+                        </View>
+                        <Ionicons name="card" size={24} color="#12A14B" style={styles.metodoIcon} />
+                        <View style={styles.metodoTextos}>
+                          <Text style={styles.metodoTitulo}>Tarjeta de Crédito o Débito</Text>
+                          <Text style={styles.metodoDescripcion}>Pago seguro con tarjeta</Text>
+                        </View>
                       </View>
-                    </View>
+                      <Ionicons 
+                        name={metodoSeleccionado === "tarjeta" ? "chevron-up" : "chevron-down"} 
+                        size={22} 
+                        color="#666" 
+                      />
+                    </TouchableOpacity>
 
                     <Animated.View style={[styles.panelDesplegable, { height: panelTarjeta }]}>
                       <Text style={styles.labelCampo}>Número de tarjeta</Text>
-                      <View style={styles.inputFake} />
+                      <TextInput
+                        style={styles.inputReal}
+                        placeholder=""
+                        value={datosTarjeta.numero}
+                        onChangeText={(texto) => handleCambioTarjeta('numero', formatearNumeroTarjeta(texto))}
+                        keyboardType="numeric"
+                        maxLength={19}
+                        placeholderTextColor="#999"
+                      />
+                      
                       <Text style={styles.labelCampo}>Nombre en la tarjeta</Text>
-                      <View style={styles.inputFake} />
+                      <TextInput
+                        style={styles.inputReal}
+                        placeholder=""
+                        value={datosTarjeta.nombre}
+                        onChangeText={(texto) => handleCambioTarjeta('nombre', texto.toUpperCase())}
+                        placeholderTextColor="#999"
+                      />
+                      
                       <View style={styles.rowCampos}>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.labelCampo}>Vencimiento</Text>
-                          <View style={styles.inputFake} />
+                          <Text style={styles.labelCampo}>Vencimiento (MM/AA)</Text>
+                          <TextInput
+                            style={styles.inputReal}
+                            placeholder=""
+                            value={datosTarjeta.vencimiento}
+                            onChangeText={(texto) => handleCambioTarjeta('vencimiento', formatearVencimiento(texto))}
+                            keyboardType="numeric"
+                            maxLength={5}
+                            placeholderTextColor="#999"
+                          />
                         </View>
-                        <View style={{ width: 10 }} />
+                        <View style={{ width: 15 }} />
                         <View style={{ flex: 1 }}>
                           <Text style={styles.labelCampo}>CVV</Text>
-                          <View style={styles.inputFake} />
+                          <TextInput
+                            style={styles.inputReal}
+                            placeholder=""
+                            value={datosTarjeta.cvv}
+                            onChangeText={(texto) => handleCambioTarjeta('cvv', texto.replace(/[^0-9]/g, ''))}
+                            keyboardType="numeric"
+                            maxLength={3}
+                            secureTextEntry
+                            placeholderTextColor="#999"
+                          />
                         </View>
                       </View>
                     </Animated.View>
-                  </TouchableOpacity>
+                  </View>
 
-                  {/* Método QR */}
-                  <TouchableOpacity
-                    style={[
-                      styles.metodoPagoButton,
-                      metodoSeleccionado === "qr" && styles.metodoPagoSeleccionado
-                    ]}
-                    onPress={() => seleccionarMetodo("qr")}
-                  >
-                    <View style={styles.metodoPagoHeader}>
-                      <View style={styles.radioContainer}>
-                        <View
-                          style={[
-                            styles.radio,
-                            metodoSeleccionado === "qr" && styles.radioSeleccionado,
-                          ]}
-                        />
-                        <Text style={styles.radioLabel}>Pago con QR (Bolivia)</Text>
+                  {/* Método QR - ACORDEÓN */}
+                  <View style={[
+                    styles.metodoPagoContainer,
+                    metodoSeleccionado === "qr" && styles.metodoPagoSeleccionado
+                  ]}>
+                    <TouchableOpacity
+                      style={styles.metodoPagoHeader}
+                      onPress={() => seleccionarMetodo("qr")}
+                    >
+                      <View style={styles.metodoInfo}>
+                        <View style={styles.radioContainer}>
+                          <View
+                            style={[
+                              styles.radio,
+                              metodoSeleccionado === "qr" && styles.radioSeleccionado,
+                            ]}
+                          />
+                        </View>
+                        <Ionicons name="qr-code" size={24} color="#12A14B" style={styles.metodoIcon} />
+                        <View style={styles.metodoTextos}>
+                          <Text style={styles.metodoTitulo}>Pago con QR</Text>
+                          <Text style={styles.metodoDescripcion}>Escanea y paga desde tu banco</Text>
+                        </View>
                       </View>
-                    </View>
+                      <Ionicons 
+                        name={metodoSeleccionado === "qr" ? "chevron-up" : "chevron-down"} 
+                        size={22} 
+                        color="#666" 
+                      />
+                    </TouchableOpacity>
 
                     <Animated.View style={[styles.panelDesplegable, { height: panelQR }]}>
                       <Text style={styles.labelCampo}>
-                        Escanea el siguiente QR con tu app bancaria:
+                        Escanea el siguiente código QR con tu app bancaria:
                       </Text>
                       <View style={styles.qrContainer}>
                         <View style={styles.qrPlaceholder}>
-                          <Text style={styles.qrPlaceholderText}>QR CODE</Text>
-                          <Text style={styles.qrPlaceholderSubtext}>Pago General Lux</Text>
+                          <Ionicons name="qr-code-outline" size={80} color="#12A14B" />
+                          <Text style={styles.qrPlaceholderSubtext}>GENERAL LUX</Text>
                           <Text style={styles.qrPlaceholderAmount}>
                             Bs. {total?.toFixed(2) || "0.00"}
+                          </Text>
+                          <Text style={styles.qrPlaceholderInfo}>
+                            Pago seguro y rápido
                           </Text>
                         </View>
                       </View>
                       <Text style={styles.qrTexto}>
-                        El pago se confirmará manualmente por la empresa.
+                        El pago se confirmará automáticamente en unos minutos.
                       </Text>
                     </Animated.View>
-                  </TouchableOpacity>
+                  </View>
                 </View>
 
                 {/* BOTÓN DE PAGO */}
                 <TouchableOpacity
-                  style={styles.botonPagar}
-                  onPress={() => {
-                    if (!metodoSeleccionado) {
-                      Alert.alert("Método de pago requerido", "Por favor selecciona un método de pago.");
-                      return;
-                    }
-                    Alert.alert(
-                      "Compra realizada", 
-                      `¡Gracias por tu compra! Método: ${metodoSeleccionado === 'tarjeta' ? 'Tarjeta' : 'QR'}`,
-                      [
-                        { 
-                          text: "Aceptar", 
-                          onPress: () => navigation.navigate("Inicio")
-                        }
-                      ]
-                    );
-                  }}
+                  style={[
+                    styles.botonPagar,
+                    !metodoSeleccionado && styles.botonPagarDisabled
+                  ]}
+                  onPress={procesarPago}
+                  disabled={!metodoSeleccionado}
                 >
-                  <Text style={styles.botonTexto}>REALIZAR PEDIDO</Text>
+                  <Text style={styles.botonTexto}>
+                    {metodoSeleccionado ? 'CONFIRMAR COMPRA' : 'SELECCIONA MÉTODO DE PAGO'}
+                  </Text>
+                  <Ionicons name="lock-closed" size={16} color="#FFF" style={styles.botonIcon} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -274,60 +415,65 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   scrollContainer: {
-    padding: 16,
-    paddingBottom: 100,
+    padding: 20,
+    paddingBottom: 120,
     flexGrow: 1,
   },
-  titulo: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#0A0A0A",
-    marginBottom: 20,
+  tituloPrincipal: {
+    fontSize: 28,
+    color: "#1a1a1a",
+    marginBottom: 25,
     textAlign: "center",
     fontFamily: "Aller_Bd",
+    letterSpacing: 0.5,
   },
   verticalLayout: {
     flex: 1,
   },
   seccion: {
-    marginBottom: 25,
+    marginBottom: 30,
+  },
+  headerSeccion: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
   },
   subtitulo: {
     fontSize: 20,
-    fontWeight: "bold",
     color: "#12A14B",
-    marginBottom: 15,
+    marginLeft: 10,
     fontFamily: "Aller_Bd",
+    letterSpacing: 0.3,
   },
   resumenCard: {
-    backgroundColor: "rgba(255,255,255,0.9)",
-    padding: 16,
-    borderRadius: 12,
-    elevation: 3,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    padding: 20,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   resumenItem: {
     flexDirection: "row",
-    marginBottom: 16,
-    paddingBottom: 16,
+    marginBottom: 18,
+    paddingBottom: 18,
     borderBottomWidth: 1,
-    borderBottomColor: "#EEE",
+    borderBottomColor: "#f0f0f0",
   },
   resumenImg: {
-    width: 70,
-    height: 70,
-    marginRight: 12,
-    borderRadius: 8,
+    width: 75,
+    height: 75,
+    marginRight: 15,
+    borderRadius: 10,
   },
   resumenImgPlaceholder: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#f8f8f8',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  placeholderText: {
-    color: '#999',
-    fontSize: 12,
+    borderColor: '#e0e0e0',
   },
   resumenInfo: {
     flex: 1,
@@ -335,102 +481,120 @@ const styles = StyleSheet.create({
   },
   resumenNombre: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+    color: "#2d2d2d",
+    marginBottom: 6,
+    fontFamily: "Aller_Bd",
+  },
+  resumenDetalle: {
+    fontSize: 14,
+    color: "#666",
     marginBottom: 4,
     fontFamily: "Aller_Rg",
   },
-  resumenPrecio: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 2,
-    fontFamily: "Aller_Rg",
-  },
   resumenSubtotal: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#12A14B",
-    fontWeight: "600",
     fontFamily: "Aller_Bd",
   },
   resumenTotalBox: {
-    marginTop: 12,
+    marginTop: 15,
     borderTopWidth: 2,
-    borderColor: "#DDD",
-    paddingTop: 15,
+    borderColor: "#e8e8e8",
+    paddingTop: 18,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   resumenTotalLabel: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    color: "#2d2d2d",
     fontFamily: "Aller_Bd",
   },
   resumenTotal: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 24,
     color: "#12A14B",
     fontFamily: "Aller_Bd",
   },
   metodosPagoContainer: {
-    gap: 12,
+    gap: 16,
   },
-  metodoPagoButton: {
-    backgroundColor: "rgba(255,255,255,0.9)",
-    padding: 16,
-    borderRadius: 12,
-    elevation: 2,
+  metodoPagoContainer: {
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: 16,
+    elevation: 3,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: "transparent",
   },
   metodoPagoSeleccionado: {
-    borderWidth: 2,
     borderColor: "#12A14B",
-    backgroundColor: "rgba(18, 161, 75, 0.05)",
+    backgroundColor: "rgba(18, 161, 75, 0.03)",
   },
   metodoPagoHeader: {
-    marginBottom: 10,
-  },
-  radioContainer: {
+    padding: 20,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+  },
+  metodoInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  radioContainer: {
+    marginRight: 12,
   },
   radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 15,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 2,
-    borderColor: "#12A14B",
-    marginRight: 10,
+    borderColor: "#ccc",
   },
   radioSeleccionado: {
     backgroundColor: "#12A14B",
+    borderColor: "#12A14B",
   },
-  radioLabel: {
+  metodoIcon: {
+    marginRight: 12,
+  },
+  metodoTextos: {
+    flex: 1,
+  },
+  metodoTitulo: {
     fontSize: 16,
-    color: "#000",
-    fontWeight: "600",
+    color: "#2d2d2d",
+    fontFamily: "Aller_Bd",
+    marginBottom: 2,
+  },
+  metodoDescripcion: {
+    fontSize: 13,
+    color: "#666",
     fontFamily: "Aller_Rg",
   },
   panelDesplegable: {
     overflow: "hidden",
-    backgroundColor: "#F8F8F8",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 8,
+    backgroundColor: "#fafafa",
+    paddingHorizontal: 20,
   },
   labelCampo: {
     fontSize: 14,
-    marginBottom: 6,
-    color: "#333",
-    fontFamily: "Aller_Rg",
+    marginBottom: 8,
+    color: "#444",
+    fontFamily: "Aller_Bd",
+    marginTop: 5,
   },
-  inputFake: {
-    height: 44,
+  inputReal: {
+    height: 52,
     backgroundColor: "#FFF",
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#CCC",
-    marginBottom: 12,
+    borderColor: "#e0e0e0",
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontFamily: "Aller_Rg",
+    color: "#2d2d2d",
   },
   rowCampos: {
     flexDirection: "row",
@@ -438,82 +602,93 @@ const styles = StyleSheet.create({
   },
   qrContainer: {
     backgroundColor: "#FFF",
-    padding: 15,
-    borderRadius: 10,
+    padding: 25,
+    borderRadius: 16,
     alignSelf: "center",
-    marginVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  qrPlaceholder: {
-    width: 160,
-    height: 160,
-    backgroundColor: '#f0f0f0',
+    marginVertical: 15,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#12A14B',
-    borderRadius: 10,
-    padding: 10,
+    borderStyle: 'dashed',
   },
-  qrPlaceholderText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#12A14B',
-    marginBottom: 5,
+  qrPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   qrPlaceholderSubtext: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  qrPlaceholderAmount: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#12A14B',
+    marginTop: 12,
+    fontFamily: "Aller_Bd",
+  },
+  qrPlaceholderAmount: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2d2d2d',
+    marginTop: 6,
+    fontFamily: "Aller_Bd",
+  },
+  qrPlaceholderInfo: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 4,
+    fontFamily: "Aller_Rg",
   },
   qrTexto: {
     textAlign: "center",
     color: "#666",
-    fontSize: 12,
-    fontStyle: 'italic',
+    fontSize: 13,
     fontFamily: "Aller_Rg",
+    marginTop: 10,
+    marginBottom: 10,
+    lineHeight: 18,
   },
   botonPagar: {
     marginTop: 25,
     backgroundColor: "#12A14B",
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 18,
+    borderRadius: 14,
     alignItems: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    elevation: 6,
+    shadowColor: "#12A14B",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  botonPagarDisabled: {
+    backgroundColor: "#ccc",
+    shadowColor: "#999",
   },
   botonTexto: {
     color: "#FFF",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 17,
     fontFamily: "Aller_Bd",
+    letterSpacing: 0.5,
+  },
+  botonIcon: {
+    marginLeft: 8,
   },
   emptyCart: {
-    marginTop: 40,
+    marginTop: 60,
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    padding: 30,
   },
   emptyText: {
     fontSize: 18,
-    marginBottom: 20,
+    marginBottom: 25,
     color: "#666",
     fontFamily: "Aller_Rg",
+    marginTop: 15,
   },
   botonSeguirComprando: {
     backgroundColor: "#12A14B",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 30,
+    borderRadius: 10,
   },
 });
