@@ -14,15 +14,17 @@ import {
   ImageBackground,
   Alert,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
-// Usa los hooks de tus contextos en lugar de useContext directo
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { db } from "../firebase/firebase";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 // Habilitar animaciones suaves en Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -34,22 +36,75 @@ const DetallesCompraScreen = () => {
   const { cartItems, subtotal: total, clearCart } = useCart();
   const { user } = useAuth();
 
-  // Estado para seleccionar método de pago
+  // Estados principales
   const [metodoSeleccionado, setMetodoSeleccionado] = useState(null);
+  const [datosUsuario, setDatosUsuario] = useState(null);
+  const [cargandoDatos, setCargandoDatos] = useState(false);
 
-  // Estados para los campos de tarjeta
+  // Estados para tarjetas
   const [datosTarjeta, setDatosTarjeta] = useState({
     numero: "",
     nombre: "",
     vencimiento: "",
     cvv: ""
   });
+  const [guardarTarjeta, setGuardarTarjeta] = useState(false);
+  const [tarjetasGuardadas, setTarjetasGuardadas] = useState([]);
+  const [tarjetaSeleccionada, setTarjetaSeleccionada] = useState(null);
+  const [mostrarFormularioTarjeta, setMostrarFormularioTarjeta] = useState(false);
 
-  // Animaciones de despliegue para paneles
+  // Animaciones
   const alturaTarjeta = useRef(new Animated.Value(0)).current;
   const alturaQR = useRef(new Animated.Value(0)).current;
 
-  // Validar que el usuario esté logueado antes de permitir compra
+  // Cargar datos del usuario
+  useEffect(() => {
+    const cargarDatosUsuario = async () => {
+      if (!user) return;
+      
+      try {
+        setCargandoDatos(true);
+        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setDatosUsuario(userData);
+          
+          // Cargar tarjetas guardadas si existen
+          if (userData.tarjetasGuardadas) {
+            setTarjetasGuardadas(userData.tarjetasGuardadas);
+          }
+        } else {
+          setDatosUsuario({
+            nombre: "",
+            apellido: "",
+            telefono: "",
+            direccion: "",
+            ciudad: "",
+            departamento: ""
+          });
+        }
+      } catch (error) {
+        console.error("Error cargando datos:", error);
+        setDatosUsuario({
+          nombre: "",
+          apellido: "",
+          telefono: "",
+          direccion: "",
+          ciudad: "",
+          departamento: ""
+        });
+      } finally {
+        setCargandoDatos(false);
+      }
+    };
+
+    if (user) {
+      cargarDatosUsuario();
+    }
+  }, [user]);
+
+  // Validar usuario
   useEffect(() => {
     if (!user) {
       Alert.alert(
@@ -66,7 +121,7 @@ const DetallesCompraScreen = () => {
     }
   }, [user, navigation]);
 
-  // Animar panel de pago
+  // Animaciones
   const animarPanel = (ref, open) => {
     Animated.timing(ref, {
       toValue: open ? 1 : 0,
@@ -75,22 +130,26 @@ const DetallesCompraScreen = () => {
     }).start();
   };
 
-  // Manejar selección de método de pago (ACORDEÓN)
+  // Manejar selección de método de pago
   const seleccionarMetodo = (metodo) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     
     if (metodoSeleccionado === metodo) {
-      // Si ya está seleccionado, lo deseleccionamos (cierra el acordeón)
       setMetodoSeleccionado(null);
       animarPanel(alturaTarjeta, false);
       animarPanel(alturaQR, false);
+      setMostrarFormularioTarjeta(false);
     } else {
-      // Selecciona el nuevo método y abre su acordeón
       setMetodoSeleccionado(metodo);
       
       if (metodo === "tarjeta") {
         animarPanel(alturaTarjeta, true);
         animarPanel(alturaQR, false);
+        
+        // Si no hay tarjetas guardadas, mostrar formulario directamente
+        if (tarjetasGuardadas.length === 0) {
+          setMostrarFormularioTarjeta(true);
+        }
       } else if (metodo === "qr") {
         animarPanel(alturaTarjeta, false);
         animarPanel(alturaQR, true);
@@ -98,10 +157,10 @@ const DetallesCompraScreen = () => {
     }
   };
 
-  // Interpolaciones para animaciones de altura
+  // Interpolaciones para animaciones
   const panelTarjeta = alturaTarjeta.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 320],
+    outputRange: [0, tarjetasGuardadas.length > 0 && !mostrarFormularioTarjeta ? 350 : 450],
   });
 
   const panelQR = alturaQR.interpolate({
@@ -109,22 +168,48 @@ const DetallesCompraScreen = () => {
     outputRange: [0, 260],
   });
 
-  // Manejar cambio en campos de tarjeta
-  const handleCambioTarjeta = (campo, valor) => {
-    setDatosTarjeta(prev => ({
-      ...prev,
-      [campo]: valor
-    }));
+  // Validaciones para tarjetas
+  const validarNumeroTarjeta = (numero) => {
+    const numeroLimpio = numero.replace(/\s/g, '');
+    return /^\d{16}$/.test(numeroLimpio);
   };
 
-  // Formatear número de tarjeta (XXXX XXXX XXXX XXXX)
+  const validarCVV = (cvv) => {
+    return /^\d{3,4}$/.test(cvv);
+  };
+
+  const validarVencimiento = (vencimiento) => {
+    if (!/^\d{2}\/\d{2}$/.test(vencimiento)) return false;
+    
+    const [mes, año] = vencimiento.split('/').map(Number);
+    const ahora = new Date();
+    const añoActual = ahora.getFullYear() % 100;
+    const mesActual = ahora.getMonth() + 1;
+    
+    if (año < añoActual) return false;
+    if (año === añoActual && mes < mesActual) return false;
+    if (mes < 1 || mes > 12) return false;
+    
+    return true;
+  };
+
+  const detectarTipoTarjeta = (numero) => {
+    const numeroLimpio = numero.replace(/\s/g, '');
+    
+    if (/^4/.test(numeroLimpio)) return "Visa";
+    if (/^5[1-5]/.test(numeroLimpio)) return "Mastercard";
+    if (/^3[47]/.test(numeroLimpio)) return "American Express";
+    
+    return "Tarjeta";
+  };
+
+  // Formateadores
   const formatearNumeroTarjeta = (texto) => {
     const textoLimpio = texto.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     const grupos = textoLimpio.match(/.{1,4}/g);
     return grupos ? grupos.join(' ') : textoLimpio;
   };
 
-  // Formatear fecha de vencimiento (MM/YY)
   const formatearVencimiento = (texto) => {
     const textoLimpio = texto.replace(/[^0-9]/g, '');
     if (textoLimpio.length >= 3) {
@@ -133,10 +218,105 @@ const DetallesCompraScreen = () => {
     return textoLimpio;
   };
 
+  // Guardar tarjeta en Firestore
+  const guardarTarjetaEnBD = async (tarjetaData) => {
+    if (!user) return false;
+    
+    try {
+      await updateDoc(doc(db, "usuarios", user.uid), {
+        tarjetasGuardadas: arrayUnion(tarjetaData)
+      });
+      return true;
+    } catch (error) {
+      console.error("Error guardando tarjeta:", error);
+      return false;
+    }
+  };
+
+  // Manejo de cambios en tarjeta
+  const handleCambioTarjeta = (campo, valor) => {
+    setDatosTarjeta(prev => ({
+      ...prev,
+      [campo]: valor
+    }));
+  };
+
+  const seleccionarTarjetaGuardada = (tarjeta) => {
+    setTarjetaSeleccionada(tarjeta.id);
+    setDatosTarjeta({
+      numero: `•••• •••• •••• ${tarjeta.ultimosDigitos}`,
+      nombre: tarjeta.nombre,
+      vencimiento: tarjeta.vencimiento,
+      cvv: ""
+    });
+    setMostrarFormularioTarjeta(false);
+  };
+
+  const usarNuevaTarjeta = () => {
+    setTarjetaSeleccionada(null);
+    setDatosTarjeta({
+      numero: "",
+      nombre: "",
+      vencimiento: "",
+      cvv: ""
+    });
+    setMostrarFormularioTarjeta(true);
+    setGuardarTarjeta(false);
+  };
+
+  const procesarGuardadoTarjeta = async () => {
+    // Validar campos antes de guardar
+    if (!datosTarjeta.numero || !datosTarjeta.nombre || !datosTarjeta.vencimiento || !datosTarjeta.cvv) {
+      Alert.alert("Datos incompletos", "Por favor completa todos los campos de la tarjeta.");
+      return;
+    }
+    
+    if (!validarNumeroTarjeta(datosTarjeta.numero)) {
+      Alert.alert("Número de tarjeta inválido", "El número de tarjeta debe tener 16 dígitos.");
+      return;
+    }
+    
+    if (!validarVencimiento(datosTarjeta.vencimiento)) {
+      Alert.alert("Fecha de vencimiento inválida", "Por favor ingresa una fecha de vencimiento válida (MM/AA).");
+      return;
+    }
+    
+    if (!validarCVV(datosTarjeta.cvv)) {
+      Alert.alert("CVV inválido", "El código de seguridad debe tener 3 o 4 dígitos.");
+      return;
+    }
+
+    const nuevaTarjeta = {
+      id: Date.now().toString(),
+      ultimosDigitos: datosTarjeta.numero.replace(/\s/g, '').slice(-4),
+      tipo: detectarTipoTarjeta(datosTarjeta.numero),
+      nombre: datosTarjeta.nombre,
+      vencimiento: datosTarjeta.vencimiento
+    };
+
+    const exito = await guardarTarjetaEnBD(nuevaTarjeta);
+    
+    if (exito) {
+      setTarjetasGuardadas(prev => [...prev, nuevaTarjeta]);
+      setTarjetaSeleccionada(nuevaTarjeta.id);
+      setDatosTarjeta({
+        numero: `•••• •••• •••• ${nuevaTarjeta.ultimosDigitos}`,
+        nombre: nuevaTarjeta.nombre,
+        vencimiento: nuevaTarjeta.vencimiento,
+        cvv: ""
+      });
+      setMostrarFormularioTarjeta(false);
+      setGuardarTarjeta(false);
+      Alert.alert("✅ Tarjeta guardada", "Tu tarjeta se ha guardado correctamente para futuras compras.");
+    } else {
+      Alert.alert("❌ Error", "No se pudo guardar la tarjeta. Intenta nuevamente.");
+    }
+  };
+
   // Validar carrito vacío
   const carritoVacio = !cartItems || cartItems.length === 0;
 
-  // Función para procesar el pago
+  // Procesar pago
   const procesarPago = () => {
     if (!metodoSeleccionado) {
       Alert.alert("Método de pago requerido", "Por favor selecciona un método de pago.");
@@ -144,18 +324,64 @@ const DetallesCompraScreen = () => {
     }
 
     if (metodoSeleccionado === "tarjeta") {
-      // Validar campos de tarjeta
-      if (!datosTarjeta.numero || !datosTarjeta.nombre || !datosTarjeta.vencimiento || !datosTarjeta.cvv) {
-        Alert.alert("Datos incompletos", "Por favor completa todos los campos de la tarjeta.");
-        return;
-      }
-      
-      if (datosTarjeta.numero.replace(/\s/g, '').length !== 16) {
-        Alert.alert("Número de tarjeta inválido", "El número de tarjeta debe tener 16 dígitos.");
-        return;
+      if (tarjetaSeleccionada) {
+        // Validar CVV para tarjeta guardada
+        if (!datosTarjeta.cvv || !validarCVV(datosTarjeta.cvv)) {
+          Alert.alert("CVV inválido", "Por favor ingresa el código de seguridad de tu tarjeta.");
+          return;
+        }
+      } else {
+        // Validar todos los campos para nueva tarjeta
+        if (!datosTarjeta.numero || !datosTarjeta.nombre || !datosTarjeta.vencimiento || !datosTarjeta.cvv) {
+          Alert.alert("Datos incompletos", "Por favor completa todos los campos de la tarjeta.");
+          return;
+        }
+        
+        if (!validarNumeroTarjeta(datosTarjeta.numero)) {
+          Alert.alert("Número de tarjeta inválido", "El número de tarjeta debe tener 16 dígitos.");
+          return;
+        }
+        
+        if (!validarVencimiento(datosTarjeta.vencimiento)) {
+          Alert.alert("Fecha de vencimiento inválida", "Por favor ingresa una fecha de vencimiento válida (MM/AA).");
+          return;
+        }
+        
+        if (!validarCVV(datosTarjeta.cvv)) {
+          Alert.alert("CVV inválido", "El código de seguridad debe tener 3 o 4 dígitos.");
+          return;
+        }
+
+        // Si el usuario quiere guardar la tarjeta
+        if (guardarTarjeta) {
+          Alert.alert(
+            "Guardar tarjeta",
+            "¿Deseas guardar esta tarjeta para futuras compras?",
+            [
+              {
+                text: "No guardar",
+                style: "cancel",
+                onPress: () => confirmarPago()
+              },
+              {
+                text: "Sí, guardar",
+                onPress: () => {
+                  procesarGuardadoTarjeta().then(() => {
+                    confirmarPago();
+                  });
+                }
+              }
+            ]
+          );
+          return;
+        }
       }
     }
 
+    confirmarPago();
+  };
+
+  const confirmarPago = () => {
     Alert.alert(
       "¡Compra realizada con éxito!", 
       `Gracias por tu compra.\nTotal: Bs. ${total?.toFixed(2)}\nMétodo: ${metodoSeleccionado === 'tarjeta' ? 'Tarjeta' : 'QR'}`,
@@ -171,6 +397,26 @@ const DetallesCompraScreen = () => {
     );
   };
 
+  // Si está cargando, mostrar spinner
+  if (cargandoDatos) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Header />
+        <ImageBackground
+          source={require("../assets/fondo.jpeg")}
+          style={{ flex: 1 }}
+          imageStyle={{ opacity: 0.15 }}
+        >
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#12A14B" />
+            <Text style={styles.loadingText}>Cargando información...</Text>
+          </View>
+        </ImageBackground>
+        <Footer />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Header />
@@ -180,7 +426,6 @@ const DetallesCompraScreen = () => {
         imageStyle={{ opacity: 0.15 }}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {/* TITULO PRINCIPAL */}
           <Text style={styles.tituloPrincipal}>Finalizar Compra</Text>
 
           {carritoVacio ? (
@@ -237,7 +482,49 @@ const DetallesCompraScreen = () => {
                 </View>
               </View>
 
-              {/* SECCIÓN 2: MÉTODOS DE PAGO */}
+              {/* SECCIÓN 2: INFORMACIÓN DE ENVÍO */}
+              {datosUsuario && (
+                <View style={styles.seccion}>
+                  <View style={styles.headerSeccion}>
+                    <Ionicons name="location-outline" size={24} color="#12A14B" />
+                    <Text style={styles.subtitulo}>Información de Envío</Text>
+                  </View>
+
+                  <View style={styles.infoCard}>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Nombre:</Text>
+                      <Text style={styles.infoValue}>
+                        {datosUsuario?.nombre || "No especificado"} {datosUsuario?.apellido || ""}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Teléfono:</Text>
+                      <Text style={styles.infoValue}>{datosUsuario?.telefono || "No especificado"}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Dirección:</Text>
+                      <Text style={styles.infoValue}>
+                        {datosUsuario?.direccion || "No especificado"}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.infoLabel}>Ciudad:</Text>
+                      <Text style={styles.infoValue}>
+                        {datosUsuario?.ciudad || "No especificado"}, {datosUsuario?.departamento || "No especificado"}
+                      </Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.editarInfoButton}
+                      onPress={() => navigation.navigate("Perfil")}
+                    >
+                      <Ionicons name="pencil" size={16} color="#12A14B" />
+                      <Text style={styles.editarInfoText}>Editar información</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {/* SECCIÓN 3: MÉTODOS DE PAGO */}
               <View style={styles.seccion}>
                 <View style={styles.headerSeccion}>
                   <Ionicons name="card-outline" size={24} color="#12A14B" />
@@ -246,7 +533,7 @@ const DetallesCompraScreen = () => {
 
                 <View style={styles.metodosPagoContainer}>
                   
-                  {/* Método Tarjeta - ACORDEÓN */}
+                  {/* Método Tarjeta */}
                   <View style={[
                     styles.metodoPagoContainer,
                     metodoSeleccionado === "tarjeta" && styles.metodoPagoSeleccionado
@@ -278,58 +565,165 @@ const DetallesCompraScreen = () => {
                     </TouchableOpacity>
 
                     <Animated.View style={[styles.panelDesplegable, { height: panelTarjeta }]}>
-                      <Text style={styles.labelCampo}>Número de tarjeta</Text>
-                      <TextInput
-                        style={styles.inputReal}
-                        placeholder=""
-                        value={datosTarjeta.numero}
-                        onChangeText={(texto) => handleCambioTarjeta('numero', formatearNumeroTarjeta(texto))}
-                        keyboardType="numeric"
-                        maxLength={19}
-                        placeholderTextColor="#999"
-                      />
                       
-                      <Text style={styles.labelCampo}>Nombre en la tarjeta</Text>
-                      <TextInput
-                        style={styles.inputReal}
-                        placeholder=""
-                        value={datosTarjeta.nombre}
-                        onChangeText={(texto) => handleCambioTarjeta('nombre', texto.toUpperCase())}
-                        placeholderTextColor="#999"
-                      />
-                      
-                      <View style={styles.rowCampos}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.labelCampo}>Vencimiento (MM/AA)</Text>
+                      {/* Tarjetas Guardadas */}
+                      {tarjetasGuardadas.length > 0 && !mostrarFormularioTarjeta && (
+                        <View style={styles.tarjetasGuardadasSection}>
+                          <Text style={styles.tarjetasGuardadasTitle}>Tarjetas Guardadas</Text>
+                          {tarjetasGuardadas.map((tarjeta) => (
+                            <TouchableOpacity
+                              key={tarjeta.id}
+                              style={[
+                                styles.tarjetaGuardada,
+                                tarjetaSeleccionada === tarjeta.id && styles.tarjetaGuardadaSeleccionada
+                              ]}
+                              onPress={() => seleccionarTarjetaGuardada(tarjeta)}
+                            >
+                              <View style={styles.tarjetaInfo}>
+                                <Ionicons 
+                                  name="card" 
+                                  size={20} 
+                                  color={tarjetaSeleccionada === tarjeta.id ? "#12A14B" : "#666"} 
+                                />
+                                <View style={styles.tarjetaDetalles}>
+                                  <Text style={styles.tarjetaTipo}>{tarjeta.tipo} •••• {tarjeta.ultimosDigitos}</Text>
+                                  <Text style={styles.tarjetaNombre}>{tarjeta.nombre}</Text>
+                                  <Text style={styles.tarjetaVencimiento}>Vence: {tarjeta.vencimiento}</Text>
+                                </View>
+                              </View>
+                              {tarjetaSeleccionada === tarjeta.id && (
+                                <Ionicons name="checkmark-circle" size={20} color="#12A14B" />
+                              )}
+                            </TouchableOpacity>
+                          ))}
+                          
+                          <TouchableOpacity 
+                            style={styles.usarNuevaTarjetaButton}
+                            onPress={usarNuevaTarjeta}
+                          >
+                            <Ionicons name="add-circle-outline" size={18} color="#12A14B" />
+                            <Text style={styles.usarNuevaTarjetaText}>Agregar nueva tarjeta</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+
+                      {/* Formulario de Nueva Tarjeta */}
+                      {(mostrarFormularioTarjeta || tarjetasGuardadas.length === 0) && (
+                        <View style={styles.formularioTarjeta}>
+                          <Text style={styles.formularioTitle}>
+                            {tarjetasGuardadas.length === 0 ? "Agregar Tarjeta" : "Nueva Tarjeta"}
+                          </Text>
+                          
+                          <View style={styles.campoTarjeta}>
+                            <Text style={styles.labelCampo}>Número de tarjeta</Text>
+                            <TextInput
+                              style={styles.inputReal}
+                              placeholder=""
+                              value={datosTarjeta.numero}
+                              onChangeText={(texto) => handleCambioTarjeta('numero', formatearNumeroTarjeta(texto))}
+                              keyboardType="numeric"
+                              maxLength={19}
+                              placeholderTextColor="#999"
+                            />
+                            {datosTarjeta.numero && (
+                              <Text style={styles.tipoTarjeta}>
+                                {detectarTipoTarjeta(datosTarjeta.numero)}
+                              </Text>
+                            )}
+                          </View>
+                          
+                          <Text style={styles.labelCampo}>Nombre en la tarjeta</Text>
                           <TextInput
                             style={styles.inputReal}
                             placeholder=""
-                            value={datosTarjeta.vencimiento}
-                            onChangeText={(texto) => handleCambioTarjeta('vencimiento', formatearVencimiento(texto))}
-                            keyboardType="numeric"
-                            maxLength={5}
+                            value={datosTarjeta.nombre}
+                            onChangeText={(texto) => handleCambioTarjeta('nombre', texto.toUpperCase())}
                             placeholderTextColor="#999"
                           />
+                          
+                          <View style={styles.rowCampos}>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.labelCampo}>Vencimiento (MM/AA)</Text>
+                              <TextInput
+                                style={styles.inputReal}
+                                placeholder=""
+                                value={datosTarjeta.vencimiento}
+                                onChangeText={(texto) => handleCambioTarjeta('vencimiento', formatearVencimiento(texto))}
+                                keyboardType="numeric"
+                                maxLength={5}
+                                placeholderTextColor="#999"
+                              />
+                            </View>
+                            <View style={{ width: 15 }} />
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.labelCampo}>CVV</Text>
+                              <TextInput
+                                style={styles.inputReal}
+                                placeholder=""
+                                value={datosTarjeta.cvv}
+                                onChangeText={(texto) => handleCambioTarjeta('cvv', texto.replace(/[^0-9]/g, ''))}
+                                keyboardType="numeric"
+                                maxLength={4}
+                                secureTextEntry
+                                placeholderTextColor="#999"
+                              />
+                            </View>
+                          </View>
+
+                          <TouchableOpacity 
+                            style={styles.guardarTarjetaOption}
+                            onPress={() => setGuardarTarjeta(!guardarTarjeta)}
+                          >
+                            <View style={styles.checkboxContainer}>
+                              <View style={[styles.checkbox, guardarTarjeta && styles.checkboxSeleccionado]}>
+                                {guardarTarjeta && <Ionicons name="checkmark" size={14} color="#FFF" />}
+                              </View>
+                            </View>
+                            <Text style={styles.guardarTarjetaText}>
+                              Guardar esta tarjeta para futuras compras
+                            </Text>
+                          </TouchableOpacity>
+
+                          {guardarTarjeta && (
+                            <TouchableOpacity 
+                              style={[
+                                styles.botonGuardarTarjeta,
+                                (!datosTarjeta.numero || !datosTarjeta.nombre || !datosTarjeta.vencimiento || !datosTarjeta.cvv) && 
+                                styles.botonGuardarTarjetaDisabled
+                              ]}
+                              onPress={procesarGuardadoTarjeta}
+                              disabled={!datosTarjeta.numero || !datosTarjeta.nombre || !datosTarjeta.vencimiento || !datosTarjeta.cvv}
+                            >
+                              <Ionicons name="save-outline" size={18} color="#FFF" />
+                              <Text style={styles.botonGuardarTarjetaText}>Guardar Tarjeta</Text>
+                            </TouchableOpacity>
+                          )}
                         </View>
-                        <View style={{ width: 15 }} />
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.labelCampo}>CVV</Text>
+                      )}
+
+                      {/* CVV para tarjeta guardada */}
+                      {tarjetaSeleccionada && !mostrarFormularioTarjeta && (
+                        <View style={styles.cvvSection}>
+                          <Text style={styles.labelCampo}>Código de seguridad (CVV)</Text>
                           <TextInput
                             style={styles.inputReal}
-                            placeholder=""
+                            placeholder="Ingresa el CVV"
                             value={datosTarjeta.cvv}
                             onChangeText={(texto) => handleCambioTarjeta('cvv', texto.replace(/[^0-9]/g, ''))}
                             keyboardType="numeric"
-                            maxLength={3}
+                            maxLength={4}
                             secureTextEntry
                             placeholderTextColor="#999"
                           />
+                          <Text style={styles.cvvHelp}>
+                            El CVV es el número de 3 o 4 dígitos en el reverso de tu tarjeta
+                          </Text>
                         </View>
-                      </View>
+                      )}
                     </Animated.View>
                   </View>
 
-                  {/* Método QR - ACORDEÓN */}
+                  {/* Método QR */}
                   <View style={[
                     styles.metodoPagoContainer,
                     metodoSeleccionado === "qr" && styles.metodoPagoSeleccionado
@@ -407,8 +801,6 @@ const DetallesCompraScreen = () => {
   );
 };
 
-export default DetallesCompraScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -445,6 +837,62 @@ const styles = StyleSheet.create({
     fontFamily: "Aller_Bd",
     letterSpacing: 0.3,
   },
+  // Loading
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+    fontFamily: "Aller_Rg",
+    color: "#666",
+  },
+  // Información de envío
+  infoCard: {
+    backgroundColor: "rgba(255,255,255,0.95)",
+    padding: 20,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontFamily: "Aller_Bd",
+    color: "#555",
+    flex: 1,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontFamily: "Aller_Rg",
+    color: "#2d2d2d",
+    flex: 2,
+    textAlign: "right",
+  },
+  editarInfoButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+    padding: 8,
+  },
+  editarInfoText: {
+    fontSize: 14,
+    fontFamily: "Aller_Rg",
+    color: "#12A14B",
+    marginLeft: 6,
+  },
+  // Resumen de compra
   resumenCard: {
     backgroundColor: "rgba(255,255,255,0.95)",
     padding: 20,
@@ -515,6 +963,7 @@ const styles = StyleSheet.create({
     color: "#12A14B",
     fontFamily: "Aller_Bd",
   },
+  // Métodos de pago
   metodosPagoContainer: {
     gap: 16,
   },
@@ -576,6 +1025,95 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#fafafa",
     paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  // Tarjetas guardadas
+  tarjetasGuardadasSection: {
+    marginBottom: 10,
+  },
+  tarjetasGuardadasTitle: {
+    fontSize: 16,
+    fontFamily: "Aller_Bd",
+    color: "#2d2d2d",
+    marginBottom: 12,
+  },
+  tarjetaGuardada: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#f8f8f8",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  tarjetaGuardadaSeleccionada: {
+    borderColor: "#12A14B",
+    backgroundColor: "rgba(18, 161, 75, 0.05)",
+  },
+  tarjetaInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  tarjetaDetalles: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  tarjetaTipo: {
+    fontSize: 14,
+    fontFamily: "Aller_Bd",
+    color: "#2d2d2d",
+    marginBottom: 2,
+  },
+  tarjetaNombre: {
+    fontSize: 12,
+    fontFamily: "Aller_Rg",
+    color: "#666",
+    marginBottom: 2,
+  },
+  tarjetaVencimiento: {
+    fontSize: 11,
+    fontFamily: "Aller_Rg",
+    color: "#888",
+  },
+  usarNuevaTarjetaButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+    backgroundColor: "#f0f8f0",
+    borderRadius: 8,
+    marginTop: 5,
+  },
+  usarNuevaTarjetaText: {
+    fontSize: 14,
+    fontFamily: "Aller_Bd",
+    color: "#12A14B",
+    marginLeft: 6,
+  },
+  // Formulario tarjeta
+  formularioTarjeta: {
+    marginTop: 10,
+  },
+  formularioTitle: {
+    fontSize: 18,
+    fontFamily: "Aller_Bd",
+    color: "#2d2d2d",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  campoTarjeta: {
+    position: "relative",
+  },
+  tipoTarjeta: {
+    position: "absolute",
+    right: 15,
+    top: 15,
+    fontSize: 12,
+    fontFamily: "Aller_Bd",
+    color: "#12A14B",
   },
   labelCampo: {
     fontSize: 14,
@@ -600,6 +1138,66 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  guardarTarjetaOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+    padding: 8,
+  },
+  checkboxContainer: {
+    marginRight: 10,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: "#ccc",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxSeleccionado: {
+    backgroundColor: "#12A14B",
+    borderColor: "#12A14B",
+  },
+  guardarTarjetaText: {
+    fontSize: 14,
+    fontFamily: "Aller_Rg",
+    color: "#666",
+    flex: 1,
+  },
+  botonGuardarTarjeta: {
+    backgroundColor: "#12A14B",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 10,
+    elevation: 2,
+  },
+  botonGuardarTarjetaDisabled: {
+    backgroundColor: "#ccc",
+  },
+  botonGuardarTarjetaText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontFamily: "Aller_Bd",
+    marginLeft: 8,
+  },
+  // CVV
+  cvvSection: {
+    marginTop: 10,
+  },
+  cvvHelp: {
+    fontSize: 12,
+    fontFamily: "Aller_Rg",
+    color: "#666",
+    marginTop: 5,
+    fontStyle: "italic",
+    textAlign: "center",
+  },
+  // QR
   qrContainer: {
     backgroundColor: "#FFF",
     padding: 25,
@@ -619,7 +1217,7 @@ const styles = StyleSheet.create({
   qrPlaceholderSubtext: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#12A14B',
+    color: "#12A14B",
     marginTop: 12,
     fontFamily: "Aller_Bd",
   },
@@ -645,6 +1243,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     lineHeight: 18,
   },
+  // Botones
   botonPagar: {
     marginTop: 25,
     backgroundColor: "#12A14B",
@@ -672,6 +1271,7 @@ const styles = StyleSheet.create({
   botonIcon: {
     marginLeft: 8,
   },
+  // Carrito vacío
   emptyCart: {
     marginTop: 60,
     alignItems: "center",
@@ -692,3 +1292,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
+
+export default DetallesCompraScreen;
