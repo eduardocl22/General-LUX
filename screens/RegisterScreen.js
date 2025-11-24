@@ -30,7 +30,6 @@ export default function RegisterScreen({ navigation }) {
     apellido: "",
     telefono: "",
     direccion: "",
-    ciudad: "",
     departamento: "Santa Cruz",
     pais: "Bolivia"
   });
@@ -69,9 +68,9 @@ export default function RegisterScreen({ navigation }) {
   };
 
   const validarFormulario = () => {
-    const { email, password, confirmPassword, nombre, apellido, telefono, direccion, ciudad } = formData;
+    const { email, password, confirmPassword, nombre, apellido, telefono, direccion } = formData;
 
-    if (!email || !password || !confirmPassword || !nombre || !apellido || !telefono || !direccion || !ciudad) {
+    if (!email || !password || !confirmPassword || !nombre || !apellido || !telefono || !direccion) {
       Alert.alert("Campos incompletos", "Por favor completa todos los campos requeridos.");
       return false;
     }
@@ -118,7 +117,6 @@ export default function RegisterScreen({ navigation }) {
         apellido: formData.apellido,
         telefono: formData.telefono,
         direccion: formData.direccion,
-        ciudad: formData.ciudad,
         departamento: formData.departamento,
         pais: formData.pais,
         email: formData.email,
@@ -258,7 +256,6 @@ export default function RegisterScreen({ navigation }) {
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Dirección de Envío</Text>
                   {renderInput("Dirección", "direccion", true)}
-                  {renderInput("Ciudad", "ciudad", true)}
                   {renderInput("Departamento", "departamento", true, "text", true)}
                   {renderInput("País", "pais", true, "text", true)}
                 </View>

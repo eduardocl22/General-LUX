@@ -34,7 +34,6 @@ export default function DetallesProductoScreen({ route }) {
   const navigation = useNavigation();
   const { addToCart, cartItems } = useCart();
 
-  const [cantidad, setCantidad] = useState(1);
   const [yaEnCarrito, setYaEnCarrito] = useState(false);
 
   useEffect(() => {
@@ -77,9 +76,6 @@ export default function DetallesProductoScreen({ route }) {
     }, 5000);
   };
 
-  const aumentarCantidad = () => setCantidad(cantidad + 1);
-  const disminuirCantidad = () => cantidad > 1 && setCantidad(cantidad - 1);
-
   const handleAddToCart = () => {
     addToCart({
       id: producto.id,
@@ -88,7 +84,7 @@ export default function DetallesProductoScreen({ route }) {
       imagen:
         imagenesLocales[producto.imagenes?.[0]] ||
         require("../assets/images/climatización.jpg"),
-      cantidad,
+      cantidad: 1,
     });
     mostrarMensaje();
     setYaEnCarrito(true);
@@ -203,27 +199,6 @@ export default function DetallesProductoScreen({ route }) {
           </Text>
         </View>
 
-        {/* Cantidad */}
-        <View style={styles.cantidadContainer}>
-          <TouchableOpacity
-            style={styles.botonCantidad}
-            onPress={disminuirCantidad}
-          >
-            <Ionicons name="remove" size={20} color="#fff" />
-          </TouchableOpacity>
-
-          <Text style={[styles.cantidadTexto, { fontFamily: "Aller_Bd" }]}>
-            {cantidad}
-          </Text>
-
-          <TouchableOpacity
-            style={styles.botonCantidad}
-            onPress={aumentarCantidad}
-          >
-            <Ionicons name="add" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
         {/* ✅ Botón dinámico */}
         <TouchableOpacity
           style={[
@@ -331,21 +306,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   precio: { fontSize: 20, color: "#12A14B", fontWeight: "bold" },
-
-  cantidadContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  botonCantidad: {
-    backgroundColor: "#12A14B",
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cantidadTexto: { fontSize: 18, marginHorizontal: 15 },
 
   botonCarrito: {
     backgroundColor: "#12A14B",

@@ -330,8 +330,6 @@ export default function PerfilScreen({ navigation }) {
               {renderCampo("Nombre", datosUsuario.nombre, "nombre", true, false, 'personal')}
               {renderCampo("Apellido", datosUsuario.apellido, "apellido", true, false, 'personal')}
               {renderCampo("Teléfono", datosUsuario.telefono, "telefono", true, false, 'personal')}
-              {renderCampo("Email", datosUsuario.email, "email", false, false, 'personal')}
-
               {editando && (
                 <TouchableOpacity 
                   style={[styles.guardarButton, guardando && styles.guardarButtonDisabled]}
