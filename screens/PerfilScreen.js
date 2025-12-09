@@ -376,7 +376,6 @@ export default function PerfilScreen({ navigation }) {
               </View>
 
               {renderCampo("Dirección", datosUsuario.direccion, "direccion", true, false, 'direccion')}
-              {renderCampo("Ciudad", datosUsuario.ciudad, "ciudad", true, false, 'direccion')}
               {renderCampo("Departamento", datosUsuario.departamento, "departamento", true, true, 'direccion')}
               {renderCampo("País", datosUsuario.pais, "pais", true, true, 'direccion')}
 
