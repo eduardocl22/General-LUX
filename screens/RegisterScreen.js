@@ -1,5 +1,5 @@
-// screens/RegisterScreen.js
-import React, { useState } from "react";
+// screens/RegisterScreen.js (solución actualizada)
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,9 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Dimensions,
-  StatusBar
+  StatusBar,
+  PanResponder,
+  Animated
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../components/Header";
@@ -47,6 +49,11 @@ export default function RegisterScreen({ navigation }) {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
+  
+  // Referencias para controlar el scroll
+  const scrollViewRef = useRef(null);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const lastTap = useRef(null);
 
   // Listas para selección
   const departamentosBolivia = [
@@ -68,6 +75,8 @@ export default function RegisterScreen({ navigation }) {
       'keyboardDidHide',
       () => {
         setKeyboardVisible(false);
+        // Ocultar teclado cuando se hace scroll
+        Keyboard.dismiss();
       }
     );
 
@@ -76,6 +85,23 @@ export default function RegisterScreen({ navigation }) {
       keyboardDidShowListener.remove();
     };
   }, []);
+
+  // Configurar PanResponder para mejores gestos
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Solo responder a gestos verticales significativos
+        return Math.abs(gestureState.dy) > 10;
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        // Si el gesto es hacia arriba, ocultar teclado
+        if (gestureState.dy < -30) {
+          Keyboard.dismiss();
+        }
+      },
+    })
+  ).current;
 
   const handleInputChange = (campo, valor) => {
     setFormData(prev => ({
@@ -87,6 +113,7 @@ export default function RegisterScreen({ navigation }) {
   const abrirModal = (campo) => {
     setCampoModal(campo);
     setModalVisible(true);
+    Keyboard.dismiss(); // Ocultar teclado al abrir modal
   };
 
   const seleccionarOpcion = (valor) => {
@@ -95,6 +122,37 @@ export default function RegisterScreen({ navigation }) {
       [campoModal]: valor
     }));
     setModalVisible(false);
+  };
+
+  // Función para manejar toque doble
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    if (lastTap.current && (now - lastTap.current) < 300) {
+      // Doble tap detectado - ocultar teclado
+      Keyboard.dismiss();
+    }
+    lastTap.current = now;
+  };
+
+  // Función para enfocar siguiente campo
+  const handleSubmitEditing = (nextField) => {
+    if (nextField) {
+      nextField.focus();
+    } else {
+      // Si no hay siguiente campo, intentar registrar
+      handleRegister();
+    }
+  };
+
+  // Referencias para los inputs
+  const inputRefs = {
+    email: useRef(null),
+    password: useRef(null),
+    confirmPassword: useRef(null),
+    nombre: useRef(null),
+    apellido: useRef(null),
+    telefono: useRef(null),
+    direccion: useRef(null),
   };
 
   const validarFormulario = () => {
@@ -186,6 +244,7 @@ export default function RegisterScreen({ navigation }) {
     if (!validarFormulario()) return;
 
     setIsRegistering(true);
+    Keyboard.dismiss(); // Ocultar teclado al registrar
 
     try {
       // 1. Crear usuario en Authentication
@@ -247,7 +306,7 @@ export default function RegisterScreen({ navigation }) {
     setShowErrorModal(false);
   };
 
-  const renderInput = (label, campo, esObligatorio = true, tipo = "text", esSelector = false) => (
+  const renderInput = (label, campo, esObligatorio = true, tipo = "text", esSelector = false, returnKeyType = "next") => (
     <View style={styles.inputContainer}>
       <Text style={styles.inputLabel}>
         {label} {esObligatorio && <Text style={styles.required}>*</Text>}
@@ -266,6 +325,7 @@ export default function RegisterScreen({ navigation }) {
         </TouchableOpacity>
       ) : (
         <TextInput
+          ref={inputRefs[campo]}
           style={styles.input}
           placeholder={`Ingresa tu ${label.toLowerCase()}`}
           placeholderTextColor="#999"
@@ -278,34 +338,66 @@ export default function RegisterScreen({ navigation }) {
             "default"
           }
           autoCapitalize={campo === "email" ? "none" : "words"}
-          returnKeyType="next"
-          blurOnSubmit={false}
+          returnKeyType={returnKeyType}
+          blurOnSubmit={returnKeyType === "done"}
+          onSubmitEditing={() => {
+            const campos = ["email", "password", "confirmPassword", "nombre", "apellido", "telefono", "direccion"];
+            const currentIndex = campos.indexOf(campo);
+            if (currentIndex < campos.length - 1) {
+              handleSubmitEditing(inputRefs[campos[currentIndex + 1]]);
+            } else {
+              handleSubmitEditing(null);
+            }
+          }}
           editable={!isRegistering}
+          onFocus={() => {
+            // Auto-scroll al campo activo
+            setTimeout(() => {
+              if (scrollViewRef.current) {
+                const fieldIndex = ["email", "password", "confirmPassword", "nombre", "apellido", "telefono", "direccion"].indexOf(campo);
+                const yOffset = fieldIndex * 80; // Aproximado
+                scrollViewRef.current.scrollTo({ y: yOffset, animated: true });
+              }
+            }, 100);
+          }}
         />
       )}
     </View>
   );
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <Header />
-        
-        <ImageBackground
-          source={require("../assets/fondo.jpeg")}
-          style={styles.background}
-          resizeMode="cover"
-          imageStyle={{ opacity: 0.15 }}
+    <View style={styles.container}>
+      <Header />
+      
+      <ImageBackground
+        source={require("../assets/fondo.jpeg")}
+        style={styles.background}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.15 }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
         >
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+          <ScrollView 
+            ref={scrollViewRef}
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+            scrollEventThrottle={16}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: false }
+            )}
+            {...panResponder.panHandlers}
           >
-            <ScrollView 
-              contentContainerStyle={styles.scrollContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
+            <TouchableWithoutFeedback 
+              onPress={() => {
+                Keyboard.dismiss();
+                handleDoubleTap();
+              }}
             >
               <View style={styles.content}>
                 <View style={styles.card}>
@@ -321,23 +413,23 @@ export default function RegisterScreen({ navigation }) {
                   {/* Información de Cuenta */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Información de Cuenta</Text>
-                    {renderInput("Email", "email", true, "email")}
-                    {renderInput("Contraseña", "password", true, "password")}
-                    {renderInput("Confirmar Contraseña", "confirmPassword", true, "password")}
+                    {renderInput("Email", "email", true, "email", false, "next")}
+                    {renderInput("Contraseña", "password", true, "password", false, "next")}
+                    {renderInput("Confirmar Contraseña", "confirmPassword", true, "password", false, "next")}
                   </View>
 
                   {/* Información Personal */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Información Personal</Text>
-                    {renderInput("Nombre", "nombre", true)}
-                    {renderInput("Apellido", "apellido", true)}
-                    {renderInput("Teléfono", "telefono", true, "phone")}
+                    {renderInput("Nombre", "nombre", true, "text", false, "next")}
+                    {renderInput("Apellido", "apellido", true, "text", false, "next")}
+                    {renderInput("Teléfono", "telefono", true, "phone", false, "next")}
                   </View>
 
                   {/* Dirección */}
                   <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Dirección de Envío</Text>
-                    {renderInput("Dirección", "direccion", true)}
+                    {renderInput("Dirección", "direccion", true, "text", false, "next")}
                     {renderInput("Departamento", "departamento", true, "text", true)}
                     {renderInput("País", "pais", true, "text", true)}
                   </View>
@@ -388,119 +480,123 @@ export default function RegisterScreen({ navigation }) {
                   </View>
                 )}
               </View>
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </ImageBackground>
+            </TouchableWithoutFeedback>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </ImageBackground>
 
-        {/* Modal para selección */}
-        <Modal
-          visible={modalVisible}
-          animationType="slide"
-          transparent={true}
-          statusBarTranslucent={true}
-          onRequestClose={() => setModalVisible(false)}
-        >
+      {/* Modal para selección */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        statusBarTranslucent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalFullScreenOverlay}>
-            <View style={styles.modalContentContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>
-                  Seleccionar {campoModal.charAt(0).toUpperCase() + campoModal.slice(1)}
-                </Text>
-                <FlatList
-                  data={campoModal === "departamento" ? departamentosBolivia : paises}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity 
-                      style={styles.modalItem}
-                      onPress={() => seleccionarOpcion(item)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.modalItemText}>{item}</Text>
-                      {formData[campoModal] === item && (
-                        <Ionicons name="checkmark" size={20} color="#12A14B" />
-                      )}
-                    </TouchableOpacity>
-                  )}
-                  showsVerticalScrollIndicator={false}
-                />
-                <TouchableOpacity 
-                  style={styles.modalCloseButton}
-                  onPress={() => setModalVisible(false)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.modalCloseText}>Cancelar</Text>
-                </TouchableOpacity>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalContentContainer}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>
+                    Seleccionar {campoModal.charAt(0).toUpperCase() + campoModal.slice(1)}
+                  </Text>
+                  <FlatList
+                    data={campoModal === "departamento" ? departamentosBolivia : paises}
+                    keyExtractor={(item) => item}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity 
+                        style={styles.modalItem}
+                        onPress={() => seleccionarOpcion(item)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.modalItemText}>{item}</Text>
+                        {formData[campoModal] === item && (
+                          <Ionicons name="checkmark" size={20} color="#12A14B" />
+                        )}
+                      </TouchableOpacity>
+                    )}
+                    showsVerticalScrollIndicator={false}
+                  />
+                  <TouchableOpacity 
+                    style={styles.modalCloseButton}
+                    onPress={() => setModalVisible(false)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.modalCloseText}>Cancelar</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           </View>
-        </Modal>
+        </TouchableWithoutFeedback>
+      </Modal>
 
-        {/* Modal de éxito profesional */}
-        <Modal
-          visible={showSuccessModal}
-          transparent={true}
-          animationType="fade"
-          statusBarTranslucent={true}
-          onRequestClose={handleSuccessModalClose}
-        >
-          <View style={styles.modalFullScreenOverlay}>
-            <View style={styles.successModalContent}>
-              <View style={styles.successIconContainer}>
-                <Ionicons name="checkmark-circle" size={80} color="#12A14B" />
-              </View>
-              <Text style={styles.successModalTitle}>¡Registro Exitoso!</Text>
-              <Text style={styles.successModalText}>
-                Tu cuenta ha sido creada correctamente. {"\n\n"}
-                Ahora puedes iniciar sesión con tus credenciales.
-              </Text>
-              <TouchableOpacity 
-                style={styles.successModalButton}
-                onPress={handleSuccessModalClose}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.successModalButtonText}>Ir a Iniciar Sesión</Text>
-                <Ionicons name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8 }} />
-              </TouchableOpacity>
+      {/* Modal de éxito profesional */}
+      <Modal
+        visible={showSuccessModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={handleSuccessModalClose}
+      >
+        <View style={styles.modalFullScreenOverlay}>
+          <View style={styles.successModalContent}>
+            <View style={styles.successIconContainer}>
+              <Ionicons name="checkmark-circle" size={80} color="#12A14B" />
             </View>
+            <Text style={styles.successModalTitle}>¡Registro Exitoso!</Text>
+            <Text style={styles.successModalText}>
+              Tu cuenta ha sido creada correctamente. {"\n\n"}
+              Ahora puedes iniciar sesión con tus credenciales.
+            </Text>
+            <TouchableOpacity 
+              style={styles.successModalButton}
+              onPress={handleSuccessModalClose}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.successModalButtonText}>Ir a Iniciar Sesión</Text>
+              <Ionicons name="arrow-forward" size={20} color="#FFF" style={{ marginLeft: 8 }} />
+            </TouchableOpacity>
           </View>
-        </Modal>
+        </View>
+      </Modal>
 
-        {/* Modal de error profesional */}
-        <Modal
-          visible={showErrorModal}
-          transparent={true}
-          animationType="fade"
-          statusBarTranslucent={true}
-          onRequestClose={handleErrorModalClose}
-        >
-          <View style={styles.modalFullScreenOverlay}>
-            <View style={styles.errorModalContent}>
-              <View style={styles.errorIconContainer}>
-                <Ionicons 
-                  name={errorMessage.tipo === "firebase" ? "alert-circle" : "warning"} 
-                  size={80} 
-                  color="#E74C3C" 
-                />
-              </View>
-              <Text style={styles.errorModalTitle}>
-                {errorMessage.titulo || "Error"}
-              </Text>
-              <Text style={styles.errorModalText}>
-                {errorMessage.mensaje}
-              </Text>
-              <TouchableOpacity 
-                style={styles.errorModalButton}
-                onPress={handleErrorModalClose}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.errorModalButtonText}>Entendido</Text>
+      {/* Modal de error profesional */}
+      <Modal
+        visible={showErrorModal}
+        transparent={true}
+        animationType="fade"
+        statusBarTranslucent={true}
+        onRequestClose={handleErrorModalClose}
+      >
+        <View style={styles.modalFullScreenOverlay}>
+          <View style={styles.errorModalContent}>
+            <View style={styles.errorIconContainer}>
+              <Ionicons 
+                name={errorMessage.tipo === "firebase" ? "alert-circle" : "warning"} 
+                size={80} 
+                color="#E74C3C" 
+              />
+            </View>
+            <Text style={styles.errorModalTitle}>
+              {errorMessage.titulo || "Error"}
+            </Text>
+            <Text style={styles.errorModalText}>
+              {errorMessage.mensaje}
+            </Text>
+            <TouchableOpacity 
+              style={styles.errorModalButton}
+              onPress={handleErrorModalClose}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.errorModalButtonText}>Entendido</Text>
                 <Ionicons name="close-circle" size={20} color="#FFF" style={{ marginLeft: 8 }} />
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      </View>
-    </TouchableWithoutFeedback>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
@@ -658,6 +754,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.7)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 1000,
   },
   modalContentContainer: {
     width: '90%',

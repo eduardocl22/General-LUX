@@ -14,7 +14,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
   const navigation = useNavigation();
-  const { user } = useAuth(); // 🔥 Usuario logueado o null
+  const { user } = useAuth();
 
   const openMenu = () => {
     try {
@@ -26,12 +26,11 @@ export default function Header() {
     }
   };
 
-  // Navegar al perfil o login según estado de auth
   const goToUser = () => {
     if (user) {
-      navigation.navigate("Perfil"); // 🔥 PerfilScreen
+      navigation.navigate("Perfil");
     } else {
-      navigation.navigate("Login"); // 🔥 LoginScreen
+      navigation.navigate("Login");
     }
   };
 
