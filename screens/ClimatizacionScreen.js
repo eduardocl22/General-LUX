@@ -73,59 +73,87 @@ export default function ClimatizacionScreen({ navigation }) {
     return productos.filter((item) => item.variante === selectedVariant);
   }, [productos, selectedVariant]);
 
-  // === Renderizado de producto ===
   const renderProduct = ({ item }) => {
     const imageSource = localImages[item.imagen];
     
     return (
-      <TouchableOpacity
-        style={styles.productCard}
-        onPress={() => navigation.navigate("DetallesProducto", { producto: item })}
-        activeOpacity={0.8}
-      >
-        {/* Contenedor de imagen con fondo degradado */}
+      <View style={styles.productCard}>
+        {/* CONTENEDOR DE IMAGEN - SIN TOUCHABLEOPACITY */}
         <View style={styles.imageContainer}>
           {imageSource ? (
             <Image source={imageSource} style={styles.productImage} />
           ) : (
             <View style={styles.noImageContainer}>
-              <Ionicons name="image" size={40} color="#CCC" />
-              <Text style={styles.noImageText}>Sin imagen</Text>
+              <Ionicons name="cube" size={32} color="#12A14B" />
+              <Text style={styles.noImageText}>Imagen no disponible</Text>
             </View>
           )}
         </View>
 
-        {/* Información del producto */}
-        <View style={styles.productInfo}>
+        {/* INFORMACIÓN DEL PRODUCTO */}
+        <View style={styles.productContent}>
+          {/* NOMBRE DEL PRODUCTO */}
           <Text 
             style={[styles.productName, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}
             numberOfLines={2}
           >
             {item.nombre}
           </Text>
-          
+
+          {/* PRECIO */}
           {item.precio && (
-            <View style={styles.priceContainer}>
-              <Text style={[styles.priceLabel, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-                Precio:
-              </Text>
-              <Text style={[styles.priceValue, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
-                Bs. {item.precio.toLocaleString()}
-              </Text>
+            <View style={styles.priceSection}>
+              <View style={styles.priceTag}>
+                <Text style={[styles.priceLabel, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+                  Precio:
+                </Text>
+                <View style={styles.priceValueContainer}>
+                  <Text style={[styles.priceCurrency, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                    Bs.
+                  </Text>
+                  <Text style={[styles.priceValue, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                    {item.precio.toLocaleString()}
+                  </Text>
+                </View>
+              </View>
+              
+              {/* BOTÓN DE DETALLES - ÚNICO QUE ES CLICKEABLE */}
+              <TouchableOpacity
+                style={styles.detailsButton}
+                onPress={() => navigation.navigate("DetallesProducto", { producto: item })}
+                activeOpacity={0.8}
+              >
+                <View style={styles.buttonContent}>
+                  <Text style={[styles.detailsButtonText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                    Ver Detalles
+                  </Text>
+                  <View style={styles.buttonIconWrapper}>
+                    <Ionicons name="arrow-forward" size={14} color="#FFF" />
+                  </View>
+                </View>
+              </TouchableOpacity>
             </View>
           )}
 
-          <TouchableOpacity
-            style={styles.detailsButton}
-            onPress={() => navigation.navigate("DetallesProducto", { producto: item })}
-          >
-            <Text style={[styles.detailsButtonText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
-              Ver Detalles
-            </Text>
-            <Ionicons name="arrow-forward" size={16} color="#FFF" style={styles.buttonIcon} />
-          </TouchableOpacity>
+          {/* SI NO HAY PRECIO, MOSTRAR BOTÓN SOLO */}
+          {!item.precio && (
+            <TouchableOpacity
+              style={styles.detailsButton}
+              onPress={() => navigation.navigate("DetallesProducto", { producto: item })}
+              activeOpacity={0.8}
+            >
+              <View style={styles.buttonContent}>
+                <Text style={[styles.detailsButtonText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                  Ver Detalles
+                </Text>
+                <View style={styles.buttonIconWrapper}>
+                  <Ionicons name="arrow-forward" size={14} color="#FFF" />
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -145,7 +173,6 @@ export default function ClimatizacionScreen({ navigation }) {
         source={require("../assets/fondo.jpeg")}
         style={styles.background}
         resizeMode="cover"
-        imageStyle={{ opacity: 0.15 }}
       >
         <Header navigation={navigation} />
 
@@ -156,9 +183,6 @@ export default function ClimatizacionScreen({ navigation }) {
           {/* Hero Section */}
           <View style={styles.heroSection}>
             <View style={styles.heroContent}>
-              <View style={styles.heroIcon}>
-                <Ionicons name="snow" size={40} color="#FFF" />
-              </View>
               <Text style={[styles.heroTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
                 CLIMATIZACIÓN
               </Text>
@@ -231,7 +255,9 @@ export default function ClimatizacionScreen({ navigation }) {
               </View>
             ) : filteredProducts.length === 0 ? (
               <View style={styles.emptyContainer}>
-                <Ionicons name="search" size={60} color="#CCC" />
+                <View style={styles.emptyIcon}>
+                  <Ionicons name="search" size={50} color="#12A14B" />
+                </View>
                 <Text style={[styles.emptyText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
                   No hay productos disponibles
                 </Text>
@@ -241,9 +267,16 @@ export default function ClimatizacionScreen({ navigation }) {
               </View>
             ) : (
               <>
-                <Text style={[styles.resultsTitle, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
-                  Productos ({filteredProducts.length})
-                </Text>
+                <View style={styles.resultsHeader}>
+                  <Text style={[styles.resultsTitle, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                    Productos
+                  </Text>
+                  <View style={styles.resultsCounter}>
+                    <Text style={[styles.resultsCount, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+                      {filteredProducts.length} productos
+                    </Text>
+                  </View>
+                </View>
                 
                 <FlatList
                   data={filteredProducts}
@@ -296,15 +329,6 @@ const styles = StyleSheet.create({
   },
   heroContent: {
     alignItems: 'center',
-  },
-  heroIcon: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 15,
   },
   heroTitle: {
     fontSize: 32,
@@ -378,50 +402,81 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 16,
     padding: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(18, 161, 75, 0.1)',
+  },
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(18, 161, 75, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
   },
   emptyText: {
     fontSize: 18,
-    color: '#666',
+    color: '#2C3E50',
     marginTop: 15,
     marginBottom: 5,
+    textAlign: 'center',
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
+    color: '#666',
+    textAlign: 'center',
+  },
+  resultsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 5,
   },
   resultsTitle: {
-    fontSize: 20,
-    color: '#2C3E50',
-    marginBottom: 15,
+    fontSize: 22,
+    color: '#000000ff', 
+  },
+  resultsCounter: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  resultsCount: {
+    fontSize: 12,
+    color: '#000000ff',
   },
   productsGrid: {
     paddingBottom: 10,
   },
   columnWrapper: {
     justifyContent: 'space-between',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   
-  // Product Card
+  // Product Card - AHORA ES UN SIMPLE VIEW (NO TOUCHABLE)
   productCard: {
     backgroundColor: '#FFF',
     borderRadius: 16,
     overflow: 'hidden',
     width: '48%',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowRadius: 15,
+    elevation: 8,
     borderWidth: 1,
-    borderColor: '#EEE',
+    borderColor: 'rgba(0,0,0,0.05)',
   },
+  
+  // Contenedor de imagen
   imageContainer: {
-    backgroundColor: 'rgba(18, 161, 75, 0.05)',
+    backgroundColor: 'rgba(18, 161, 75, 0.03)',
     padding: 15,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
+    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   productImage: {
     width: 120,
@@ -433,53 +488,94 @@ const styles = StyleSheet.create({
     height: 120,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.02)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(18, 161, 75, 0.05)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(18, 161, 75, 0.1)',
+    borderStyle: 'dashed',
   },
   noImageText: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 5,
+    fontSize: 10,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 8,
   },
-  productInfo: {
-    padding: 15,
+  
+  // Contenido del producto
+  productContent: {
+    padding: 16,
   },
   productName: {
     fontSize: 14,
     color: '#2C3E50',
-    marginBottom: 10,
-    minHeight: 40,
+    marginBottom: 12,
     lineHeight: 18,
+    fontWeight: '600',
   },
-  priceContainer: {
+  
+  // Sección de precio
+  priceSection: {
+    marginTop: 4,
+  },
+  priceTag: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 12,
+    backgroundColor: 'rgba(18, 161, 75, 0.05)',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   priceLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#666',
-    marginRight: 5,
+  },
+  priceValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  priceCurrency: {
+    fontSize: 12,
+    color: '#12A14B',
+    marginRight: 2,
   },
   priceValue: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#12A14B',
+    fontWeight: 'bold',
   },
+  
+  // Botón de detalles - ÚNICO ELEMENTO CLICKEABLE
   detailsButton: {
     backgroundColor: '#12A14B',
+    borderRadius: 10,
+    overflow: 'hidden',
+    shadowColor: '#12A14B',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-    borderRadius: 8,
-    marginTop: 5,
+    paddingHorizontal: 12,
   },
   detailsButtonText: {
     color: '#FFF',
-    fontSize: 14,
+    fontSize: 13,
+    marginRight: 6,
   },
-  buttonIcon: {
-    marginLeft: 5,
+  buttonIconWrapper: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   
   // Footer

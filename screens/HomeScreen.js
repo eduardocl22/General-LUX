@@ -113,10 +113,10 @@ export default function HomeScreen({ navigation }) {
 
   // Productos destacados
   const productosDestacados = [
-    { id: 1, nombre: "Smart TV 4K", precio: "$899", categoria: "Televisores", img: require("../assets/images/televisores.jpg") },
-    { id: 2, nombre: "Refrigerador Inverter", precio: "$1,299", categoria: "Refrigeración", img: require("../assets/images/refrigeración.png") },
-    { id: 3, nombre: "Lavadora Automática", precio: "$699", categoria: "Lavadoras", img: require("../assets/images/lavadoras.png") },
-    { id: 4, nombre: "Aire Acondicionado", precio: "$1,199", categoria: "Climatización", img: require("../assets/images/climatización.jpg") },
+    { id: 1, nombre: "Smart TV 4K", precio: "Bs. 899", categoria: "Televisores", img: require("../assets/images/televisores.jpg") },
+    { id: 2, nombre: "Refrigerador Inverter", precio: "Bs. 299", categoria: "Refrigeración", img: require("../assets/images/refrigeración.png") },
+    { id: 3, nombre: "Lavadora Automática", precio: "Bs. 699", categoria: "Lavadoras", img: require("../assets/images/lavadoras.png") },
+    { id: 4, nombre: "Aire Acondicionado", precio: "Bs. 1,199", categoria: "Climatización", img: require("../assets/images/climatización.jpg") },
   ];
 
   const openWhatsapp = () => {
@@ -191,26 +191,6 @@ export default function HomeScreen({ navigation }) {
               Innovación y tecnología para tu hogar. Descubre nuestras categorías 
               y encuentra los mejores productos con garantía y soporte especializado.
             </Text>
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Ionicons name="shield-checkmark" size={20} color="#12A14B" />
-                <Text style={[styles.statText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-                  Garantía
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Ionicons name="time" size={20} color="#12A14B" />
-                <Text style={[styles.statText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-                  Soporte 24/7
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Ionicons name="car" size={20} color="#12A14B" />
-                <Text style={[styles.statText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-                  Envío Rápido
-                </Text>
-              </View>
-            </View>
           </View>
 
           {/* Productos Destacados */}
@@ -484,13 +464,6 @@ const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 22,
     marginBottom: 15,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
-    paddingTop: 15,
   },
   statItem: {
     alignItems: 'center',
