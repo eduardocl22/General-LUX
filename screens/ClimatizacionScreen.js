@@ -9,12 +9,14 @@ import {
   FlatList,
   Image,
   ImageBackground,
+  StatusBar,
 } from "react-native";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useFonts } from "expo-font";
+import { Ionicons } from "@expo/vector-icons";
 
 const subproductos = [
   "Aires Acondicionados Smart",
@@ -46,9 +48,13 @@ export default function ClimatizacionScreen({ navigation }) {
     Aller_Rg: require("../assets/fonts/Aller_Rg.ttf"),
   });
 
+  const fontFamilyOrDefault = (fontName) =>
+    fontsLoaded ? fontName : "System";
+
   useEffect(() => {
     const fetchProductos = async () => {
       try {
+        setLoading(true);
         const snapshot = await getDocs(collection(db, "Climatizacion"));
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setProductos(data);
@@ -70,238 +76,415 @@ export default function ClimatizacionScreen({ navigation }) {
   // === Renderizado de producto ===
   const renderProduct = ({ item }) => {
     const imageSource = localImages[item.imagen];
-    const isTwoLines = item.nombre.length > 15; // Condición simple para detectar nombres largos
-
+    
     return (
-      <View key={item.id} style={styles.productCard}>
-        {imageSource ? (
-          <Image source={imageSource} style={styles.productImage} />
-        ) : (
-          <View
-            style={{
-              width: 150,
-              height: 150,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgba(0,0,0,0.05)",
-            }}
-          >
-            <Text style={{ color: "#666", fontSize: 12 }}>Sin imagen</Text>
-          </View>
-        )}
+      <TouchableOpacity
+        style={styles.productCard}
+        onPress={() => navigation.navigate("DetallesProducto", { producto: item })}
+        activeOpacity={0.8}
+      >
+        {/* Contenedor de imagen con fondo degradado */}
+        <View style={styles.imageContainer}>
+          {imageSource ? (
+            <Image source={imageSource} style={styles.productImage} />
+          ) : (
+            <View style={styles.noImageContainer}>
+              <Ionicons name="image" size={40} color="#CCC" />
+              <Text style={styles.noImageText}>Sin imagen</Text>
+            </View>
+          )}
+        </View>
 
-        <View
-          style={[
-            styles.textContainer,
-            !isTwoLines && { justifyContent: "center" },
-          ]}
-        >
-          <Text
-            style={[
-              styles.productText,
-              { fontFamily: "Aller_Rg" },
-              isTwoLines && { marginBottom: 5 },
-            ]}
+        {/* Información del producto */}
+        <View style={styles.productInfo}>
+          <Text 
+            style={[styles.productName, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}
             numberOfLines={2}
-            textAlign="center"
           >
             {item.nombre}
           </Text>
-        </View>
+          
+          {item.precio && (
+            <View style={styles.priceContainer}>
+              <Text style={[styles.priceLabel, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+                Precio:
+              </Text>
+              <Text style={[styles.priceValue, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                Bs. {item.precio.toLocaleString()}
+              </Text>
+            </View>
+          )}
 
-        <TouchableOpacity
-          style={styles.readMoreButton}
-          onPress={() =>
-            navigation.navigate("DetallesProducto", { producto: item })
-          }
-        >
-          <Text style={[styles.readMoreText, { fontFamily: "Aller_BdIt" }]}>
-            Ver más
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.detailsButton}
+            onPress={() => navigation.navigate("DetallesProducto", { producto: item })}
+          >
+            <Text style={[styles.detailsButtonText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+              Ver Detalles
+            </Text>
+            <Ionicons name="arrow-forward" size={16} color="#FFF" style={styles.buttonIcon} />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
     );
   };
 
   if (!fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2ecc71" />
+        <ActivityIndicator size="large" color="#12A14B" />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Header />
+      <StatusBar barStyle="light-content" backgroundColor="#12A14B" />
+      
       <ImageBackground
         source={require("../assets/fondo.jpeg")}
         style={styles.background}
         resizeMode="cover"
+        imageStyle={{ opacity: 0.15 }}
       >
-        {/* ===== Filtros de variantes ===== */}
-        <View style={styles.stickyChips}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[
-                styles.chip,
-                selectedVariant === null && styles.chipSelected,
-              ]}
-              onPress={() => setSelectedVariant(null)}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  selectedVariant === null && styles.chipTextSelected,
-                  { fontFamily: "Aller_BdIt" },
-                ]}
-              >
-                Todas
-              </Text>
-            </TouchableOpacity>
+        <Header navigation={navigation} />
 
-            {subproductos.map((item, index) => (
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Hero Section */}
+          <View style={styles.heroSection}>
+            <View style={styles.heroContent}>
+              <View style={styles.heroIcon}>
+                <Ionicons name="snow" size={40} color="#FFF" />
+              </View>
+              <Text style={[styles.heroTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
+                CLIMATIZACIÓN
+              </Text>
+              <Text style={[styles.heroSubtitle, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+                Sistemas de aire acondicionado para tu hogar u oficina
+              </Text>
+            </View>
+          </View>
+
+          {/* Filtros */}
+          <View style={styles.filtersSection}>
+            <Text style={[styles.filtersTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
+              Filtro por categoría
+            </Text>
+            
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filtersScroll}
+            >
               <TouchableOpacity
-                key={index}
                 style={[
-                  styles.chip,
-                  selectedVariant === item && styles.chipSelected,
+                  styles.filterChip,
+                  selectedVariant === null && styles.filterChipSelected,
                 ]}
-                onPress={() => setSelectedVariant(item)}
+                onPress={() => setSelectedVariant(null)}
               >
                 <Text
                   style={[
-                    styles.chipText,
-                    selectedVariant === item && styles.chipTextSelected,
-                    { fontFamily: "Aller_BdIt" },
+                    styles.filterChipText,
+                    selectedVariant === null && styles.filterChipTextSelected,
+                    { fontFamily: fontFamilyOrDefault("Aller_Bd") }
                   ]}
                 >
-                  {item}
+                  Todas
                 </Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
 
-        {/* ===== Lista de productos ===== */}
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="#2ecc71"
-            style={{ flex: 1, marginTop: 50 }}
-          />
-        ) : filteredProducts.length === 0 ? (
-          <Text style={[styles.mensajeVacio, { fontFamily: "Aller_Rg" }]}>
-            No hay productos disponibles.
-          </Text>
-        ) : (
-          <FlatList
-            key={"2"} // <- Esto evita el error de numColumns
-            data={filteredProducts}
-            renderItem={renderProduct}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{ padding: 15, paddingBottom: 80 }}
-            ListHeaderComponent={
-              <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>
-                Climatización
-              </Text>
-            }
-            numColumns={2}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-              marginBottom: 15,
-            }}
-          />
-        )}
+              {subproductos.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.filterChip,
+                    selectedVariant === item && styles.filterChipSelected,
+                  ]}
+                  onPress={() => setSelectedVariant(item)}
+                >
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      selectedVariant === item && styles.filterChipTextSelected,
+                      { fontFamily: fontFamilyOrDefault("Aller_Bd") }
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Productos */}
+          <View style={styles.productsSection}>
+            {loading ? (
+              <View style={styles.loadingProducts}>
+                <ActivityIndicator size="large" color="#12A14B" />
+                <Text style={[styles.loadingText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+                  Cargando productos...
+                </Text>
+              </View>
+            ) : filteredProducts.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="search" size={60} color="#CCC" />
+                <Text style={[styles.emptyText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                  No hay productos disponibles
+                </Text>
+                <Text style={[styles.emptySubtext, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+                  Prueba con otra categoría
+                </Text>
+              </View>
+            ) : (
+              <>
+                <Text style={[styles.resultsTitle, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                  Productos ({filteredProducts.length})
+                </Text>
+                
+                <FlatList
+                  data={filteredProducts}
+                  renderItem={renderProduct}
+                  keyExtractor={(item) => item.id}
+                  scrollEnabled={false}
+                  numColumns={2}
+                  contentContainerStyle={styles.productsGrid}
+                  columnWrapperStyle={styles.columnWrapper}
+                />
+              </>
+            )}
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footerContainer}>
+            <Footer />
+          </View>
+        </ScrollView>
       </ImageBackground>
-      <Footer />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "space-between" },
-  background: { flex: 1, width: "100%", height: "100%" },
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  background: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
   },
-  title: {
-    fontSize: 35,
-    margin: 16,
-    color: "#000",
-    textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  
+  // Hero Section
+  heroSection: {
+    backgroundColor: 'rgba(18, 161, 75, 0.9)',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  stickyChips: {
-    backgroundColor: "#12A14B",
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderColor: "#12A14B",
-    zIndex: 10,
+  heroContent: {
+    alignItems: 'center',
   },
-  chip: {
-    paddingHorizontal: 12,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    borderRadius: 16,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  chipSelected: { backgroundColor: "#12A14B", borderColor: "#12A14B" },
-  chipText: { fontSize: 16, color: "#333" },
-  chipTextSelected: { color: "#fff", fontWeight: "bold" },
-  productCard: {
-    backgroundColor: "rgba(255,255,255,0.9)",
-    borderRadius: 12,
-    overflow: "hidden",
-    elevation: 3,
-    padding: 10,
+  heroIcon: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 15,
-    alignItems: "center",
-    flex: 1,
-    marginHorizontal: 5,
-    minHeight: 260,
+  },
+  heroTitle: {
+    fontSize: 32,
+    color: '#FFF',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
+  },
+  
+  // Filters Section
+  filtersSection: {
+    marginBottom: 25,
+    paddingHorizontal: 20,
+  },
+  filtersTitle: {
+    fontSize: 20,
+    color: '#2C3E50',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  filtersScroll: {
+    paddingHorizontal: 5,
+  },
+  filterChip: {
+    backgroundColor: '#FFF',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginRight: 10,
+    borderWidth: 1.5,
+    borderColor: '#DDD',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  filterChipSelected: {
+    backgroundColor: '#12A14B',
+    borderColor: '#12A14B',
+  },
+  filterChipText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  filterChipTextSelected: {
+    color: '#FFF',
+  },
+  
+  // Products Section
+  productsSection: {
+    marginBottom: 25,
+    paddingHorizontal: 20,
+  },
+  loadingProducts: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#666',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 30,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#666',
+    marginTop: 15,
+    marginBottom: 5,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#999',
+  },
+  resultsTitle: {
+    fontSize: 20,
+    color: '#2C3E50',
+    marginBottom: 15,
+  },
+  productsGrid: {
+    paddingBottom: 10,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  
+  // Product Card
+  productCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    overflow: 'hidden',
+    width: '48%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#EEE',
+  },
+  imageContainer: {
+    backgroundColor: 'rgba(18, 161, 75, 0.05)',
+    padding: 15,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
   },
   productImage: {
-    width: 150,
-    height: 150,
-    resizeMode: "contain",
-    marginBottom: 10,
+    width: 120,
+    height: 120,
+    resizeMode: 'contain',
   },
-  textContainer: {
-    minHeight: 40,
-    justifyContent: "flex-start",
-  },
-  productText: {
-    fontSize: 16,
-    color: "#000",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  readMoreButton: {
-    marginTop: 10,
-    backgroundColor: "#5BA33B",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+  noImageContainer: {
+    width: 120,
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.02)',
     borderRadius: 8,
   },
-  readMoreText: {
-    color: "#fff",
-    fontWeight: "bold",
+  noImageText: {
     fontSize: 12,
-    textAlign: "center",
+    color: '#999',
+    marginTop: 5,
   },
-  mensajeVacio: {
-    textAlign: "center",
+  productInfo: {
+    padding: 15,
+  },
+  productName: {
+    fontSize: 14,
+    color: '#2C3E50',
+    marginBottom: 10,
+    minHeight: 40,
+    lineHeight: 18,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  priceLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginRight: 5,
+  },
+  priceValue: {
     fontSize: 16,
-    color: "#333",
-    marginTop: 20,
+    color: '#12A14B',
+  },
+  detailsButton: {
+    backgroundColor: '#12A14B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 5,
+  },
+  detailsButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+  },
+  buttonIcon: {
+    marginLeft: 5,
+  },
+  
+  // Footer
+  footerContainer: {
+    marginTop: 0,
+    backgroundColor: 'transparent',
   },
 });

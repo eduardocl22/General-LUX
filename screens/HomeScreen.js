@@ -1,4 +1,3 @@
-// HomeScreen.js - Versión Final Limpia
 import React, { useState } from "react";
 import {
   View,
@@ -154,7 +153,6 @@ export default function HomeScreen({ navigation }) {
         source={require("../assets/fondo.jpeg")}
         style={styles.background}
         resizeMode="cover"
-        imageStyle={{ opacity: 0.15 }}
       >
         <Header navigation={navigation} />
 
