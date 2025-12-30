@@ -142,10 +142,38 @@ function CustomDrawerContent(props) {
   const { productosOpen, activeItem, toggleProductos, setActiveItem } = useMenu();
 
   const handleNavigation = (screen, label) => {
-    setActiveItem(label);
+  setActiveItem(label);
+  
+  // Cerrar el drawer
+  props.navigation.closeDrawer();
+  
+  // Lista de pantallas que DEBEN limpiar el historial
+  const screensThatClearHistory = [
+    "CarritoScreen", 
+    "Perfil", 
+    "Login", 
+    "Register",
+    "Inicio",  // Agregar Inicio también
+    "Sobre Nosotros",
+    "Contáctanos"
+  ];
+  
+  // Si es una pantalla que debe limpiar historial
+  if (screensThatClearHistory.includes(screen)) {
+    // Usar reset para limpiar toda la pila de navegación
+    props.navigation.reset({
+      index: 0,
+      routes: [{ name: screen }],
+    });
+  } else if (screen === "DetallesProducto") {
+    // Para detalles, navegar normalmente (permitir volver)
     props.navigation.navigate(screen);
-    // No cerramos productosOpen aquí
-  };
+  } else {
+    // Para categorías de productos (Cocinas, Climatización, etc.)
+    // Navegar normalmente - estas están en Stack Navigators
+    props.navigation.navigate(screen);
+  }
+};
 
   const handleCloseDrawer = () => {
     props.navigation.closeDrawer();

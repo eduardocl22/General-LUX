@@ -28,10 +28,26 @@ export default function Header() {
 
   const goToUser = () => {
     if (user) {
-      navigation.navigate("Perfil");
+      // Navegar al perfil limpiando historial
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Perfil' }],
+      });
     } else {
-      navigation.navigate("Login");
+      // Navegar al login limpiando historial
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
     }
+  };
+
+  const goToCart = () => {
+    // Navegar al carrito limpiando historial
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'CarritoScreen' }],
+    });
   };
 
   return (
@@ -65,7 +81,7 @@ export default function Header() {
         <View style={styles.rightIcons}>
           {/* Carrito */}
           <TouchableOpacity
-            onPress={() => navigation.navigate("CarritoScreen")}
+            onPress={goToCart}
             style={[styles.iconButton, { marginRight: 10 }]}
             activeOpacity={0.8}
           >

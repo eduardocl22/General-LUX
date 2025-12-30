@@ -113,6 +113,7 @@ export default function DetallesProductoScreen({ route }) {
 
 // NUEVO - Usar navigate normal:
 const handleVerCarrito = () => {
+  // Navegar normalmente - el historial se manejará de otra forma
   navigation.navigate("CarritoScreen");
 };
 
