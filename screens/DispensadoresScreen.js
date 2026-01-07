@@ -1,4 +1,3 @@
-// screens/DispensadoresScreen.js
 import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
@@ -11,6 +10,7 @@ import {
   Image,
   ImageBackground,
   StatusBar,
+  Dimensions,
 } from "react-native";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
@@ -18,6 +18,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useFonts } from "expo-font";
 import { Ionicons } from "@expo/vector-icons";
+
+const { height } = Dimensions.get("window");
 
 const subproductos = ["Con Compresor", "Eléctrico"];
 
@@ -163,7 +165,10 @@ export default function DispensadoresScreen({ navigation }) {
         <Header navigation={navigation} />
 
         <ScrollView 
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            (filteredProducts.length === 0 || loading) && styles.scrollContentEmpty
+          ]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.heroSection}>
@@ -237,16 +242,21 @@ export default function DispensadoresScreen({ navigation }) {
                 </Text>
               </View>
             ) : filteredProducts.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <View style={styles.emptyIcon}>
-                  <Ionicons name="search" size={50} color="#12A14B" />
+              <View style={styles.emptySection}>
+                <View style={styles.emptyContainer}>
+                  <View style={styles.emptyIcon}>
+                    <Ionicons name="search" size={50} color="#12A14B" />
+                  </View>
+                  <Text style={[styles.emptyText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
+                    No hay productos disponibles
+                  </Text>
+                  <Text style={[styles.emptySubtext, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
+                    Prueba con otra categoría
+                  </Text>
                 </View>
-                <Text style={[styles.emptyText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
-                  No hay productos disponibles
-                </Text>
-                <Text style={[styles.emptySubtext, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-                  Prueba con otra categoría
-                </Text>
+                
+                {/* Espaciador para contenido vacío */}
+                <View style={styles.emptySpacer} />
               </View>
             ) : (
               <>
@@ -274,10 +284,20 @@ export default function DispensadoresScreen({ navigation }) {
             )}
           </View>
 
-          <View style={styles.footerContainer}>
+          {/* Footer DENTRO del ScrollView (solo cuando hay productos) */}
+          {filteredProducts.length > 0 && !loading && (
+            <View style={styles.footerContainer}>
+              <Footer />
+            </View>
+          )}
+        </ScrollView>
+
+        {/* Footer FUERA del ScrollView (cuando está vacío o cargando) */}
+        {(filteredProducts.length === 0 || loading) && (
+          <View style={styles.bottomFooter}>
             <Footer />
           </View>
-        </ScrollView>
+        )}
       </ImageBackground>
     </View>
   );
@@ -293,6 +313,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 0,
+  },
+  scrollContentEmpty: {
+    minHeight: height * 0.8, // Altura mínima para contenido vacío
   },
   loadingContainer: {
     flex: 1,
@@ -365,6 +389,7 @@ const styles = StyleSheet.create({
   productsSection: {
     marginBottom: 25,
     paddingHorizontal: 20,
+    flex: 1,
   },
   loadingProducts: {
     alignItems: 'center',
@@ -374,6 +399,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
     color: '#666',
+  },
+  // Sección de contenido vacío
+  emptySection: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -404,6 +434,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  emptySpacer: {
+    height: height * 0.3, // Espacio para empujar contenido
   },
   resultsHeader: {
     flexDirection: 'row',
@@ -552,8 +585,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   
+  // Footer DENTRO del ScrollView (para cuando hay productos)
   footerContainer: {
-    marginTop: 0,
+    marginTop: 20,
+    backgroundColor: 'transparent',
+  },
+  
+  // Footer FUERA del ScrollView (para cuando está vacío o cargando)
+  bottomFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: 'transparent',
   },
 });

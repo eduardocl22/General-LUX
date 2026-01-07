@@ -180,9 +180,6 @@ export default function HomeScreen({ navigation }) {
           {/* Tarjeta de Bienvenida */}
           <View style={styles.welcomeCard}>
             <View style={styles.welcomeHeader}>
-              <View style={styles.welcomeIcon}>
-                <Ionicons name="home" size={28} color="#FFF" />
-              </View>
               <Text style={[styles.welcomeTitle, { fontFamily: fontFamilyOrDefault("Aller_BdIt") }]}>
                 Bienvenido a General Lux
               </Text>
