@@ -316,10 +316,6 @@ const handleVerCarrito = () => {
             {yaEnCarrito ? (
               <View style={styles.inCartContainer}>
                 <View style={styles.inCartMessage}>
-                  <Ionicons name="checkmark-circle" size={20} color="#000000ff" />
-                  <Text style={[styles.inCartText, { fontFamily: fontFamilyOrDefault("Aller_Rg") }]}>
-                    Este producto ya está en tu carrito
-                  </Text>
                 </View>
                 <TouchableOpacity
                   style={styles.viewCartButton}
@@ -736,6 +732,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: 'transparent',
     paddingHorizontal: 0,
-    marginHorizontal: 0,
+    marginHorizontal: 1,
   },
 });
