@@ -12,9 +12,11 @@ import {
   UIManager,
   Platform,
   ImageBackground,
+  StatusBar,
   Alert,
   TextInput,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,6 +27,8 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { db } from "../firebase/firebase";
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+
+const { width, height } = Dimensions.get("window");
 
 // Habilitar animaciones suaves en Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -160,12 +164,12 @@ const DetallesCompraScreen = () => {
   // Interpolaciones para animaciones
   const panelTarjeta = alturaTarjeta.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, tarjetasGuardadas.length > 0 && !mostrarFormularioTarjeta ? 350 : 450],
+    outputRange: [0, tarjetasGuardadas.length > 0 && !mostrarFormularioTarjeta ? 320 : 420],
   });
 
   const panelQR = alturaQR.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 260],
+    outputRange: [0, 240],
   });
 
   // Validaciones para tarjetas
@@ -400,53 +404,96 @@ const DetallesCompraScreen = () => {
   // Si está cargando, mostrar spinner
   if (cargandoDatos) {
     return (
-      <View style={{ flex: 1 }}>
-        <Header />
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#12A14B" />
         <ImageBackground
           source={require("../assets/fondo.jpeg")}
-          style={{ flex: 1 }}
-          imageStyle={{ opacity: 0.15 }}
+          style={styles.background}
+          resizeMode="cover"
         >
+          <Header />
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#12A14B" />
             <Text style={styles.loadingText}>Cargando información...</Text>
           </View>
         </ImageBackground>
-        <Footer />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Header />
+      <StatusBar barStyle="light-content" backgroundColor="#12A14B" />
+      
       <ImageBackground
         source={require("../assets/fondo.jpeg")}
-        style={{ flex: 1 }}
-        imageStyle={{ opacity: 0.15 }}
+        style={styles.background}
+        resizeMode="cover"
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.tituloPrincipal}>Finalizar Compra</Text>
+        <Header navigation={navigation} />
+
+        <ScrollView 
+          contentContainerStyle={[
+            styles.scrollContainer,
+            (carritoVacio || cartItems.length === 0) && styles.scrollContainerEmpty
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header de la pantalla */}
+          <View style={styles.headerSection}>
+            <View style={styles.headerTitleContainer}>
+              <View style={styles.purchaseIconHeader}>
+                <Ionicons name="bag-check" size={28} color="#FFF" />
+              </View>
+              <Text style={[styles.title, { fontFamily: "Aller_BdIt" }]}>
+                Finalizar Compra
+              </Text>
+            </View>
+            <Text style={[styles.subtitle, { fontFamily: "Aller_Rg" }]}>
+              Completa tu compra de manera segura
+            </Text>
+          </View>
 
           {carritoVacio ? (
-            <View style={styles.emptyCart}>
-              <Ionicons name="cart-outline" size={64} color="#CCC" />
-              <Text style={styles.emptyText}>Tu carrito está vacío</Text>
-              <TouchableOpacity
-                style={styles.botonSeguirComprando}
-                onPress={() => navigation.navigate("Inicio")}
-              >
-                <Text style={styles.botonTexto}>Seguir comprando</Text>
-              </TouchableOpacity>
+            <View style={styles.emptySection}>
+              <View style={styles.emptyContainer}>
+                <View style={styles.emptyIconContainer}>
+                  <Ionicons name="cart-outline" size={80} color="#12A14B" />
+                  <View style={styles.emptyIconBadge}>
+                    <Ionicons name="close" size={24} color="#FFF" />
+                  </View>
+                </View>
+                <Text style={[styles.emptyTitle, { fontFamily: "Aller_Bd" }]}>
+                  Carrito Vacío
+                </Text>
+                <Text style={[styles.emptyText, { fontFamily: "Aller_Rg" }]}>
+                  Tu carrito de compras está vacío. 
+                  {"\n"}Agrega productos para proceder con la compra.
+                </Text>
+                <TouchableOpacity
+                  style={styles.continueShoppingButton}
+                  onPress={() => navigation.navigate("Inicio")}
+                  activeOpacity={0.9}
+                >
+                  <Ionicons name="home-outline" size={22} color="#FFF" />
+                  <Text style={[styles.continueShoppingText, { fontFamily: "Aller_Bd" }]}>
+                    Ir al Inicio
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              
+              {/* Espaciador para carrito vacío */}
+              <View style={styles.emptySpacer} />
             </View>
           ) : (
-            <View style={styles.verticalLayout}>
-              
+            <>
               {/* SECCIÓN 1: RESUMEN DE COMPRA */}
-              <View style={styles.seccion}>
-                <View style={styles.headerSeccion}>
-                  <Ionicons name="receipt-outline" size={24} color="#12A14B" />
-                  <Text style={styles.subtitulo}>Resumen del Pedido</Text>
+              <View style={styles.sectionCard}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name="receipt-outline" size={22} color="#12A14B" />
+                  <Text style={[styles.sectionTitle, { fontFamily: "Aller_BdIt" }]}>
+                    Resumen del Pedido
+                  </Text>
                 </View>
 
                 <View style={styles.resumenCard}>
@@ -460,101 +507,128 @@ const DetallesCompraScreen = () => {
                         />
                       ) : (
                         <View style={[styles.resumenImg, styles.resumenImgPlaceholder]}>
-                          <Ionicons name="image-outline" size={24} color="#999" />
+                          <Ionicons name="cube" size={24} color="#BBB" />
                         </View>
                       )}
                       <View style={styles.resumenInfo}>
-                        <Text style={styles.resumenNombre}>{item.nombre}</Text>
-                        <Text style={styles.resumenDetalle}>
+                        <Text style={[styles.resumenNombre, { fontFamily: "Aller_Bd" }]}>
+                          {item.nombre}
+                        </Text>
+                        <Text style={[styles.resumenDetalle, { fontFamily: "Aller_Rg" }]}>
                           Cantidad: {item.cantidad} × Bs. {item.precio?.toFixed(2) || "0.00"}
                         </Text>
-                        <Text style={styles.resumenSubtotal}>
-                          Bs. {(item.cantidad * item.precio).toFixed(2)}
-                        </Text>
+                        <View style={styles.resumenSubtotalRow}>
+                          <Text style={[styles.resumenSubtotalLabel, { fontFamily: "Aller_Rg" }]}>
+                            Subtotal:
+                          </Text>
+                          <Text style={[styles.resumenSubtotal, { fontFamily: "Aller_Bd" }]}>
+                            Bs. {(item.cantidad * item.precio).toFixed(2)}
+                          </Text>
+                        </View>
                       </View>
                     </View>
                   ))}
 
-                  <View style={styles.resumenTotalBox}>
-                    <Text style={styles.resumenTotalLabel}>Total a pagar:</Text>
-                    <Text style={styles.resumenTotal}>Bs. {total?.toFixed(2) || "0.00"}</Text>
+                  <View style={styles.totalContainer}>
+                    <View style={styles.totalRow}>
+                      <Text style={[styles.totalLabel, { fontFamily: "Aller_Bd" }]}>
+                        Total a pagar:
+                      </Text>
+                      <Text style={[styles.totalValue, { fontFamily: "Aller_Bd" }]}>
+                        Bs. {total?.toFixed(2) || "0.00"}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
 
               {/* SECCIÓN 2: INFORMACIÓN DE ENVÍO */}
               {datosUsuario && (
-                <View style={styles.seccion}>
-                  <View style={styles.headerSeccion}>
-                    <Ionicons name="location-outline" size={24} color="#12A14B" />
-                    <Text style={styles.subtitulo}>Información de Envío</Text>
+                <View style={styles.sectionCard}>
+                  <View style={styles.sectionHeader}>
+                    <Ionicons name="location-outline" size={22} color="#12A14B" />
+                    <Text style={[styles.sectionTitle, { fontFamily: "Aller_BdIt" }]}>
+                      Información de Envío
+                    </Text>
                   </View>
 
                   <View style={styles.infoCard}>
                     <View style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>Nombre:</Text>
-                      <Text style={styles.infoValue}>
+                      <Text style={[styles.infoLabel, { fontFamily: "Aller_Rg" }]}>Nombre:</Text>
+                      <Text style={[styles.infoValue, { fontFamily: "Aller_Bd" }]}>
                         {datosUsuario?.nombre || "No especificado"} {datosUsuario?.apellido || ""}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>Teléfono:</Text>
-                      <Text style={styles.infoValue}>{datosUsuario?.telefono || "No especificado"}</Text>
+                      <Text style={[styles.infoLabel, { fontFamily: "Aller_Rg" }]}>Teléfono:</Text>
+                      <Text style={[styles.infoValue, { fontFamily: "Aller_Bd" }]}>
+                        {datosUsuario?.telefono || "No especificado"}
+                      </Text>
                     </View>
                     <View style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>Dirección:</Text>
-                      <Text style={styles.infoValue}>
+                      <Text style={[styles.infoLabel, { fontFamily: "Aller_Rg" }]}>Dirección:</Text>
+                      <Text style={[styles.infoValue, { fontFamily: "Aller_Bd" }]}>
                         {datosUsuario?.direccion || "No especificado"}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
-                      <Text style={styles.infoLabel}>Ciudad:</Text>
-                      <Text style={styles.infoValue}>
+                      <Text style={[styles.infoLabel, { fontFamily: "Aller_Rg" }]}>Ciudad:</Text>
+                      <Text style={[styles.infoValue, { fontFamily: "Aller_Bd" }]}>
                         {datosUsuario?.ciudad || "No especificado"}, {datosUsuario?.departamento || "No especificado"}
                       </Text>
                     </View>
                     <TouchableOpacity 
-                      style={styles.editarInfoButton}
+                      style={styles.editInfoButton}
                       onPress={() => navigation.navigate("Perfil")}
+                      activeOpacity={0.8}
                     >
                       <Ionicons name="pencil" size={16} color="#12A14B" />
-                      <Text style={styles.editarInfoText}>Editar información</Text>
+                      <Text style={[styles.editInfoText, { fontFamily: "Aller_Bd" }]}>
+                        Editar información
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
               )}
 
               {/* SECCIÓN 3: MÉTODOS DE PAGO */}
-              <View style={styles.seccion}>
-                <View style={styles.headerSeccion}>
-                  <Ionicons name="card-outline" size={24} color="#12A14B" />
-                  <Text style={styles.subtitulo}>Método de Pago</Text>
+              <View style={styles.sectionCard}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name="card-outline" size={22} color="#12A14B" />
+                  <Text style={[styles.sectionTitle, { fontFamily: "Aller_BdIt" }]}>
+                    Método de Pago
+                  </Text>
                 </View>
 
-                <View style={styles.metodosPagoContainer}>
+                <View style={styles.paymentMethodsContainer}>
                   
                   {/* Método Tarjeta */}
                   <View style={[
-                    styles.metodoPagoContainer,
-                    metodoSeleccionado === "tarjeta" && styles.metodoPagoSeleccionado
+                    styles.methodContainer,
+                    metodoSeleccionado === "tarjeta" && styles.methodContainerSelected
                   ]}>
                     <TouchableOpacity
-                      style={styles.metodoPagoHeader}
+                      style={styles.methodHeader}
                       onPress={() => seleccionarMetodo("tarjeta")}
+                      activeOpacity={0.8}
                     >
-                      <View style={styles.metodoInfo}>
+                      <View style={styles.methodInfo}>
                         <View style={styles.radioContainer}>
                           <View
                             style={[
                               styles.radio,
-                              metodoSeleccionado === "tarjeta" && styles.radioSeleccionado,
+                              metodoSeleccionado === "tarjeta" && styles.radioSelected,
                             ]}
                           />
                         </View>
-                        <Ionicons name="card" size={24} color="#12A14B" style={styles.metodoIcon} />
-                        <View style={styles.metodoTextos}>
-                          <Text style={styles.metodoTitulo}>Tarjeta de Crédito o Débito</Text>
-                          <Text style={styles.metodoDescripcion}>Pago seguro con tarjeta</Text>
+                        <Ionicons name="card" size={24} color="#12A14B" style={styles.methodIcon} />
+                        <View style={styles.methodTexts}>
+                          <Text style={[styles.methodTitle, { fontFamily: "Aller_Bd" }]}>
+                            Tarjeta de Crédito/Débito
+                          </Text>
+                          <Text style={[styles.methodDescription, { fontFamily: "Aller_Rg" }]}>
+                            Pago seguro con tarjeta
+                          </Text>
                         </View>
                       </View>
                       <Ionicons 
@@ -564,31 +638,40 @@ const DetallesCompraScreen = () => {
                       />
                     </TouchableOpacity>
 
-                    <Animated.View style={[styles.panelDesplegable, { height: panelTarjeta }]}>
+                    <Animated.View style={[styles.expandablePanel, { height: panelTarjeta }]}>
                       
                       {/* Tarjetas Guardadas */}
                       {tarjetasGuardadas.length > 0 && !mostrarFormularioTarjeta && (
-                        <View style={styles.tarjetasGuardadasSection}>
-                          <Text style={styles.tarjetasGuardadasTitle}>Tarjetas Guardadas</Text>
+                        <View style={styles.savedCardsSection}>
+                          <Text style={[styles.savedCardsTitle, { fontFamily: "Aller_Bd" }]}>
+                            Tarjetas Guardadas
+                          </Text>
                           {tarjetasGuardadas.map((tarjeta) => (
                             <TouchableOpacity
                               key={tarjeta.id}
                               style={[
-                                styles.tarjetaGuardada,
-                                tarjetaSeleccionada === tarjeta.id && styles.tarjetaGuardadaSeleccionada
+                                styles.savedCard,
+                                tarjetaSeleccionada === tarjeta.id && styles.savedCardSelected
                               ]}
                               onPress={() => seleccionarTarjetaGuardada(tarjeta)}
+                              activeOpacity={0.8}
                             >
-                              <View style={styles.tarjetaInfo}>
+                              <View style={styles.cardInfo}>
                                 <Ionicons 
                                   name="card" 
                                   size={20} 
                                   color={tarjetaSeleccionada === tarjeta.id ? "#12A14B" : "#666"} 
                                 />
-                                <View style={styles.tarjetaDetalles}>
-                                  <Text style={styles.tarjetaTipo}>{tarjeta.tipo} •••• {tarjeta.ultimosDigitos}</Text>
-                                  <Text style={styles.tarjetaNombre}>{tarjeta.nombre}</Text>
-                                  <Text style={styles.tarjetaVencimiento}>Vence: {tarjeta.vencimiento}</Text>
+                                <View style={styles.cardDetails}>
+                                  <Text style={[styles.cardType, { fontFamily: "Aller_Bd" }]}>
+                                    {tarjeta.tipo} •••• {tarjeta.ultimosDigitos}
+                                  </Text>
+                                  <Text style={[styles.cardName, { fontFamily: "Aller_Rg" }]}>
+                                    {tarjeta.nombre}
+                                  </Text>
+                                  <Text style={[styles.cardExpiry, { fontFamily: "Aller_Rg" }]}>
+                                    Vence: {tarjeta.vencimiento}
+                                  </Text>
                                 </View>
                               </View>
                               {tarjetaSeleccionada === tarjeta.id && (
@@ -598,27 +681,31 @@ const DetallesCompraScreen = () => {
                           ))}
                           
                           <TouchableOpacity 
-                            style={styles.usarNuevaTarjetaButton}
+                            style={styles.useNewCardButton}
                             onPress={usarNuevaTarjeta}
+                            activeOpacity={0.8}
                           >
                             <Ionicons name="add-circle-outline" size={18} color="#12A14B" />
-                            <Text style={styles.usarNuevaTarjetaText}>Agregar nueva tarjeta</Text>
+                            <Text style={[styles.useNewCardText, { fontFamily: "Aller_Bd" }]}>
+                              Agregar nueva tarjeta
+                            </Text>
                           </TouchableOpacity>
                         </View>
                       )}
 
                       {/* Formulario de Nueva Tarjeta */}
                       {(mostrarFormularioTarjeta || tarjetasGuardadas.length === 0) && (
-                        <View style={styles.formularioTarjeta}>
-                          <Text style={styles.formularioTitle}>
+                        <View style={styles.cardForm}>
+                          <Text style={[styles.formTitle, { fontFamily: "Aller_Bd" }]}>
                             {tarjetasGuardadas.length === 0 ? "Agregar Tarjeta" : "Nueva Tarjeta"}
                           </Text>
                           
-                          <View style={styles.campoTarjeta}>
-                            <Text style={styles.labelCampo}>Número de tarjeta</Text>
+                          <View style={styles.cardField}>
+                            <Text style={[styles.fieldLabel, { fontFamily: "Aller_Rg" }]}>
+                              Número de tarjeta
+                            </Text>
                             <TextInput
-                              style={styles.inputReal}
-                              placeholder=""
+                              style={styles.input}
                               value={datosTarjeta.numero}
                               onChangeText={(texto) => handleCambioTarjeta('numero', formatearNumeroTarjeta(texto))}
                               keyboardType="numeric"
@@ -626,27 +713,29 @@ const DetallesCompraScreen = () => {
                               placeholderTextColor="#999"
                             />
                             {datosTarjeta.numero && (
-                              <Text style={styles.tipoTarjeta}>
+                              <Text style={[styles.cardTypeBadge, { fontFamily: "Aller_Bd" }]}>
                                 {detectarTipoTarjeta(datosTarjeta.numero)}
                               </Text>
                             )}
                           </View>
                           
-                          <Text style={styles.labelCampo}>Nombre en la tarjeta</Text>
+                          <Text style={[styles.fieldLabel, { fontFamily: "Aller_Rg" }]}>
+                            Nombre en la tarjeta
+                          </Text>
                           <TextInput
-                            style={styles.inputReal}
-                            placeholder=""
+                            style={styles.input}
                             value={datosTarjeta.nombre}
                             onChangeText={(texto) => handleCambioTarjeta('nombre', texto.toUpperCase())}
                             placeholderTextColor="#999"
                           />
                           
-                          <View style={styles.rowCampos}>
+                          <View style={styles.rowFields}>
                             <View style={{ flex: 1 }}>
-                              <Text style={styles.labelCampo}>Vencimiento (MM/AA)</Text>
+                              <Text style={[styles.fieldLabel, { fontFamily: "Aller_Rg" }]}>
+                                MM/AA
+                              </Text>
                               <TextInput
-                                style={styles.inputReal}
-                                placeholder=""
+                                style={styles.input}
                                 value={datosTarjeta.vencimiento}
                                 onChangeText={(texto) => handleCambioTarjeta('vencimiento', formatearVencimiento(texto))}
                                 keyboardType="numeric"
@@ -656,10 +745,11 @@ const DetallesCompraScreen = () => {
                             </View>
                             <View style={{ width: 15 }} />
                             <View style={{ flex: 1 }}>
-                              <Text style={styles.labelCampo}>CVV</Text>
+                              <Text style={[styles.fieldLabel, { fontFamily: "Aller_Rg" }]}>
+                                CVV
+                              </Text>
                               <TextInput
-                                style={styles.inputReal}
-                                placeholder=""
+                                style={styles.input}
                                 value={datosTarjeta.cvv}
                                 onChangeText={(texto) => handleCambioTarjeta('cvv', texto.replace(/[^0-9]/g, ''))}
                                 keyboardType="numeric"
@@ -671,15 +761,16 @@ const DetallesCompraScreen = () => {
                           </View>
 
                           <TouchableOpacity 
-                            style={styles.guardarTarjetaOption}
+                            style={styles.saveCardOption}
                             onPress={() => setGuardarTarjeta(!guardarTarjeta)}
+                            activeOpacity={0.8}
                           >
                             <View style={styles.checkboxContainer}>
-                              <View style={[styles.checkbox, guardarTarjeta && styles.checkboxSeleccionado]}>
+                              <View style={[styles.checkbox, guardarTarjeta && styles.checkboxSelected]}>
                                 {guardarTarjeta && <Ionicons name="checkmark" size={14} color="#FFF" />}
                               </View>
                             </View>
-                            <Text style={styles.guardarTarjetaText}>
+                            <Text style={[styles.saveCardText, { fontFamily: "Aller_Rg" }]}>
                               Guardar esta tarjeta para futuras compras
                             </Text>
                           </TouchableOpacity>
@@ -687,15 +778,18 @@ const DetallesCompraScreen = () => {
                           {guardarTarjeta && (
                             <TouchableOpacity 
                               style={[
-                                styles.botonGuardarTarjeta,
+                                styles.saveCardButton,
                                 (!datosTarjeta.numero || !datosTarjeta.nombre || !datosTarjeta.vencimiento || !datosTarjeta.cvv) && 
-                                styles.botonGuardarTarjetaDisabled
+                                styles.saveCardButtonDisabled
                               ]}
                               onPress={procesarGuardadoTarjeta}
                               disabled={!datosTarjeta.numero || !datosTarjeta.nombre || !datosTarjeta.vencimiento || !datosTarjeta.cvv}
+                              activeOpacity={0.9}
                             >
                               <Ionicons name="save-outline" size={18} color="#FFF" />
-                              <Text style={styles.botonGuardarTarjetaText}>Guardar Tarjeta</Text>
+                              <Text style={[styles.saveCardButtonText, { fontFamily: "Aller_Bd" }]}>
+                                Guardar Tarjeta
+                              </Text>
                             </TouchableOpacity>
                           )}
                         </View>
@@ -704,9 +798,11 @@ const DetallesCompraScreen = () => {
                       {/* CVV para tarjeta guardada */}
                       {tarjetaSeleccionada && !mostrarFormularioTarjeta && (
                         <View style={styles.cvvSection}>
-                          <Text style={styles.labelCampo}>Código de seguridad (CVV)</Text>
+                          <Text style={[styles.fieldLabel, { fontFamily: "Aller_Rg" }]}>
+                            Código de seguridad (CVV)
+                          </Text>
                           <TextInput
-                            style={styles.inputReal}
+                            style={styles.input}
                             placeholder="Ingresa el CVV"
                             value={datosTarjeta.cvv}
                             onChangeText={(texto) => handleCambioTarjeta('cvv', texto.replace(/[^0-9]/g, ''))}
@@ -715,7 +811,7 @@ const DetallesCompraScreen = () => {
                             secureTextEntry
                             placeholderTextColor="#999"
                           />
-                          <Text style={styles.cvvHelp}>
+                          <Text style={[styles.cvvHelp, { fontFamily: "Aller_Rg" }]}>
                             El CVV es el número de 3 o 4 dígitos en el reverso de tu tarjeta
                           </Text>
                         </View>
@@ -725,26 +821,31 @@ const DetallesCompraScreen = () => {
 
                   {/* Método QR */}
                   <View style={[
-                    styles.metodoPagoContainer,
-                    metodoSeleccionado === "qr" && styles.metodoPagoSeleccionado
+                    styles.methodContainer,
+                    metodoSeleccionado === "qr" && styles.methodContainerSelected
                   ]}>
                     <TouchableOpacity
-                      style={styles.metodoPagoHeader}
+                      style={styles.methodHeader}
                       onPress={() => seleccionarMetodo("qr")}
+                      activeOpacity={0.8}
                     >
-                      <View style={styles.metodoInfo}>
+                      <View style={styles.methodInfo}>
                         <View style={styles.radioContainer}>
                           <View
                             style={[
                               styles.radio,
-                              metodoSeleccionado === "qr" && styles.radioSeleccionado,
+                              metodoSeleccionado === "qr" && styles.radioSelected,
                             ]}
                           />
                         </View>
-                        <Ionicons name="qr-code" size={24} color="#12A14B" style={styles.metodoIcon} />
-                        <View style={styles.metodoTextos}>
-                          <Text style={styles.metodoTitulo}>Pago con QR</Text>
-                          <Text style={styles.metodoDescripcion}>Escanea y paga desde tu banco</Text>
+                        <Ionicons name="qr-code" size={24} color="#12A14B" style={styles.methodIcon} />
+                        <View style={styles.methodTexts}>
+                          <Text style={[styles.methodTitle, { fontFamily: "Aller_Bd" }]}>
+                            Pago con QR
+                          </Text>
+                          <Text style={[styles.methodDescription, { fontFamily: "Aller_Rg" }]}>
+                            Escanea y paga desde tu banco
+                          </Text>
                         </View>
                       </View>
                       <Ionicons 
@@ -754,90 +855,85 @@ const DetallesCompraScreen = () => {
                       />
                     </TouchableOpacity>
 
-                    <Animated.View style={[styles.panelDesplegable, { height: panelQR }]}>
-                      <Text style={styles.labelCampo}>
+                    <Animated.View style={[styles.expandablePanel, { height: panelQR }]}>
+                      <Text style={[styles.fieldLabel, { fontFamily: "Aller_Rg" }]}>
                         Escanea el siguiente código QR con tu app bancaria:
                       </Text>
                       <View style={styles.qrContainer}>
                         <View style={styles.qrPlaceholder}>
                           <Ionicons name="qr-code-outline" size={80} color="#12A14B" />
-                          <Text style={styles.qrPlaceholderSubtext}>GENERAL LUX</Text>
-                          <Text style={styles.qrPlaceholderAmount}>
+                          <Text style={[styles.qrPlaceholderSubtext, { fontFamily: "Aller_Bd" }]}>
+                            GENERAL LUX
+                          </Text>
+                          <Text style={[styles.qrPlaceholderAmount, { fontFamily: "Aller_Bd" }]}>
                             Bs. {total?.toFixed(2) || "0.00"}
                           </Text>
-                          <Text style={styles.qrPlaceholderInfo}>
+                          <Text style={[styles.qrPlaceholderInfo, { fontFamily: "Aller_Rg" }]}>
                             Pago seguro y rápido
                           </Text>
                         </View>
                       </View>
-                      <Text style={styles.qrTexto}>
+                      <Text style={[styles.qrText, { fontFamily: "Aller_Rg" }]}>
                         El pago se confirmará automáticamente en unos minutos.
                       </Text>
                     </Animated.View>
                   </View>
                 </View>
 
-                {/* BOTÓN DE PAGO */}
+                {/* BOTÓN DE CONFIRMAR COMPRA */}
                 <TouchableOpacity
                   style={[
-                    styles.botonPagar,
-                    !metodoSeleccionado && styles.botonPagarDisabled
+                    styles.confirmButton,
+                    !metodoSeleccionado && styles.confirmButtonDisabled
                   ]}
                   onPress={procesarPago}
                   disabled={!metodoSeleccionado}
+                  activeOpacity={0.9}
                 >
-                  <Text style={styles.botonTexto}>
+                  <Text style={[styles.confirmButtonText, { fontFamily: "Aller_Bd" }]}>
                     {metodoSeleccionado ? 'CONFIRMAR COMPRA' : 'SELECCIONA MÉTODO DE PAGO'}
                   </Text>
-                  <Ionicons name="lock-closed" size={16} color="#FFF" style={styles.botonIcon} />
                 </TouchableOpacity>
               </View>
-            </View>
+
+              {/* Footer DENTRO del ScrollView (solo cuando hay productos) */}
+              {cartItems.length > 0 && !carritoVacio && (
+                <View style={styles.footerContainer}>
+                  <Footer />
+                </View>
+              )}
+            </>
           )}
         </ScrollView>
+
+        {/* Footer FUERA del ScrollView (cuando está vacío) */}
+        {(carritoVacio || cartItems.length === 0) && (
+          <View style={styles.bottomFooter}>
+            <Footer />
+          </View>
+        )}
       </ImageBackground>
-      <Footer />
     </View>
   );
 };
 
+/* ------------------------ ESTILOS MEJORADOS ------------------------ */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#F8F9FA',
   },
-  scrollContainer: {
-    padding: 20,
-    paddingBottom: 120,
-    flexGrow: 1,
-  },
-  tituloPrincipal: {
-    fontSize: 28,
-    color: "#1a1a1a",
-    marginBottom: 25,
-    textAlign: "center",
-    fontFamily: "Aller_Bd",
-    letterSpacing: 0.5,
-  },
-  verticalLayout: {
+  background: {
     flex: 1,
   },
-  seccion: {
-    marginBottom: 30,
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 0,
   },
-  headerSeccion: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
+  scrollContainerEmpty: {
+    minHeight: height * 0.8,
   },
-  subtitulo: {
-    fontSize: 20,
-    color: "#12A14B",
-    marginLeft: 10,
-    fontFamily: "Aller_Bd",
-    letterSpacing: 0.3,
-  },
-  // Loading
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -849,145 +945,264 @@ const styles = StyleSheet.create({
     fontFamily: "Aller_Rg",
     color: "#666",
   },
-  // Información de envío
-  infoCard: {
-    backgroundColor: "rgba(255,255,255,0.95)",
-    padding: 20,
-    borderRadius: 16,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-  infoLabel: {
-    fontSize: 14,
-    fontFamily: "Aller_Bd",
-    color: "#555",
-    flex: 1,
-  },
-  infoValue: {
-    fontSize: 14,
-    fontFamily: "Aller_Rg",
-    color: "#2d2d2d",
-    flex: 2,
-    textAlign: "right",
-  },
-  editarInfoButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+  // Header Section
+  headerSection: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 20,
     marginTop: 10,
-    padding: 8,
-  },
-  editarInfoText: {
-    fontSize: 14,
-    fontFamily: "Aller_Rg",
-    color: "#12A14B",
-    marginLeft: 6,
-  },
-  // Resumen de compra
-  resumenCard: {
-    backgroundColor: "rgba(255,255,255,0.95)",
-    padding: 20,
+    marginBottom: 20,
     borderRadius: 16,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  purchaseIconHeader: {
+    position: 'relative',
+    marginRight: 15,
+  },
+  title: {
+    fontSize: 22,
+    color: '#2C3E50',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  // Carrito Vacío
+  emptySection: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  emptyContainer: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 16,
+    padding: 40,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  emptyIconContainer: {
+    position: 'relative',
+    marginBottom: 20,
+  },
+  emptyIconBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#E74C3C',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyTitle: {
+    fontSize: 24,
+    color: '#2C3E50',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 25,
+  },
+  emptySpacer: {
+    height: height * 0.3,
+  },
+  continueShoppingButton: {
+    backgroundColor: '#12A14B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 25,
+    borderRadius: 12,
+    width: '100%',
+    gap: 10,
+    shadowColor: '#12A14B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
     shadowRadius: 8,
+    elevation: 6,
+  },
+  continueShoppingText: {
+    color: '#FFF',
+    fontSize: 16,
+  },
+  // Section Cards
+  sectionCard: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    color: '#2C3E50',
+    marginLeft: 10,
+  },
+  // Resumen de Compra
+  resumenCard: {
+    marginTop: 10,
   },
   resumenItem: {
-    flexDirection: "row",
-    marginBottom: 18,
-    paddingBottom: 18,
+    flexDirection: 'row',
+    marginBottom: 20,
+    paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: '#EEE',
   },
   resumenImg: {
     width: 75,
     height: 75,
-    marginRight: 15,
-    borderRadius: 10,
+    borderRadius: 12,
+    backgroundColor: '#F8F9FA',
   },
   resumenImgPlaceholder: {
-    backgroundColor: '#f8f8f8',
-    alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
   },
   resumenInfo: {
     flex: 1,
-    justifyContent: 'center',
+    marginLeft: 15,
   },
   resumenNombre: {
     fontSize: 16,
-    color: "#2d2d2d",
-    marginBottom: 6,
-    fontFamily: "Aller_Bd",
+    color: '#2C3E50',
+    marginBottom: 8,
+    lineHeight: 20,
   },
   resumenDetalle: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 4,
-    fontFamily: "Aller_Rg",
+    color: '#666',
+    marginBottom: 10,
+  },
+  resumenSubtotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  resumenSubtotalLabel: {
+    fontSize: 14,
+    color: '#666',
   },
   resumenSubtotal: {
-    fontSize: 15,
-    color: "#12A14B",
-    fontFamily: "Aller_Bd",
+    fontSize: 16,
+    color: '#12A14B',
   },
-  resumenTotalBox: {
-    marginTop: 15,
+  totalContainer: {
+    marginTop: 20,
+    paddingTop: 20,
     borderTopWidth: 2,
-    borderColor: "#e8e8e8",
-    paddingTop: 18,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    borderTopColor: '#EEE',
   },
-  resumenTotalLabel: {
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  totalLabel: {
     fontSize: 18,
-    color: "#2d2d2d",
-    fontFamily: "Aller_Bd",
+    color: '#2C3E50',
   },
-  resumenTotal: {
+  totalValue: {
     fontSize: 24,
-    color: "#12A14B",
-    fontFamily: "Aller_Bd",
+    color: '#12A14B',
   },
-  // Métodos de pago
-  metodosPagoContainer: {
+  // Información de Envío
+  infoCard: {
+    marginTop: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 15,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#2C3E50',
+    flex: 2,
+    textAlign: 'right',
+  },
+  editInfoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 15,
+    padding: 10,
+    backgroundColor: 'rgba(18, 161, 75, 0.05)',
+    borderRadius: 10,
+    gap: 8,
+  },
+  editInfoText: {
+    fontSize: 14,
+    color: '#12A14B',
+  },
+  // Métodos de Pago
+  paymentMethodsContainer: {
     gap: 16,
+    marginBottom: 20,
   },
-  metodoPagoContainer: {
-    backgroundColor: "rgba(255,255,255,0.95)",
+  methodContainer: {
+    backgroundColor: '#FFF',
     borderRadius: 16,
-    elevation: 3,
     overflow: 'hidden',
     borderWidth: 2,
-    borderColor: "transparent",
+    borderColor: 'transparent',
   },
-  metodoPagoSeleccionado: {
-    borderColor: "#12A14B",
-    backgroundColor: "rgba(18, 161, 75, 0.03)",
+  methodContainerSelected: {
+    borderColor: '#12A14B',
+    backgroundColor: 'rgba(18, 161, 75, 0.03)',
   },
-  metodoPagoHeader: {
+  methodHeader: {
     padding: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  metodoInfo: {
-    flexDirection: "row",
-    alignItems: "center",
+  methodInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
   },
   radioContainer: {
@@ -998,149 +1213,137 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: "#ccc",
+    borderColor: '#CCC',
   },
-  radioSeleccionado: {
-    backgroundColor: "#12A14B",
-    borderColor: "#12A14B",
+  radioSelected: {
+    backgroundColor: '#12A14B',
+    borderColor: '#12A14B',
   },
-  metodoIcon: {
+  methodIcon: {
     marginRight: 12,
   },
-  metodoTextos: {
+  methodTexts: {
     flex: 1,
   },
-  metodoTitulo: {
+  methodTitle: {
     fontSize: 16,
-    color: "#2d2d2d",
-    fontFamily: "Aller_Bd",
+    color: '#2C3E50',
     marginBottom: 2,
   },
-  metodoDescripcion: {
+  methodDescription: {
     fontSize: 13,
-    color: "#666",
-    fontFamily: "Aller_Rg",
+    color: '#666',
   },
-  panelDesplegable: {
-    overflow: "hidden",
-    backgroundColor: "#fafafa",
+  expandablePanel: {
+    overflow: 'hidden',
+    backgroundColor: '#FAFAFA',
     paddingHorizontal: 20,
     paddingVertical: 15,
   },
-  // Tarjetas guardadas
-  tarjetasGuardadasSection: {
+  // Tarjetas Guardadas
+  savedCardsSection: {
     marginBottom: 10,
   },
-  tarjetasGuardadasTitle: {
+  savedCardsTitle: {
     fontSize: 16,
-    fontFamily: "Aller_Bd",
-    color: "#2d2d2d",
+    color: '#2C3E50',
     marginBottom: 12,
   },
-  tarjetaGuardada: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#f8f8f8",
+  savedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#F8F9FA',
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
     borderWidth: 2,
-    borderColor: "transparent",
+    borderColor: 'transparent',
   },
-  tarjetaGuardadaSeleccionada: {
-    borderColor: "#12A14B",
-    backgroundColor: "rgba(18, 161, 75, 0.05)",
+  savedCardSelected: {
+    borderColor: '#12A14B',
+    backgroundColor: 'rgba(18, 161, 75, 0.05)',
   },
-  tarjetaInfo: {
-    flexDirection: "row",
-    alignItems: "center",
+  cardInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
   },
-  tarjetaDetalles: {
+  cardDetails: {
     marginLeft: 12,
     flex: 1,
   },
-  tarjetaTipo: {
+  cardType: {
     fontSize: 14,
-    fontFamily: "Aller_Bd",
-    color: "#2d2d2d",
+    color: '#2C3E50',
     marginBottom: 2,
   },
-  tarjetaNombre: {
+  cardName: {
     fontSize: 12,
-    fontFamily: "Aller_Rg",
-    color: "#666",
+    color: '#666',
     marginBottom: 2,
   },
-  tarjetaVencimiento: {
+  cardExpiry: {
     fontSize: 11,
-    fontFamily: "Aller_Rg",
-    color: "#888",
+    color: '#888',
   },
-  usarNuevaTarjetaButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+  useNewCardButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 12,
-    backgroundColor: "#f0f8f0",
+    backgroundColor: 'rgba(18, 161, 75, 0.05)',
     borderRadius: 8,
     marginTop: 5,
+    gap: 8,
   },
-  usarNuevaTarjetaText: {
+  useNewCardText: {
     fontSize: 14,
-    fontFamily: "Aller_Bd",
-    color: "#12A14B",
-    marginLeft: 6,
+    color: '#12A14B',
   },
-  // Formulario tarjeta
-  formularioTarjeta: {
+  // Formulario de Tarjeta
+  cardForm: {
     marginTop: 10,
   },
-  formularioTitle: {
-    fontSize: 18,
-    fontFamily: "Aller_Bd",
-    color: "#2d2d2d",
+  formTitle: {
+    fontSize: 16,
+    color: '#2C3E50',
     marginBottom: 15,
-    textAlign: "center",
+    textAlign: 'center',
   },
-  campoTarjeta: {
-    position: "relative",
+  cardField: {
+    position: 'relative',
   },
-  tipoTarjeta: {
-    position: "absolute",
-    right: 15,
-    top: 15,
-    fontSize: 12,
-    fontFamily: "Aller_Bd",
-    color: "#12A14B",
-  },
-  labelCampo: {
+  fieldLabel: {
     fontSize: 14,
     marginBottom: 8,
-    color: "#444",
-    fontFamily: "Aller_Bd",
-    marginTop: 5,
+    color: '#444',
   },
-  inputReal: {
+  input: {
     height: 52,
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: '#E0E0E0',
     marginBottom: 16,
     paddingHorizontal: 16,
     fontSize: 16,
-    fontFamily: "Aller_Rg",
-    color: "#2d2d2d",
+    color: '#2C3E50',
   },
-  rowCampos: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  cardTypeBadge: {
+    position: 'absolute',
+    right: 15,
+    top: 15,
+    fontSize: 12,
+    color: '#12A14B',
   },
-  guardarTarjetaOption: {
-    flexDirection: "row",
-    alignItems: "center",
+  rowFields: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  saveCardOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 10,
     padding: 8,
   },
@@ -1152,38 +1355,36 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: "#ccc",
-    alignItems: "center",
-    justifyContent: "center",
+    borderColor: '#CCC',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  checkboxSeleccionado: {
-    backgroundColor: "#12A14B",
-    borderColor: "#12A14B",
+  checkboxSelected: {
+    backgroundColor: '#12A14B',
+    borderColor: '#12A14B',
   },
-  guardarTarjetaText: {
+  saveCardText: {
     fontSize: 14,
-    fontFamily: "Aller_Rg",
-    color: "#666",
+    color: '#666',
     flex: 1,
   },
-  botonGuardarTarjeta: {
-    backgroundColor: "#12A14B",
+  saveCardButton: {
+    backgroundColor: '#12A14B',
     paddingVertical: 14,
     borderRadius: 10,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: 10,
     elevation: 2,
+    gap: 8,
   },
-  botonGuardarTarjetaDisabled: {
-    backgroundColor: "#ccc",
+  saveCardButtonDisabled: {
+    backgroundColor: '#CCC',
   },
-  botonGuardarTarjetaText: {
-    color: "#FFF",
+  saveCardButtonText: {
+    color: '#FFF',
     fontSize: 16,
-    fontFamily: "Aller_Bd",
-    marginLeft: 8,
   },
   // CVV
   cvvSection: {
@@ -1191,18 +1392,17 @@ const styles = StyleSheet.create({
   },
   cvvHelp: {
     fontSize: 12,
-    fontFamily: "Aller_Rg",
-    color: "#666",
+    color: '#666',
     marginTop: 5,
-    fontStyle: "italic",
-    textAlign: "center",
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
   // QR
   qrContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
     padding: 25,
     borderRadius: 16,
-    alignSelf: "center",
+    alignSelf: 'center',
     marginVertical: 15,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1216,80 +1416,61 @@ const styles = StyleSheet.create({
   },
   qrPlaceholderSubtext: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: "#12A14B",
+    color: '#12A14B',
     marginTop: 12,
-    fontFamily: "Aller_Bd",
   },
   qrPlaceholderAmount: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2d2d2d',
+    color: '#2C3E50',
     marginTop: 6,
-    fontFamily: "Aller_Bd",
   },
   qrPlaceholderInfo: {
     fontSize: 13,
     color: '#666',
     marginTop: 4,
-    fontFamily: "Aller_Rg",
   },
-  qrTexto: {
-    textAlign: "center",
-    color: "#666",
+  qrText: {
+    textAlign: 'center',
+    color: '#666',
     fontSize: 13,
-    fontFamily: "Aller_Rg",
     marginTop: 10,
     marginBottom: 10,
     lineHeight: 18,
   },
-  // Botones
-  botonPagar: {
-    marginTop: 25,
-    backgroundColor: "#12A14B",
-    paddingVertical: 18,
-    borderRadius: 14,
-    alignItems: "center",
-    elevation: 6,
-    shadowColor: "#12A14B",
+  // Botón de Confirmar
+  confirmButton: {
+    backgroundColor: '#12A14B',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 10,
+    shadowColor: '#12A14B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    flexDirection: "row",
-    justifyContent: "center",
+    elevation: 6,
   },
-  botonPagarDisabled: {
-    backgroundColor: "#ccc",
-    shadowColor: "#999",
+  confirmButtonDisabled: {
+    backgroundColor: '#CCC',
+    shadowColor: '#999',
   },
-  botonTexto: {
-    color: "#FFF",
-    fontSize: 17,
-    fontFamily: "Aller_Bd",
-    letterSpacing: 0.5,
+  confirmButtonText: {
+    color: '#FFF',
+    fontSize: 16,
   },
-  botonIcon: {
-    marginLeft: 8,
+  // Footer
+  footerContainer: {
+    marginTop: 20,
+    backgroundColor: 'transparent',
   },
-  // Carrito vacío
-  emptyCart: {
-    marginTop: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 30,
-  },
-  emptyText: {
-    fontSize: 18,
-    marginBottom: 25,
-    color: "#666",
-    fontFamily: "Aller_Rg",
-    marginTop: 15,
-  },
-  botonSeguirComprando: {
-    backgroundColor: "#12A14B",
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-    borderRadius: 10,
+  bottomFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent',
   },
 });
 

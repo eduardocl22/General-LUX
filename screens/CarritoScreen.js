@@ -267,7 +267,6 @@ export default function CarritoScreen({ navigation }) {
                   onPress={handleContinueShopping}
                   activeOpacity={0.9}
                 >
-                  <Ionicons name="arrow-back" size={20} color="#12A14B" />
                   <Text style={[styles.actionButtonText, { fontFamily: fontFamilyOrDefault("Aller_Bd") }]}>
                     Seguir Comprando
                   </Text>
